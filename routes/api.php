@@ -18,6 +18,8 @@ Route::namespace('API')->group(function () {
     
     Route::post('register', 'AuthController@register');
     Route::post('login', 'AuthController@login');
+    Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
+    Route::post('reset-password', 'AuthController@resetPassword');
 
 });
 
