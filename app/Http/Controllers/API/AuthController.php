@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
 use App\Models\User;
+use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -105,8 +106,31 @@ class AuthController extends BaseController
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
+    }
 
-        
+    public function resetPassword(Request $request)
+    {
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required',
+            'confirm_password' => 'required|same:password',
+        ]);
+
+        try {
+            $token_check = PasswordReset::where('email', $request->email)->first();
+            if (!$token_check) {
+                return $this->sendError('Invalid/Expired Token.', 'Token Expired or Invalid');
+            }else {
+                $user = User::where('email', $token_check->email)->first();
+                $user->password = \Hash::make($request->password);
+                $user->update();
+                $token_check->delete();
+            }
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Password Updated');
     }
 
 
