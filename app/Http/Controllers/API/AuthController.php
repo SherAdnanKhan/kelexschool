@@ -8,9 +8,12 @@ use Illuminate\Database\QueryException;
 use Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 
 class AuthController extends BaseController
 {
+    use SendsPasswordResetEmails;
     /**
      * Register api
      *
@@ -19,7 +22,6 @@ class AuthController extends BaseController
     public function register(Request $request)
     {
         $returnData = [];
-
         $validator = Validator::make($request->all(), [
             'first_name' => 'required',
             'last_name' => 'required',
@@ -40,13 +42,11 @@ class AuthController extends BaseController
             $user = User::create($input);
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
             $returnData['user'] =  $user;
-        
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-           
         return $this->sendResponse($returnData, 'User register successfully.');
     }
 
@@ -54,7 +54,6 @@ class AuthController extends BaseController
     public function login(Request $request)
     {
         $returnData = [];
-
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -75,13 +74,39 @@ class AuthController extends BaseController
             else{ 
                 return $this->sendError('Invalid Email or Password.', ['error'=>'Unauthorised']);
             } 
-        
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
 
+    }
+    
+    public function sendResetLinkEmail(Request $request)
+    {
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+   
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $user = User::where('email', $request->email)->first();
+            if (isset($user)) {
+                $response = $this->broker()->sendResetLink(
+                    $this->credentials($request)
+                );
+                return $this->sendResponse($returnData, 'Email Sent');
+            }else {
+                return $this->sendError('Invalid Account.', 'No account associated with this email');
+            }
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+
+        
     }
 
 
