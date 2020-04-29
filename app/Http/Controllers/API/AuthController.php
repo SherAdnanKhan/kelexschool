@@ -29,12 +29,11 @@ class AuthController extends BaseController
             'confirm_password' => 'required|same:password',
         ]);
    
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-        
-        try {
 
+        try {
             $input = $request->all();
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
@@ -47,9 +46,7 @@ class AuthController extends BaseController
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-   
-        
-   
+           
         return $this->sendResponse($returnData, 'User register successfully.');
     }
 
@@ -63,12 +60,12 @@ class AuthController extends BaseController
             'password' => 'required',
         ]);
    
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-        try {
 
-            if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
+        try {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
                 $user = Auth::user(); 
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
