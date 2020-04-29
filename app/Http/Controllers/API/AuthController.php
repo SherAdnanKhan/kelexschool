@@ -40,7 +40,7 @@ class AuthController extends BaseController
             $input['last_login'] = now();
             $user = User::create($input);
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
-            $returnData['username'] =  $user->username;
+            $returnData['user'] =  $user;
         
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
@@ -71,6 +71,7 @@ class AuthController extends BaseController
             if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
                 $user = Auth::user(); 
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
+                $returnData['user'] = $user;
        
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
