@@ -18,9 +18,9 @@ Route::namespace('API')->group(function () {
     Route::post('register', 'AuthController@register');
     Route::post('login', 'AuthController@login');
     Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
-    
+    Route::post('change-password', 'AuthController@changePassword');
     Route::middleware('auth:api')->group(function () {
-        Route::post('reset-password', 'AuthController@resetPassword');
+        //Route::post('change-password', 'AuthController@changePassword');
 
     });
 

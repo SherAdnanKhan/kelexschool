@@ -116,25 +116,30 @@ class AuthController extends BaseController
         }
     }
 
-    public function resetPassword(Request $request)
+    public function changePassword(Request $request)
     {
         $returnData = [];
+        $user_auth_check = Auth::guard('api')->check();
+        if (!$user_auth_check) {
+            return $this->sendError('Unauthorized', 'Please Login to proceed');
+        }
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
+            'old_password' => 'required',
             'password' => 'required',
             'confirm_password' => 'required|same:password',
         ]);
-
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
         try {
-            $token_check = PasswordReset::where('email', $request->email)->first();
-            if (!$token_check) {
-                return $this->sendError('Invalid/Expired Token.', 'Token Expired or Invalid');
-            }else {
-                $user = User::where('email', $token_check->email)->first();
-                $user->password = \Hash::make($request->password);
-                $user->update();
-                $token_check->delete();
+            $auth_user = auth('api')->user();
+            $user = User::where('email', $auth_user->email)->first();
+            if (!\Hash::check($request->old_password, $auth_user->password)) {
+                return $this->sendError('Invalid Old Password', 'Please enter correct password');
             }
+            $user->password = \Hash::make($request->password);
+            $user->update();
+
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
