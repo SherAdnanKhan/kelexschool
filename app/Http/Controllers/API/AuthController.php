@@ -41,6 +41,7 @@ class AuthController extends BaseController
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
             $user = User::create($input);
+            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
             $returnData['user'] =  $user;
         }catch(QueryException $ex) {
