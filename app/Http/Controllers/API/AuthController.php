@@ -41,6 +41,7 @@ class AuthController extends BaseController
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
             $user = User::create($input);
+            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
             $returnData['user'] =  $user;
         }catch(QueryException $ex) {
@@ -86,6 +87,7 @@ class AuthController extends BaseController
     public function sendResetLinkEmail(Request $request)
     {
         $returnData = [];
+        $reset_details = [];
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
         ]);
@@ -96,37 +98,48 @@ class AuthController extends BaseController
         try {
             $user = User::where('email', $request->email)->first();
             if (isset($user)) {
-                $response = $this->broker()->sendResetLink(
-                    $this->credentials($request)
-                );
-                return $this->sendResponse($returnData, 'Email Sent');
+                $new_password = substr(md5(uniqid(rand(),1)),3,10);
+                $reset_details['first_name'] = $user->first_name;
+                $reset_details['last_name'] = $user->last_name;
+                $reset_details['email'] = $request->email;
+                $reset_details['new_password'] = $new_password;
+                $user->password = \Hash::make($new_password);
+                $user->update();
+                \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
+                
+                return $this->sendResponse($returnData, 'Your password has been reset, check your e-mail to receive temporary password');
             }else {
-                return $this->sendError('Invalid Account.', 'No account associated with this email');
+                return $this->sendError('Invalid Account.', 'Sorry, Your email doesn\'t exists in our record');
             }
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
     }
 
-    public function resetPassword(Request $request)
+    public function changePassword(Request $request)
     {
         $returnData = [];
+        $user_auth_check = Auth::guard('api')->check();
+        if (!$user_auth_check) {
+            return $this->sendError('Unauthorized', 'Please Login to proceed');
+        }
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
+            'old_password' => 'required',
             'password' => 'required',
             'confirm_password' => 'required|same:password',
         ]);
-
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
         try {
-            $token_check = PasswordReset::where('email', $request->email)->first();
-            if (!$token_check) {
-                return $this->sendError('Invalid/Expired Token.', 'Token Expired or Invalid');
-            }else {
-                $user = User::where('email', $token_check->email)->first();
-                $user->password = \Hash::make($request->password);
-                $user->update();
-                $token_check->delete();
+            $auth_user = auth('api')->user();
+            $user = User::where('email', $auth_user->email)->first();
+            if (!\Hash::check($request->old_password, $auth_user->password)) {
+                return $this->sendError('Invalid Old Password', 'Please enter correct password');
             }
+            $user->password = \Hash::make($request->password);
+            $user->update();
+
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
