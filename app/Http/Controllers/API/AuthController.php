@@ -86,6 +86,7 @@ class AuthController extends BaseController
     public function sendResetLinkEmail(Request $request)
     {
         $returnData = [];
+        $reset_details = [];
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
         ]);
@@ -96,12 +97,18 @@ class AuthController extends BaseController
         try {
             $user = User::where('email', $request->email)->first();
             if (isset($user)) {
-                $response = $this->broker()->sendResetLink(
-                    $this->credentials($request)
-                );
-                return $this->sendResponse($returnData, 'Email Sent');
+                $new_password = substr(md5(uniqid(rand(),1)),3,10);
+                $reset_details['first_name'] = $user->first_name;
+                $reset_details['last_name'] = $user->last_name;
+                $reset_details['email'] = $request->email;
+                $reset_details['new_password'] = $new_password;
+                $user->password = \Hash::make($new_password);
+                $user->update();
+                \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
+                
+                return $this->sendResponse($returnData, 'Your password has been reset, check your e-mail to receive temporary password');
             }else {
-                return $this->sendError('Invalid Account.', 'No account associated with this email');
+                return $this->sendError('Invalid Account.', 'Sorry, Your email doesn\'t exists in our record');
             }
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
