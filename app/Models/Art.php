@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Art extends Model
 {
+    public $timestamps = false;
+    protected $fillable = ['name', 'parent_id'];
+    
     public function parent()
     {
         return $this->belongsTo(Art::class,'parent_id')->where('parent_id',null)->with('parent');
@@ -13,6 +16,6 @@ class Art extends Model
 
     public function children()
     {
-        return $this->hasMany(Art::class,'parent_id')->with('children');
+        return $this->hasMany(self::class, 'parent_id');
     }
 }

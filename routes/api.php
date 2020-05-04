@@ -24,6 +24,7 @@ Route::namespace('API')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::group(['prefix' => 'art'], function () {
             Route::get('', 'ArtController@getAll');
+            Route::post('', 'ArtController@store');
         });
     });
 
