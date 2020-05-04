@@ -19,9 +19,13 @@ Route::namespace('API')->group(function () {
     Route::post('login', 'AuthController@login');
     Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
     Route::post('change-password', 'AuthController@changePassword');
-    Route::middleware('auth:api')->group(function () {
-        //Route::post('change-password', 'AuthController@changePassword');
 
+    
+    Route::middleware('auth:api')->group(function () {
+        Route::group(['prefix' => 'art'], function () {
+            Route::get('', 'ArtController@getAll');
+            Route::post('', 'ArtController@store');
+        });
     });
 
 });

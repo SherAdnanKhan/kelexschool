@@ -41,7 +41,7 @@ class AuthController extends BaseController
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
             $user = User::create($input);
-            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
+            //\Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
             $returnData['user'] =  $user;
         }catch(QueryException $ex) {
@@ -105,7 +105,9 @@ class AuthController extends BaseController
                 $reset_details['new_password'] = $new_password;
                 $user->password = \Hash::make($new_password);
                 $user->update();
-                \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
+                if(env('APP_ENV') != 'local') {
+                    \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
+                }
                 
                 return $this->sendResponse($returnData, 'Your password has been reset, check your e-mail to receive temporary password');
             }else {
