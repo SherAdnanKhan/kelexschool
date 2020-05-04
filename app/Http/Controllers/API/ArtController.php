@@ -28,12 +28,10 @@ class ArtController extends BaseController
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-
         try {
             if($request->has('parent_id')) {
                 $parent_id = $request->parent_id;
             }
-            
             $input = $request->all();
             $input['parent_id'] = $parent_id;
             $art = Art::create($input);
@@ -44,8 +42,6 @@ class ArtController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'New art added successfully.');
-
-
 
     }
 }
