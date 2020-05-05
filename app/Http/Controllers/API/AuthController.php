@@ -24,6 +24,7 @@ class AuthController extends BaseController
     public function register(Request $request)
     {
         $returnData = [];
+        $image_recived =[];
         $validator = Validator::make($request->all(), [
             'first_name' => 'required',
             'last_name' => 'required',
@@ -42,25 +43,25 @@ class AuthController extends BaseController
             $input = $request->all();
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
-            if($request->has('avatar')) {
-                $image_recived = $this->uploadImage($request->avatar, "artists/");
-                $returnData['image'] = $image_recived;
-            }
-
             $user = User::create($input);
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
             
             $returnData['user'] =  $user;
 
-            $image = new Image();
-            $image->title = $image_recived['image_name'];
-            $image->path = $image_recived['image_path'];
-            $image->image_type = 'App\Models\User';
-            $image->image_id = 1;
-            $image->created_by = $user->id;
-            $image->updated_by  = $user->id;
-            $image->deleted_by = $user->id;
-            $image->save();
+            if($request->has('avatar')) {
+                $image_recived = $this->uploadImage($request->avatar, "artists/");
+                $returnData['image'] = $image_recived;
+                $image = new Image();
+                $image->title = $image_recived['image_name'];
+                $image->path = $image_recived['image_path'];
+                $image->image_type = 'App\Models\User';
+                $image->image_id = 1;
+                $image->created_by = $user->id;
+                $image->updated_by  = $user->id;
+                $image->deleted_by = $user->id;
+                $image->save();
+            }
+
             \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
 
         }catch(QueryException $ex) {
@@ -124,10 +125,7 @@ class AuthController extends BaseController
                 $reset_details['new_password'] = $new_password;
                 $user->password = \Hash::make($new_password);
                 $user->update();
-                if(env('APP_ENV') != 'local') {
                     \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
-                }
-                
                 return $this->sendResponse($returnData, 'Your password has been reset, check your e-mail to receive temporary password');
             }else {
                 return $this->sendError('Invalid Account.', 'Sorry, Your email doesn\'t exists in our record');

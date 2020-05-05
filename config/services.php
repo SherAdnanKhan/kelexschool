@@ -25,9 +25,9 @@ return [
     ],
 
     'ses' => [
-        'key' => env('SES_KEY'),
-        'secret' => env('SES_SECRET'),
-        'region' => env('SES_REGION', 'us-east-1'),
+        'key' => env('MAIL_USERNAME'),
+        'secret' => env('MAIL_PASSWORD'),
+        'region' => env('SES_REGION', 'us-west-2'),
     ],
 
 ];
