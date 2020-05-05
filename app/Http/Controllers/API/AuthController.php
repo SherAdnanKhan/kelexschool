@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
 use App\Models\User;
+use App\Models\Image;
 use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
@@ -30,6 +31,7 @@ class AuthController extends BaseController
             'email' => 'required|unique:users,email|email',
             'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
+            'avatar' => 'image|max:2000'
         ]);
    
         if ($validator->fails()){
@@ -40,10 +42,27 @@ class AuthController extends BaseController
             $input = $request->all();
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
+            if($request->has('avatar')) {
+                $image_recived = $this->uploadImage($request->avatar, "artists/");
+                $returnData['image'] = $image_recived;
+            }
+
             $user = User::create($input);
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
-            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
+            
             $returnData['user'] =  $user;
+
+            $image = new Image();
+            $image->title = $image_recived['image_name'];
+            $image->path = $image_recived['image_path'];
+            $image->image_type = 'App\Models\User';
+            $image->image_id = 1;
+            $image->created_by = $user->id;
+            $image->updated_by  = $user->id;
+            $image->deleted_by = $user->id;
+            $image->save();
+            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
+
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {

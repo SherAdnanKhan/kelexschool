@@ -17,6 +17,7 @@
         "laravel/passport": "^8.4",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
+        "league/flysystem-aws-s3-v3": "^1.0",
         "spatie/laravel-sluggable": "^2.2"
     },
     "require-dev": {
