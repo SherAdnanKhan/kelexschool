@@ -41,12 +41,12 @@ class AuthController extends BaseController
             $input['password'] = bcrypt($input['password']);
             $input['last_login'] = now();
             $user = User::create($input);
-            //\Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
+            \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
             $returnData['user'] =  $user;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(Exception $ex) {
+        }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'User register successfully.');
@@ -78,7 +78,7 @@ class AuthController extends BaseController
             } 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(Exception $ex) {
+        }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
 
@@ -113,7 +113,7 @@ class AuthController extends BaseController
             }else {
                 return $this->sendError('Invalid Account.', 'Sorry, Your email doesn\'t exists in our record');
             }
-        }catch(Exception $ex) {
+        }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
     }
@@ -142,7 +142,7 @@ class AuthController extends BaseController
             $user->password = \Hash::make($request->password);
             $user->update();
 
-        }catch(Exception $ex) {
+        }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'Password Updated');
