@@ -87,8 +87,8 @@ class AuthController extends BaseController
 
         try {
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
-                $user = Auth::user(); 
-                $avatar = $user->avatars();
+                $user = Auth::user();                 
+                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
                 $returnData['avatars'] = $avatar;

@@ -61,6 +61,6 @@ class User extends Authenticatable
 
     public function avatars()
     {
-        return $this->hasMany('App\Models\Image', 'image_id', 'id');
+        return $this->hasMany(Image::class, 'created_by', 'id');
     }
 }
