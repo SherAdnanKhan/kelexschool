@@ -55,7 +55,7 @@ class AuthController extends BaseController
                 $image->title = $image_recived['image_name'];
                 $image->path = $image_recived['image_path'];
                 $image->image_type = 'App\Models\User';
-                $image->image_id = 1;
+                $image->image_id = $user->id;
                 $image->created_by = $user->id;
                 $image->updated_by  = $user->id;
                 $image->deleted_by = $user->id;
@@ -87,14 +87,16 @@ class AuthController extends BaseController
 
         try {
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
-                $user = Auth::user(); 
+                $user = Auth::user();                 
+                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
+                $returnData['avatars'] = $avatar;
        
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
             else{ 
-                return $this->sendError('Invalid Email or Password.', ['error'=>'Unauthorised']);
+                return $this->sendError('Validation Error', ['error'=>'Unauthorised', 'message' => 'Incorrect Email or Password']);
             } 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);

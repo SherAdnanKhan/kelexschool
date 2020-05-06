@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->morphMany(Image::class, 'image');
     }
+
+    public function avatars()
+    {
+        return $this->hasMany(Image::class, 'created_by', 'id');
+    }
 }
