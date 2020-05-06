@@ -77,7 +77,7 @@ class AuthController extends BaseController
     {
         $returnData = [];
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required',
             'password' => 'required',
         ]);
    
@@ -86,7 +86,8 @@ class AuthController extends BaseController
         }
 
         try {
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
+            $field = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+            if (Auth::attempt([$field => $request->email, 'password' => $request->password])){ 
                 $user = Auth::user();                 
                 $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
