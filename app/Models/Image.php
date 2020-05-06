@@ -7,5 +7,7 @@ use Storage;
 
 class Image extends Model
 {
-    
+    protected $fillable = [
+        'path', 'title'
+    ];
 }

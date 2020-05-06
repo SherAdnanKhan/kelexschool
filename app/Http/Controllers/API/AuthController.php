@@ -55,7 +55,7 @@ class AuthController extends BaseController
                 $image->title = $image_recived['image_name'];
                 $image->path = $image_recived['image_path'];
                 $image->image_type = 'App\Models\User';
-                $image->image_id = 1;
+                $image->image_id = $user->id;
                 $image->created_by = $user->id;
                 $image->updated_by  = $user->id;
                 $image->deleted_by = $user->id;
@@ -88,8 +88,10 @@ class AuthController extends BaseController
         try {
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
                 $user = Auth::user(); 
+                $avatar = $user->avatars();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
+                $returnData['avatars'] = $avatar;
        
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
