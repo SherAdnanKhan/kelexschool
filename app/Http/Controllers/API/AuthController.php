@@ -94,7 +94,7 @@ class AuthController extends BaseController
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
             else{ 
-                return $this->sendError('Invalid Email or Password.', ['error'=>'Unauthorised']);
+                return $this->sendError('Validation Error', ['error'=>'Unauthorised', 'message' => 'Incorrect Email or Password']);
             } 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
