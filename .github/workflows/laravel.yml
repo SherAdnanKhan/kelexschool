@@ -13,7 +13,10 @@ jobs:
     - name: Connect
       run: |
         eval `ssh-agent`
+        mkdir -p ~/.ssh
+        chmod 600 ~/.ssh/id_rsa && chmod 700 ~/.ssh
         ssh-add - <<< "${{ secrets.SSH_KEY }}"
+        ssh-keyscan -t rsa 184.169.228.69 >> ~/.ssh/known_hosts
         ssh -tt ubuntu@184.169.228.69
         cd /home/ubuntu/meuzmnet-laravel
         /usr/bin/git pull origin develop
