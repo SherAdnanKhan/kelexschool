@@ -28,6 +28,7 @@ Route::namespace('API')->group(function () {
         });
         Route::group(['prefix' => 'my-studio'], function () {
             Route::get('/', 'StudioController@getMyStudio');
+            Route::post('/avatar', 'StudioController@updateMyCubicImage');
         });
 
         Route::group(['prefix' => 'gallery'], function () {
