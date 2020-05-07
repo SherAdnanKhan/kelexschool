@@ -44,4 +44,5 @@ class ArtController extends BaseController
         return $this->sendResponse($returnData, 'New art added successfully.');
 
     }
+
 }
