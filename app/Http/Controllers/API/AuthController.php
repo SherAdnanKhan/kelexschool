@@ -131,7 +131,7 @@ class AuthController extends BaseController
                     \Mail::to($request->email)->send(new \App\Mail\ResetPasswordMail($reset_details));
                 return $this->sendResponse($returnData, 'Your password has been reset, check your e-mail to receive temporary password');
             }else {
-                return $this->sendError('Invalid Account.', 'Sorry, Your email doesn\'t exists in our record');
+                return $this->sendError('Invalid Account', ['error'=>'Invalid Account', 'message' => 'Sorry, Your email doesn\'t exists in our record']);
             }
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
@@ -143,7 +143,7 @@ class AuthController extends BaseController
         $returnData = [];
         $user_auth_check = Auth::guard('api')->check();
         if (!$user_auth_check) {
-            return $this->sendError('Unauthorized', 'Please Login to proceed');
+            return $this->sendError('Unauthorized', ['error'=>'Unauthorised', 'message' => 'Please login before']);
         }
         $validator = Validator::make($request->all(), [
             'old_password' => 'required',
@@ -157,7 +157,7 @@ class AuthController extends BaseController
             $auth_user = auth('api')->user();
             $user = User::where('email', $auth_user->email)->first();
             if (!\Hash::check($request->old_password, $auth_user->password)) {
-                return $this->sendError('Invalid Old Password', 'Please enter correct password');
+                return $this->sendError('Invalid Old Password', ['error'=>'Invalid Old Password', 'message' => 'Please enter correct password'] );
             }
             $user->password = \Hash::make($request->password);
             $user->update();
