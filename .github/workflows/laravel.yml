@@ -1,0 +1,19 @@
+name: Laravel
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  laravel-deploy:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Connect
+      run: |
+        eval `ssh-agent`
+        ssh-add - <<< "${{ secrets.SSH_KEY }}"
+        ssh ubuntu@${{ secrets.IP_ADDRESS }}
+        cd /home/ubuntu/meuzmnet-laravel
+        /usr/bin/git pull origin develop
