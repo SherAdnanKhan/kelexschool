@@ -14,6 +14,6 @@ jobs:
       run: |
         eval `ssh-agent`
         ssh-add - <<< "${{ secrets.SSH_KEY }}"
-        ssh ubuntu@${{ secrets.IP_ADDRESS }}
+        ssh -tt ubuntu@${{ secrets.IP_ADDRESS }}
         cd /home/ubuntu/meuzmnet-laravel
         /usr/bin/git pull origin develop
