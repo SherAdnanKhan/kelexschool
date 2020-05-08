@@ -6,7 +6,9 @@ use App\Http\Controllers\API\BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
+use Auth;
 use App\Models\Art;
+use App\Models\User;
 
 
 class ArtController extends BaseController
@@ -25,7 +27,7 @@ class ArtController extends BaseController
             'name' => 'required',
         ]);
    
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
@@ -42,6 +44,33 @@ class ArtController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'New art added successfully.');
+
+    }
+
+    public function userArtSection(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'art_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $user->art_id = $request->art_id;
+            $user->update();
+            $updated_user = User::with('art.parent')->find($user->id);
+            $returnData['user'] = $updated_user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Your art successfully added');
+
+
 
     }
 

@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Art extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['name', 'parent_id'];
+    protected $fillable = [ 'name', 'parent_id' ];
+    protected $hidden = [ 'deleted_at' ];
     
     public function parent()
     {
-        return $this->belongsTo(Art::class,'parent_id')->where('parent_id',null)->with('parent');
+        //return $this->belongsTo(Art::class,'parent_id')->with('parent'); //for nested parents
+        return $this->belongsTo(Art::class,'parent_id');
     }
 
     public function children()
