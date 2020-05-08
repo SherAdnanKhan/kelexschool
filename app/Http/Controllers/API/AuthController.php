@@ -8,6 +8,7 @@ use Illuminate\Database\QueryException;
 use Validator;
 use App\Models\User;
 use App\Models\Image;
+use App\Models\Gallery;
 use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
@@ -57,11 +58,16 @@ class AuthController extends BaseController
                 $image->image_type = 'App\Models\User';
                 $image->image_id = $user->id;
                 $image->created_by = $user->id;
-                $image->updated_by  = $user->id;
-                $image->deleted_by = $user->id;
                 $image->save();
             }
-
+            //default galleries on registeration
+            $galleries = config('constants.galleries');
+            foreach($galleries as $gallery) {
+                $new_gallery = new Gallery();
+                $new_gallery->title = $gallery;
+                $new_gallery->created_by = $user->id;
+                $new_gallery->save();
+            }
             \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
 
         }catch(QueryException $ex) {
