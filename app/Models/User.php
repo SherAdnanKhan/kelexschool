@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Image::class, 'created_by', 'id');
     }
+    
+    public function art()
+    {
+        return $this->belongsTo(Art::class, 'art_id');
+    }
 }
