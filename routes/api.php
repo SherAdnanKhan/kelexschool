@@ -15,27 +15,32 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::namespace('API')->group(function () {
-    Route::post('register', 'AuthController@register');
-    Route::post('login', 'AuthController@login');
-    Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
-    Route::post('change-password', 'AuthController@changePassword');
-
-    
-    Route::middleware('auth:api')->group(function () {
-        Route::group(['prefix' => 'art'], function () {
-            Route::get('', 'ArtController@getAll');
-            Route::post('', 'ArtController@store');
-            Route::post('/user-art-selection', 'ArtController@userArtSection');
-        });
-        Route::group(['prefix' => 'my-studio'], function () {
-            Route::get('/', 'StudioController@getMyStudio');
-            Route::post('/avatar', 'StudioController@updateMyCubicImage');
-        });
-
-        Route::group(['prefix' => 'gallery'], function () {
-            Route::get('my-galleries', 'GalleryController@getMyGalleries');
+    Route::namespace('v1')->group( function () {
+        Route::group(['prefix' => 'v1'], function () { 
+            Route::group(['prefix' => 'auth'], function () {
+                Route::post('register', 'AuthController@register'); 
+                Route::post('login', 'AuthController@login');
+                Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
+                Route::post('change-password', 'AuthController@changePassword');
+            });
+            Route::middleware('auth:api')->group(function () {
+                Route::group(['prefix' => 'arts'], function () {
+                    Route::get('', 'ArtController@getAll');
+                    Route::post('', 'ArtController@store');
+                    Route::post('/user-art-selection', 'ArtController@userArtSection');
+                });
+                Route::group(['prefix' => 'my-studio'], function () {
+                    Route::get('/', 'StudioController@getMyStudio');
+                    Route::post('/avatar', 'StudioController@updateMyCubicImage');
+                });
+                Route::group(['prefix' => 'galleries'], function () {
+                    Route::get('my-gallery', 'GalleryController@getMyGalleries');
+                });
+            });
         });
     });
+    
+
 
 });
 
