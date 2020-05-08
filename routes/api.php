@@ -33,8 +33,8 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'StudioController@getMyStudio');
                     Route::post('/avatar', 'StudioController@updateMyCubicImage');
                 });
-                Route::group(['prefix' => 'gallery'], function () {
-                    Route::get('my-galleries', 'GalleryController@getMyGalleries');
+                Route::group(['prefix' => 'galleries'], function () {
+                    Route::get('my-gallery', 'GalleryController@getMyGalleries');
                 });
             });
         });
