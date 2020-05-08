@@ -16,12 +16,11 @@ class CreateGalleriesTable extends Migration
         Schema::create('galleries', function (Blueprint $table) {
             $table->id();
             $table->string('slug');
-            $table->string('name');
-            $table->string('title')->nullable();
+            $table->string('title');
             $table->text('description')->nullable();
             $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by');
-            $table->unsignedBigInteger('deleted_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
