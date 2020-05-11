@@ -19,7 +19,8 @@ class ArtController extends BaseController
         return $this->sendResponse($arts, 'All arts record');
     }
 
-    public function store(Request $request) {
+    public function store(Request $request) 
+    {
         $returnData = [];
         $parent_id = null;
 
@@ -70,7 +71,26 @@ class ArtController extends BaseController
         }
         return $this->sendResponse($returnData, 'Your art successfully added');
 
+    }
 
+    public function searchArt(Request $request)
+    {
+        $returnData = [];
+        try {
+            if($request->has('art')) {
+                $arts = Art::where('name', 'LIKE', '%'.$request->art.'%')->get();
+            }else {
+              $arts = Art::all();  
+            }
+            //$arts = Art::where('name', 'LIKE', '%'.$art.'%')->get();
+            $returnData['arts'] = $arts;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Your art successfully added');
 
     }
 

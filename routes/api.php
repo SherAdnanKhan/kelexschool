@@ -27,11 +27,12 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'arts'], function () {
                     Route::get('', 'ArtController@getAll');
                     Route::post('', 'ArtController@store');
-                    Route::post('/user-art-selection', 'ArtController@userArtSection');
+                    Route::post('user-art-selection', 'ArtController@userArtSection');
+                    Route::get('search', 'ArtController@searchArt');
                 });
                 Route::group(['prefix' => 'my-studio'], function () {
                     Route::get('/', 'StudioController@getMyStudio');
-                    Route::post('/avatar', 'StudioController@updateMyCubicImage');
+                    Route::post('avatar', 'StudioController@updateMyCubicImage');
                 });
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
