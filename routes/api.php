@@ -39,6 +39,9 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
                 });
+                Route::group(['prefix' => 'favs'], function () {
+                    Route::post('/', 'FavController@store');
+                });
             });
         });
     });
