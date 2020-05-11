@@ -19,7 +19,6 @@ class CreatePostTable extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->unsignedBigInteger('gallery_id');
-            $table->unsignedBigInteger('art_id')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
@@ -30,7 +29,6 @@ class CreatePostTable extends Migration
             $table->foreign('updated_by')->references('id')->on('users');
             $table->foreign('deleted_by')->references('id')->on('users');
             $table->foreign('gallery_id')->references('id')->on('galleries');
-            $table->foreign('art_id')->references('id')->on('arts');
         });
            
     }
