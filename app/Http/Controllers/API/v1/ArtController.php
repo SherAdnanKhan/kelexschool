@@ -24,7 +24,7 @@ class ArtController extends BaseController
         $parent_id = null;
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|unique:arts,name',
         ]);
    
         if ($validator->fails()) {
