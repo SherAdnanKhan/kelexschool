@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\v1\BaseController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Auth;
+use App\Models\Gallery;
 
-class GalleryController extends Controller
+class GalleryController extends BaseController
 {
     public function getMyGalleries()
     {
-        $user_auth_check = Auth::guard('api');
-        dd($user_auth_check);
+        $user = Auth::guard('api')->user();
+        $galleries = Gallery::where('created_by', $user->id)->get();
+
+        return $this->sendResponse($galleries, 'My all galleries');
     }
 }

@@ -13,6 +13,7 @@ class Gallery extends Model
     protected $fillable = [
         'title', 'slug', 'created_by'
     ];
+    protected $hidden = [ 'deleted_at', 'deleted_by' ];
 
     public function getSlugOptions() : SlugOptions
     {
