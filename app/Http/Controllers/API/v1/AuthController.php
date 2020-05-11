@@ -51,7 +51,6 @@ class AuthController extends BaseController
 
             if($request->has('avatar')) {
                 $image_recived = $this->uploadImage($request->avatar, "artists/");
-                $returnData['image'] = $image_recived;
                 $image = new Image();
                 $image->title = $image_recived['image_name'];
                 $image->path = $image_recived['image_path'];
@@ -59,6 +58,10 @@ class AuthController extends BaseController
                 $image->image_id = $user->id;
                 $image->created_by = $user->id;
                 $image->save();
+
+                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
+                $returnData['user']['avatars'] = $avatar;
+
             }
             //default galleries on registeration
             $galleries = config('constants.galleries');
@@ -98,7 +101,7 @@ class AuthController extends BaseController
                 $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
-                $returnData['avatars'] = $avatar;
+                $returnData['user']['avatars'] = $avatar;
        
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
