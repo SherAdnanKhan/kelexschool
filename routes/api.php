@@ -36,6 +36,9 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
                 });
+                Route::group(['prefix' => 'posts'], function () {
+                    Route::post('/', 'PostController@store');
+                });
             });
         });
     });
