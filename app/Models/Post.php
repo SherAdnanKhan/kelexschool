@@ -7,14 +7,15 @@ use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Gallery extends Model
+class Post extends Model
 {
     use HasSlug, SoftDeletes;
     
     protected $fillable = [
-        'title', 'slug', 'created_by'
+        'title', 'slug', 'description', 'created_by', 'gallery_id'
     ];
-    protected $hidden = [ 'deleted_at', 'deleted_by' ];
+    protected $hidden = [ 'deleted_by' ];
+    protected $dates = [ 'deleted_at' ];
 
     public function getSlugOptions() : SlugOptions
     {
