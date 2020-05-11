@@ -61,6 +61,7 @@ class PostController extends BaseController
             $post = new Post;
             $post->title = $request->title;
             $post->gallery_id = $request->gallery_id;
+            $post->art_id = $request->art_id ? $request->art_id : null;
             $post->description = $request->description ? $request->description : null;
             $post->created_by = $user->id;
             $post->save(); 
