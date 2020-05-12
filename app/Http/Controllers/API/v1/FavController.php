@@ -17,15 +17,19 @@ class FavController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function favs()
     {
         $returnData = [];
+        $faved_user_ids = [];
         $user = Auth::guard('api')->user();
-        $fav_by_count = Fav::where('faved_to', $user->id)->get()->count();
-        $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
-        $returnData['fav_by_count'] = $fav_by_count;
-        $returnData['fav_to_count'] = $fav_to_count;
-        return $this->sendResponse($returnData, 'Count Faves');
+        $favs = Fav::where('faved_by', $user->id)->get(['faved_to']);
+        foreach($favs as $fav) {
+            array_push($faved_user_ids, $fav->faved_to);
+        }
+        $all_faved_users = User::with('avatars', 'art', 'galleries')->whereIn('id', $faved_user_ids)->get();
+        
+        $returnData['faves'] = $all_faved_users;
+        return $this->sendResponse($returnData, 'User faves');
     }
 
     /**
@@ -119,5 +123,16 @@ class FavController extends BaseController
     public function destroy($id)
     {
         //
+    }
+
+    public function favCounts()
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $fav_by_count = Fav::where('faved_to', $user->id)->get()->count();
+        $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
+        $returnData['fav_by_count'] = $fav_by_count;
+        $returnData['fav_to_count'] = $fav_to_count;
+        return $this->sendResponse($returnData, 'Count Faves');
     }
 }
