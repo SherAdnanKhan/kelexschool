@@ -44,9 +44,10 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'LobbyController@index');
                 });
                 Route::group(['prefix' => 'favs'], function () {
+                    Route::post('/', 'FavController@store');
+                    Route::get('/get-faved-by', 'FavController@fav_by');
                     Route::get('/get-faves', 'FavController@favs');
                     Route::get('/fav-counts', 'FavController@favCounts');
-                    Route::post('/', 'FavController@store');
                 });
                 Route::group(['prefix' => 'users'], function () {
                     Route::get('/', 'UserController@getAllUsers');
