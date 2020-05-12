@@ -32,6 +32,21 @@ class FavController extends BaseController
         return $this->sendResponse($returnData, 'User faves');
     }
 
+    public function fav_by()
+    {
+        $returnData = [];
+        $faved_user_ids = [];
+        $user = Auth::guard('api')->user();
+        $favs = Fav::where('faved_to', $user->id)->get(['faved_by']);
+        foreach($favs as $fav) {
+            array_push($faved_user_ids, $fav->faved_by);
+        }
+        $all_faved_users = User::with('avatars', 'art', 'galleries')->whereIn('id', $faved_user_ids)->get();
+        
+        $returnData['faves'] = $all_faved_users;
+        return $this->sendResponse($returnData, 'User faved By');
+    }
+
     /**
      * Show the form for creating a new resource.
      *
