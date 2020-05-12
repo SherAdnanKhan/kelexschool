@@ -25,8 +25,8 @@ Route::namespace('API')->group(function () {
             });
             Route::middleware('auth:api')->group(function () {
                 Route::group(['prefix' => 'arts'], function () {
-                    Route::get('', 'ArtController@getAll');
-                    Route::post('', 'ArtController@store');
+                    Route::get('/', 'ArtController@getAll');
+                    Route::post('/', 'ArtController@store');
                     Route::post('user-art-selection', 'ArtController@userArtSection');
                     Route::get('search', 'ArtController@searchArt');
                 });
@@ -40,9 +40,15 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
                 });
+                Route::group(['prefix' => 'lobby'], function () {
+                    Route::get('/', 'LobbyController@index');
+                });
                 Route::group(['prefix' => 'favs'], function () {
-                    Route::get('/', 'FavController@index');
+                    Route::get('/fav-counts', 'FavController@index');
                     Route::post('/', 'FavController@store');
+                });
+                Route::group(['prefix' => 'users'], function () {
+                    Route::get('/', 'UserController@getAllUsers');
                 });
             });
         });
