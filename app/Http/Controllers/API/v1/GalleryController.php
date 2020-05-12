@@ -16,4 +16,5 @@ class GalleryController extends BaseController
 
         return $this->sendResponse($galleries, 'My all galleries');
     }
+
 }

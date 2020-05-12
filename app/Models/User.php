@@ -54,15 +54,15 @@ class User extends Authenticatable
         return 'slug';
     }
 
-    public function avatar()
+    public function avatars()
     {
         return $this->morphMany(Image::class, 'image');
     }
 
-    public function avatars()
-    {
-        return $this->hasMany(Image::class, 'created_by', 'id');
-    }
+    // public function avatars()
+    // {
+    //     return $this->hasMany(Image::class, 'created_by', 'id')->where('image_type', 'App\Models\User');
+    // }
     
     public function art()
     {
