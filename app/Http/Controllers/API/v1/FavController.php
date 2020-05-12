@@ -19,7 +19,13 @@ class FavController extends BaseController
      */
     public function index()
     {
-        //
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $fav_by_count = Fav::where('faved_to', $user->id)->get()->count();
+        $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
+        $returnData['fav_by_count'] = $fav_by_count;
+        $returnData['fav_to_count'] = $fav_to_count;
+        return $this->sendResponse($returnData, 'Count Faves');
     }
 
     /**
