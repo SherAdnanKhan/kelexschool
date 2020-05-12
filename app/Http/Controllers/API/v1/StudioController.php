@@ -8,19 +8,22 @@ use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
 use App\Models\Image;
+use App\Models\User;
+use App\Models\Fav;
 
 class StudioController extends BaseController
 {
     public function getMyStudio() 
     {
         $returnData = [];
-        $user = Auth::guard('api')->user();
-        $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
+        $auth_user = Auth::guard('api')->user();
+        $user = User::with('avatars')->find($auth_user->id);
         $returnData['user'] = $user;
-        $returnData['avatars'] = $avatar;
-        //implement after favs module
-        $returnData['favs_count'] = 0;
-        $returnData['favs_by_count'] = 0;
+        $fav_by_count = Fav::where('faved_to', $user->id)->get()->count();
+        $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
+        $returnData['fav_by_count'] = $fav_by_count;
+        $returnData['favs_count'] = $fav_to_count;
+        
         return $this->sendResponse($returnData, 'My studio');
     }
 
