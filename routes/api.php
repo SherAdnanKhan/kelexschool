@@ -30,25 +30,28 @@ Route::namespace('API')->group(function () {
                     Route::post('user-art-selection', 'ArtController@userArtSection');
                     Route::get('search', 'ArtController@searchArt');
                 });
-                Route::group(['prefix' => 'my-studio'], function () {
-                    Route::get('/', 'StudioController@getMyStudio');
-                    Route::post('avatar', 'StudioController@updateMyCubicImage');
-                });
-                Route::group(['prefix' => 'galleries'], function () {
-                    Route::get('my-gallery', 'GalleryController@getMyGalleries');
-                    Route::get('/{slug}', 'GalleryController@show');
-                });
-                Route::group(['prefix' => 'posts'], function () {
-                    Route::post('/', 'PostController@store');
-                });
-                Route::group(['prefix' => 'lobby'], function () {
-                    Route::get('/', 'LobbyController@index');
-                });
                 Route::group(['prefix' => 'favs'], function () {
                     Route::post('/', 'FavController@store');
                     Route::get('/get-faved-by', 'FavController@fav_by');
                     Route::get('/get-faves', 'FavController@favs');
                     Route::get('/fav-counts', 'FavController@favCounts');
+                });
+                Route::group(['prefix' => 'galleries'], function () {
+                    Route::get('my-gallery', 'GalleryController@getMyGalleries');
+                    Route::get('/{slug}', 'GalleryController@show');
+                });
+                Route::group(['prefix' => 'lobby'], function () {
+                    Route::get('/', 'LobbyController@index');
+                });
+                Route::group(['prefix' => 'my-studio'], function () {
+                    Route::get('/', 'StudioController@getMyStudio');
+                    Route::post('avatar', 'StudioController@updateMyCubicImage');
+                });
+                Route::group(['prefix' => 'posts'], function () {
+                    Route::post('/', 'PostController@store');
+                });
+                Route::group(['prefix' => 'studios'], function () {
+                    Route::get('/{slug}', 'StudioController@getUserStudio');
                 });
                 Route::group(['prefix' => 'users'], function () {
                     Route::get('/', 'UserController@getAllUsers');
