@@ -28,4 +28,14 @@ class Gallery extends Model
     {
         return 'slug';
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'gallery_id', 'id');
+    }
+
+    public function image()
+    {
+        return $this->morphOne(Image::class, 'image');
+    }
 }
