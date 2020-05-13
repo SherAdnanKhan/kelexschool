@@ -51,6 +51,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'users'], function () {
                     Route::get('/', 'UserController@getAllUsers');
+                    Route::get('search', 'UserController@searchUsers');
                 });
             });
         });

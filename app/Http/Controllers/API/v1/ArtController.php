@@ -90,7 +90,7 @@ class ArtController extends BaseController
         }catch(Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-        return $this->sendResponse($returnData, 'Your art successfully added');
+        return $this->sendResponse($returnData, 'your art search');
 
     }
 

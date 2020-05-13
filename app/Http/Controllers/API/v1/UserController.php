@@ -13,4 +13,23 @@ class UserController extends BaseController
         $users = User::all();
         return $this->sendResponse($users, 'all users list');
     }
+    
+    public function searchUsers(Request $request)
+    {
+        $returnData = [];
+        try {
+            if($request->has('name')) {
+                $users = User::with('avatars')->where('username', 'LIKE', '%'.$request->name.'%')->get();
+            }else {
+              $users = User::with('avatars')->all();  
+            }
+            $returnData['users'] = $users;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);
+        }
+        return $this->sendResponse($returnData, 'Artist Search result');
+    }
 }
