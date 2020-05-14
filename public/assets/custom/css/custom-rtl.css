@@ -1,0 +1,109 @@
+h2.logo-text  {
+    margin: 17px 0 !important;
+    color: #fff;
+}
+.page-logo>a:hover {
+    text-decoration: none;
+}
+.avatar>img {
+    margin: 0 auto;
+    width: 50%;
+    height: 50%;
+    -webkit-border-radius: 50%!important;
+    -moz-border-radius: 50%!important;
+    border-radius: 50%!important;
+}
+.author-name {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+.author-phone {
+    font-size: 16px;
+}
+.author-email {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.author-social-media-link {
+    margin-top: 20px;
+    text-align: center;
+}
+.author-phone>i {
+    font-size: 20px;
+    width: 25px;
+}
+.author-email>i {
+    width: 25px;
+}
+.title-label {
+    width: 170px;
+}
+.center-buttons {
+    text-align: center;
+}
+.require {
+    color: red;
+}
+.actions {
+    float: left;
+}
+.control-label-div {
+    font-weight: bold;
+}
+
+.media_section{
+    padding-top: 42px;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    border-top: 1px solid rgba(128, 128, 128, 0.151);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.151);
+    height: 140px;
+}
+.media_icon label{
+    font-weight: 600;
+}
+
+.fa-file-pdf-o:before,
+.fa-music:before{
+    font-size: 60px;
+    padding-left: 50px;
+    display: inline-block;
+    margin-right: 35px;
+}
+.content_section{
+    font-weight: 600;
+    padding-top: 30px;
+    height: 100px;
+
+}
+.content_section label{
+    margin-bottom: 40px;
+    padding-right: 0px;
+    font-weight: 600;
+    font-size: 20px;
+}
+#summernote{
+    display: block !important;
+    visibility: hidden !important;
+}
+#summernote_content>.note-editor{
+    position: relative;
+    top: -30px;
+}
+.publish_as>.bootstrap-switch{
+    margin-left: 16px;
+}
+.note-editable.panel-body {
+    min-height: 350px;
+}
+.social-icon.whatsapp {
+    background: url(../../global/img/social/whatsapp.png) no-repeat;
+}
+.social-icon.snapchat {
+    background: url(../../global/img/social/snapchat.png) no-repeat;
+}
+p.pdf_author,p.volume_author{
+    padding-left: 20px;
+    padding-top: 10px;
+}
