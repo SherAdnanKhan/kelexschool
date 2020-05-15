@@ -48,9 +48,8 @@ class GalleryController extends BaseController
             if (isset($user_fav_gallery)) {
                 return $this->sendError('Already faved Gallery', ['error'=>'Already faved Gallery', 'message' => 'you Already faved this Gallery']);
             }
-            $input = $request->all();
-            $input['user_id'] = $user->id;
-            $art = UserFavGallery::create($input);
+            
+            $user->favGalleries()->attach($request->gallery_id);
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
