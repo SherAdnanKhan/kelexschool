@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Image::class, 'created_by', 'id')->where('image_type', 'App\Models\Post');
     }
+
+    public function favGalleries()
+    {
+        return $this->belongsToMany(Gallery::class, 'user_fav_galleries');
+    }
 }
