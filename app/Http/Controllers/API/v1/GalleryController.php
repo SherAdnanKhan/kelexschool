@@ -28,7 +28,7 @@ class GalleryController extends BaseController
             return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
         }
         
-        $posts = Post::where('gallery_id', $gallery->id)->get();
+        $posts = Post::with('image')->where('gallery_id', $gallery->id)->get();
         return $this->sendResponse($posts, 'Gallery posts');
     }
 
