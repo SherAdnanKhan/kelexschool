@@ -28,6 +28,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'ArtController@getAll');
                     Route::post('/', 'ArtController@store');
                     Route::post('user-art-selection', 'ArtController@userArtSection');
+                    Route::get('/{id}', 'ArtController@show');
                     Route::get('search', 'ArtController@searchArt');
                 });
                 Route::group(['prefix' => 'favs'], function () {
