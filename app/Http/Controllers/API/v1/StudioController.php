@@ -23,7 +23,6 @@ class StudioController extends BaseController
         $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
         $returnData['fav_by_count'] = $fav_by_count;
         $returnData['favs_count'] = $fav_to_count;
-        //total posts 
         
         return $this->sendResponse($returnData, 'My studio');
     }
