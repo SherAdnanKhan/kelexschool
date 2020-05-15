@@ -72,6 +72,29 @@ class StudioController extends BaseController
 
     }
 
+    public function deleteMyCubicImage($id)
+    {
+        try {
+            $user = Auth::guard('api')->user();
+            $image = Image::where('id', $id)->where('image_type', 'App\Models\User')->first();
+            if (!isset($image)) {
+                return $this->sendError('Invalid Image Id', ['error'=>'No Image Exists', 'message' => 'No image exists']);
+            }else {
+                if ($image->created_by != $user->id) {
+                    return $this->sendError('Invalid Image Id', ['error'=>'Unauthorized Image', 'message' => 'No image exists']);
+                }
+            }
+
+            $image->delete();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse([], 'Avatar image deleted');
+    }
+
     public function getUserStudio($slug)
     {
         $returnData = [];
@@ -88,4 +111,6 @@ class StudioController extends BaseController
         return $this->sendResponse($returnData, 'User studio');
         
     }
+
+    
 }

@@ -46,6 +46,7 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'my-studio'], function () {
                     Route::get('/', 'StudioController@getMyStudio');
                     Route::post('avatar', 'StudioController@updateMyCubicImage');
+                    Route::Delete('avatar/{id}', 'StudioController@deleteMyCubicImage');
                 });
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
