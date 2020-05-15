@@ -44,9 +44,12 @@ class GalleryController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-            $input = $request->all();
-            $input['user_id'] = $user->id;
-            $art = UserFavGallery::create($input);
+            $user_fav_gallery = UserFavGallery::where('gallery_id', $request->gallery_id)->where('user_id', $user->id)->first();
+            if (isset($user_fav_gallery)) {
+                return $this->sendError('Already faved Gallery', ['error'=>'Already faved Gallery', 'message' => 'you Already faved this Gallery']);
+            }
+            
+            $user->favGalleries()->attach($request->gallery_id);
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
@@ -54,6 +57,35 @@ class GalleryController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'Mark into Fave Successfully.');
+
+    }
+
+    public function make_unfav(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'gallery_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            
+            $user_fav_gallery = UserFavGallery::where('gallery_id', $request->gallery_id)->where('user_id', $user->id)->first();
+            if (!isset($user_fav_gallery)) {
+                return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
+            }
+            $user->favGalleries()->detach($request->gallery_id);
+            
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Mark into Unfav Successfully.');
 
     }
 
