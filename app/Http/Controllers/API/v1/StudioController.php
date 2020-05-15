@@ -63,6 +63,9 @@ class StudioController extends BaseController
                     $image->deleted_by = $user->id;
                     $image->save();
                 }
+
+                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
+                $returnData['avatars'] = $avatar; 
                 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
