@@ -89,4 +89,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Gallery::class, 'user_fav_galleries');
     }
 
+    public function FunctionName(Type $var = null)
+    {
+        # code...
+    }
+
 }
