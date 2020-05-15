@@ -73,4 +73,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Gallery::class, 'created_by', 'id');
     }
+
+    public function postsImagesRandom()
+    {
+        return $this->hasMany(Image::class, 'created_by', 'id')->where('image_type', 'App\Models\Post');
+    }
 }

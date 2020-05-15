@@ -94,4 +94,19 @@ class ArtController extends BaseController
 
     }
 
+    public function show($id)
+    {
+        try {
+            $art = Art::findOrFail($id);
+            $returnData['art'] = $art;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'your art search');
+       
+    }
+
 }
