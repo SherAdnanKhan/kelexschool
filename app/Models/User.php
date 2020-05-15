@@ -74,6 +74,11 @@ class User extends Authenticatable
         return $this->hasMany(Gallery::class, 'created_by', 'id');
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'created_by', 'id');
+    }
+
     public function postsImagesRandom()
     {
         return $this->hasMany(Image::class, 'created_by', 'id')->where('image_type', 'App\Models\Post');
@@ -83,4 +88,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Gallery::class, 'user_fav_galleries');
     }
+
+    public function FunctionName(Type $var = null)
+    {
+        # code...
+    }
+
 }

@@ -38,4 +38,9 @@ class Gallery extends Model
     {
         return $this->morphOne(Image::class, 'image');
     }
+
+    public function favGalleries()
+    {
+        return $this->belongsToMany(User::class, 'user_fav_galleries');
+    }
 }
