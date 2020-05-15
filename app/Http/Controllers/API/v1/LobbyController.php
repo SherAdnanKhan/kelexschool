@@ -20,7 +20,9 @@ class LobbyController extends BaseController
         foreach($faved_users as $faved_user) {
             array_push($faved_user_ids, $faved_user->faved_to);
         }
-        $all_faved_users = User::with('avatars')->whereIn('id', $faved_user_ids)->get();
+        $all_faved_users = User::with('avatars', 'art.parent')->withCount('posts')->whereIn('id', $faved_user_ids)->get();
+
+        //faved gallery images
         return $this->sendResponse($all_faved_users, '');
     }
 }

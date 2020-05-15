@@ -26,7 +26,7 @@ class FavController extends BaseController
         foreach($favs as $fav) {
             array_push($faved_user_ids, $fav->faved_to);
         }
-        $all_faved_users = User::with('avatars', 'art', 'galleries')->whereIn('id', $faved_user_ids)->get();
+        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
         
         $returnData['faves'] = $all_faved_users;
         return $this->sendResponse($returnData, 'User faves');
@@ -41,7 +41,7 @@ class FavController extends BaseController
         foreach($favs as $fav) {
             array_push($faved_user_ids, $fav->faved_by);
         }
-        $all_faved_users = User::with('avatars', 'art', 'galleries')->whereIn('id', $faved_user_ids)->get();
+        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
         
         $returnData['faves'] = $all_faved_users;
         return $this->sendResponse($returnData, 'User faved By');

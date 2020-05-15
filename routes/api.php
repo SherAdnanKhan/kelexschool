@@ -28,6 +28,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'ArtController@getAll');
                     Route::post('/', 'ArtController@store');
                     Route::post('user-art-selection', 'ArtController@userArtSection');
+                    Route::get('/art/{id}', 'ArtController@show');
                     Route::get('search', 'ArtController@searchArt');
                 });
                 Route::group(['prefix' => 'favs'], function () {
@@ -39,6 +40,8 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
                     Route::get('/{slug}', 'GalleryController@show');
+                    Route::post('/fav', 'GalleryController@make_fav');
+                    Route::post('/unfav', 'GalleryController@make_unfav');
                 });
                 Route::group(['prefix' => 'lobby'], function () {
                     Route::get('/', 'LobbyController@index');

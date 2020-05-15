@@ -19,9 +19,13 @@ class UserController extends BaseController
         $returnData = [];
         try {
             if($request->has('name')) {
-                $users = User::with('avatars')->where('username', 'LIKE', '%'.$request->name.'%')->get();
+                $users = User::with(['avatars', 'art', 'postsImagesRandom' => function($query) {
+                    return $query->limit(4);
+                }])->where('username', 'LIKE', '%'.$request->name.'%')->get();
             }else {
-              $users = User::with('avatars')->all();  
+              $users = User::with(['avatars', 'art', 'postsImagesRandom' => function($query) {
+                return $query->limit(4);
+                }])->all();  
             }
             $returnData['users'] = $users;
 
