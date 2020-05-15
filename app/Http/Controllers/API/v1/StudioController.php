@@ -44,7 +44,7 @@ class StudioController extends BaseController
                 if($request->has('image_id')) {
                     $image = Image::find($request->image_id);
                     $image_recived = $this->uploadImage($request->avatar, "artists/");
-                    $returnData['image'] = $image_recived;
+                    // $returnData['image'] = $image_recived;
                     $image->title = $image_recived['image_name'];
                     $image->path = $image_recived['image_path'];
                     $image->updated_by  = $user->id;
@@ -52,7 +52,7 @@ class StudioController extends BaseController
 
                 }else {
                     $image_recived = $this->uploadImage($request->avatar, "artists/");
-                    $returnData['image'] = $image_recived;
+                    // $returnData['image'] = $image_recived;
                     $image = new Image();
                     $image->title = $image_recived['image_name'];
                     $image->path = $image_recived['image_path'];
@@ -63,6 +63,9 @@ class StudioController extends BaseController
                     $image->deleted_by = $user->id;
                     $image->save();
                 }
+
+                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
+                $returnData['avatars'] = $avatar; 
                 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
