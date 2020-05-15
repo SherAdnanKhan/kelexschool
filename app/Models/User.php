@@ -73,4 +73,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Gallery::class, 'created_by', 'id');
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'created_by', 'id');
+    }
+
 }

@@ -13,7 +13,7 @@ class GalleryController extends BaseController
     public function getMyGalleries()
     {
         $user = Auth::guard('api')->user();
-        $galleries = Gallery::with('posts.image', 'image')->where('created_by', $user->id)->get();
+        $galleries = Gallery::with('posts.image', 'image')->withCount('posts')->where('created_by', $user->id)->get();
 
         return $this->sendResponse($galleries, 'My all galleries');
     }
