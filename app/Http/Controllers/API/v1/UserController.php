@@ -19,11 +19,11 @@ class UserController extends BaseController
         $returnData = [];
         try {
             if($request->has('name')) {
-                $users = User::with(['avatars', 'art', 'postsImagesRandom' => function($query) {
+                $users = User::with(['avatars', 'art.parent', 'postsImagesRandom' => function($query) {
                     return $query->limit(4);
                 }])->where('username', 'LIKE', '%'.$request->name.'%')->get();
             }else {
-              $users = User::with(['avatars', 'art', 'postsImagesRandom' => function($query) {
+              $users = User::with(['avatars', 'art.parent', 'postsImagesRandom' => function($query) {
                 return $query->limit(4);
                 }])->all();  
             }
