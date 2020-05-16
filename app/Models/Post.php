@@ -44,4 +44,9 @@ class Post extends Model
     {
         return $this->belongsToMany(User::class, 'user_stroke_posts');
     }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
