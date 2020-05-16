@@ -51,9 +51,12 @@ Route::namespace('API')->group(function () {
                     Route::post('avatar', 'StudioController@updateMyCubicImage');
                     Route::Delete('avatar/{id}', 'StudioController@deleteMyCubicImage');
                 });
+                Route::group(['prefix' => 'post'], function () {
+                    Route::post('/stroke', 'PostController@makeStroke');
+                    Route::post('/unstroke', 'PostController@unStroke');
+                });
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
-                    Route::post('/post/stroke', 'PostController@makeStroke');
                 });
                 Route::group(['prefix' => 'studios'], function () {
                     Route::get('/{slug}', 'StudioController@getUserStudio');
