@@ -88,6 +88,33 @@ class PostController extends BaseController
         return $this->sendResponse($returnData, 'Exhibit Added');
     }
 
+    public function makeStroke(Request $requestl)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'post_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $hasStroke = $user->strokePosts()->where('id', $request->post_id)->exists();
+            if ($hasStroke) {
+                return $this->sendError('Already Stoke Post', ['error'=>'Already Stroke Post', 'message' => 'You already stroke this post']);
+            }
+            
+            $user->strokePosts()->attach($request->post_id);
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Mark into Fave Successfully.');
+    }
+
     /**
      * Display the specified resource.
      *
