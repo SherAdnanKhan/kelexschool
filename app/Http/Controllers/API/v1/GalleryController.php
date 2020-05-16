@@ -23,12 +23,14 @@ class GalleryController extends BaseController
 
     public function show($slug)
     {
+        $user = Auth::guard('api')->user();
         $gallery = Gallery::where('slug', $slug)->first();
         if (!isset($gallery)) {
             return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
         }
         
         $posts = Post::with('image')->where('gallery_id', $gallery->id)->get();
+        $posts['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
         return $this->sendResponse($posts, 'Gallery posts');
     }
 
