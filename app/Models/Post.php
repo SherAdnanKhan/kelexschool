@@ -34,4 +34,9 @@ class Post extends Model
     {
         return $this->morphOne(Image::class, 'image');
     }
+
+    public function strokeUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_stroke_posts');
+    }
 }

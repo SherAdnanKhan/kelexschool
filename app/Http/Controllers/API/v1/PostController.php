@@ -149,9 +149,19 @@ class PostController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
-        //
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $post = Post::where('slug', $slug)->with('image')->withCount('strokeUsers')->first();
+        if (!isset($post)) {
+            return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+        }
+        $returnData['post'] = $post;
+        $returnData['has_stroke'] = $hasStroke = $user->strokePosts()->where('id', $post->id)->exists();
+
+        return $this->sendResponse($returnData, 'Post');
     }
 
     /**
