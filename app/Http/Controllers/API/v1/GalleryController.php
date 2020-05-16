@@ -23,6 +23,7 @@ class GalleryController extends BaseController
 
     public function show($slug)
     {
+        $returnData = [];
         $user = Auth::guard('api')->user();
         $gallery = Gallery::where('slug', $slug)->first();
         if (!isset($gallery)) {
@@ -30,8 +31,9 @@ class GalleryController extends BaseController
         }
         
         $posts = Post::with('image')->where('gallery_id', $gallery->id)->get();
-        $posts['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
-        return $this->sendResponse($posts, 'Gallery posts');
+        $returnData['posts'] = $posts;
+        $returnData['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
+        return $this->sendResponse($returnData, 'Gallery posts');
     }
 
     public function make_fav(Request $request)
