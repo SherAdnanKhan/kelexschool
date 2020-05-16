@@ -101,7 +101,8 @@ class StudioController extends BaseController
     public function getUserStudio($slug)
     {
         $returnData = [];
-        $user = User::with('avatars', 'galleries.image', 'art.parent')->withCount('posts')->where('slug', $slug)->first();
+        $my_user = Auth::guard('api')->user();
+        $user = User::with('avatars', 'galleries.image', 'galleries.posts.image' ,'art.parent')->withCount('posts')->where('slug', $slug)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }
@@ -110,7 +111,7 @@ class StudioController extends BaseController
         $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
         $returnData['fav_by_count'] = $fav_by_count;
         $returnData['favs_count'] = $fav_to_count;
-        
+        $returnData['has_faved'] = $has_faved = Fav::where([ ['faved_by', $my_user->id], ['faved_to', $user->id] ])->exists();
         return $this->sendResponse($returnData, 'User studio');
         
     }
