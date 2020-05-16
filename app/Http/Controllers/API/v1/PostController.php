@@ -115,6 +115,34 @@ class PostController extends BaseController
         return $this->sendResponse($returnData, 'Mark Stroke Successfully.');
     }
 
+    public function unStroke(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'post_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $hasStroke = $user->strokePosts()->where('id', $request->post_id)->exists();
+            if (!$hasStroke) {
+                return $this->sendError('None Stoke Post', ['error'=>'None Stroke Post', 'message' => 'You didn\'t stroke this post before']);
+            }
+            
+            $user->strokePosts()->detach($request->post_id);
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Mark UnStroke Successfully.');
+    }
+
+
     /**
      * Display the specified resource.
      *
