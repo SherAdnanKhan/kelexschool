@@ -58,6 +58,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
+                    Route::get('/{slug}', 'PostController@show');
                 });
                 Route::group(['prefix' => 'studios'], function () {
                     Route::get('/{slug}', 'StudioController@getUserStudio');

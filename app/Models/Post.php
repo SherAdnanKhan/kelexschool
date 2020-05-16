@@ -14,7 +14,7 @@ class Post extends Model
     protected $fillable = [
         'title', 'slug', 'description', 'created_by', 'gallery_id'
     ];
-    protected $hidden = [ 'deleted_by' ];
+    protected $hidden = [ 'deleted_by', 'deleted_at', 'updated_at', 'updated_by' ];
     protected $dates = [ 'deleted_at' ];
 
     public function getSlugOptions() : SlugOptions
@@ -30,8 +30,18 @@ class Post extends Model
         return 'slug';
     }
 
+    public function art()
+    {
+        return $this->belongsTo(Art::class, 'art_id');
+    }
+
     public function image()
     {
         return $this->morphOne(Image::class, 'image');
+    }
+
+    public function strokeUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_stroke_posts');
     }
 }
