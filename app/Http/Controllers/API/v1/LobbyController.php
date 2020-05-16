@@ -24,7 +24,7 @@ class LobbyController extends BaseController
         $all_faved_users = User::with('avatars', 'art.parent')->withCount('posts')->whereIn('id', $faved_user_ids)->get();
 
         //faved gallery images
-        $user_with_faved_galleries = User::with('avatars', 'art.parent', 'favGalleries.posts.image')->get();
+        $user_with_faved_galleries = User::with('avatars', 'art.parent', 'favGalleries.posts.image', 'favGalleries.image')->where('id', $user->id)->get();
 
         $returnData['all_faved_users'] = $all_faved_users;
         $returnData['user_with_faved_galleries'] = $user_with_faved_galleries;
