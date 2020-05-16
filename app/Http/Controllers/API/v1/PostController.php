@@ -88,7 +88,7 @@ class PostController extends BaseController
         return $this->sendResponse($returnData, 'Exhibit Added');
     }
 
-    public function makeStroke(Request $requestl)
+    public function makeStroke(Request $request)
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
@@ -112,7 +112,7 @@ class PostController extends BaseController
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-        return $this->sendResponse($returnData, 'Mark into Fave Successfully.');
+        return $this->sendResponse($returnData, 'Mark Stroke Successfully.');
     }
 
     /**
