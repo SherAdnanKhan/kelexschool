@@ -43,4 +43,9 @@ class Gallery extends Model
     {
         return $this->belongsToMany(User::class, 'user_fav_galleries');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
