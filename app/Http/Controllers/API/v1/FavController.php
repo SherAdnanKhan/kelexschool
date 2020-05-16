@@ -77,7 +77,7 @@ class FavController extends BaseController
 
         try {
             $user_check = User::findOrFail($request->faved_to);
-            $check_already_fav = Fav::where([ ['faved_by', $user->id], ['faved_to', $request->faved_to]])->first();
+            $check_already_fav = Fav::where([ ['faved_by', $user->id], ['faved_to', $request->faved_to] ])->first();
             if (isset($check_already_fav)) {
                 return $this->sendError('Already Exists', ['error'=>'Already Fav', 'message' => 'You already added faved to this user']);
             }
@@ -135,9 +135,25 @@ class FavController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($unfaved_to)
     {
-        //
+        $user = Auth::guard('api')->user();
+
+        try {
+            $user_check = User::findOrFail($unfaved_to);
+            $check_already_fav = Fav::where([ ['faved_by', $user->id], ['faved_to', $unfaved_to] ])->first();
+            if (!$check_already_fav) {
+                return $this->sendError('Not faved', ['error'=>'Not faved list', 'message' => 'You are not faved to this user']);
+            }
+
+            $check_already_fav->delete(); 
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse([], 'Unfaved Sucessfully');
     }
 
     public function favCounts()
