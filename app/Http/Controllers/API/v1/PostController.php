@@ -154,7 +154,7 @@ class PostController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $post = Post::where('slug', $slug)->with('image', 'art.parent')->withCount('strokeUsers')->first();
+        $post = Post::where('slug', $slug)->with('image', 'user.art.parent')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
