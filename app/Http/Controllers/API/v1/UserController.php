@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\v1;
 use App\Http\Controllers\API\v1\BaseController;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Auth;
+use Validator;
 
 class UserController extends BaseController
 {
@@ -35,5 +37,26 @@ class UserController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);
         }
         return $this->sendResponse($returnData, 'Artist Search result');
+    }
+
+    public function updateUserFeel(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'feel_color' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $user->update(['feel_color' => $request->feel_color]);
+            $returnData['user'] = $user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'User feel Successfully.');
     }
 }
