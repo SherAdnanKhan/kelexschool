@@ -31,6 +31,10 @@ Route::namespace('API')->group(function () {
                     Route::get('/art/{id}', 'ArtController@show');
                     Route::get('search', 'ArtController@searchArt');
                 });
+                Route::group(['prefix' => 'comments'], function () {
+                    Route::post('/', 'CommentController@store');
+                    Route::get('/{post_id}', 'CommentController@show');
+                });
                 Route::group(['prefix' => 'favs'], function () {
                     Route::post('/', 'FavController@store');
                     Route::delete('/{id}', 'FavController@destroy');
