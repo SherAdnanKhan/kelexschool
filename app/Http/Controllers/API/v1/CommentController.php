@@ -17,9 +17,10 @@ class CommentController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($post_id)
     {
-        //
+        $returnData['comments'] = $comments = Comment::with('user.avatars')->where('post_id', $post_id)->get();
+        return $this->sendResponse($returnData, 'comments');
     }
 
     /**
