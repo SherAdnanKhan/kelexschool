@@ -50,8 +50,11 @@ class UserController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-            $user->update(['feel_color' => $request->feel_color]);
-            $returnData['user'] = $user;
+            $user->feel_color = $request->feel_color;
+            $user->update();
+
+            $return_user = User::with('avatars')->find($user->id);
+            $returnData['user'] = $return_user;
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
