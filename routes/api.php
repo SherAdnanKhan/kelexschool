@@ -33,7 +33,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');
-                    Route::get('/{post_id}', 'CommentController@show');
+                    Route::get('/{post_id}', 'CommentController@index');
                 });
                 Route::group(['prefix' => 'favs'], function () {
                     Route::post('/', 'FavController@store');
