@@ -61,7 +61,8 @@ class CommentController extends BaseController
             $comment->created_by = $user->id;
             $comment->save(); 
 
-            $returnData['comment'] = $comment;
+            $comment_return = Comment::with('user.avatars')->find($comment->id);
+            $returnData['comment'] = $comment_return;
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
