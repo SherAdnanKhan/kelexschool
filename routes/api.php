@@ -31,6 +31,10 @@ Route::namespace('API')->group(function () {
                     Route::get('/art/{id}', 'ArtController@show');
                     Route::get('search', 'ArtController@searchArt');
                 });
+                Route::group(['prefix' => 'chats'], function () {
+                    Route::post('/', 'ChatController@store');
+                    Route::get('/{post_id}', 'ChatController@index');
+                });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');
                     Route::get('/{post_id}', 'CommentController@index');

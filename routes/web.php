@@ -17,6 +17,17 @@ Route::get('/', function () {
     return view('welcome_static');
 });
 
+Route::get('fire', function () {
+    // this fires the event
+    //return extension_loaded('redis');
+    event(new App\Events\EventName());
+    return "event fired";
+});
+
+Route::get('test', function () {
+    // this checks for the event
+    return view('test');
+});
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
