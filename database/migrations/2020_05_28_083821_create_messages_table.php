@@ -18,6 +18,7 @@ class CreateMessagesTable extends Migration
             $table->text('message');
             $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('created_by');
+            $table->boolean('status')->comment('1-Read, 0-Unread');
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade')->onUpdate('cascade');

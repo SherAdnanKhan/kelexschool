@@ -17,7 +17,7 @@ class ChatController extends BaseController
      */
     public function index()
     {
-        //
+        
     }
 
     /**
