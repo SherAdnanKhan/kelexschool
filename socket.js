@@ -4,9 +4,12 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
 io.sockets.on('connection', function (socket) {
-  socket.on('room', function (room) {
-    socket.join(room);
+  console.log("user connected");
+  socket.on('room', (data) => {
+    socket.join(data.room);
     console.log("room joined");
+    console.log(data.room);
+    //callback && callback("Successfull");
   });
   socket.on('message', function (message) {
     io.sockets.in(message.room).emit('message', message.message);

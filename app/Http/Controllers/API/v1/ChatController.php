@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
+use App\Models\User;
+use App\Models\Conversation;
 
 class ChatController extends BaseController
 {
@@ -17,6 +19,8 @@ class ChatController extends BaseController
      */
     public function index()
     {
+        $user = Auth::guard('api')->user();
+
         
     }
 
@@ -25,9 +29,34 @@ class ChatController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($user_slug)
     {
-        //
+        $returnData = $userIds = [];
+        $user = Auth::guard('api')->user();
+        array_push($userIds, $user->id);
+        $user_chatable_check = User::where('slug', $user_slug)->first();
+        if( !$user_chatable_check ) {
+            return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
+        }
+
+        array_push($userIds, $user_chatable_check->id);
+        // Check conversation exists
+        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($userIds) {
+            $query->whereIn('user_id', $userIds);
+        })->first();
+
+        if( !$hasConversation ) {
+            $conversation = Conversation::create(['name', 'room_com']);
+            $conversation->participants()->attach($userIds);
+
+            $new_conversation = Conversation::with('messages.user.avatars')->find($conversation->id);
+            $returnData['conversation'] = $new_conversation;
+        }
+        else {
+            $returnData['conversation'] = $hasConversation;
+        }
+        return $this->sendResponse($returnData, 'User One to one Conversation');
+
     }
 
     /**
@@ -38,7 +67,7 @@ class ChatController extends BaseController
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
