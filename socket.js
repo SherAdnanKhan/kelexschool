@@ -18,6 +18,11 @@ io.sockets.on('connection', function (socket) {
     console.log("message", data);
     callback && callback();
   });
+
+  socket.on('leave', (data) => {
+    console.log("Leaved")
+    socket.leave(data.room);
+  });
 });
 
 const server = http.listen(8080, function () {
