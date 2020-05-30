@@ -5,15 +5,18 @@ const io = require('socket.io')(http);
 
 io.sockets.on('connection', function (socket) {
   console.log("user connected");
-  socket.on('room', (data) => {
+  socket.on('join', (data, callback) => {
     socket.join(data.room);
     console.log("room joined");
     console.log(data.room);
-    //callback && callback("Successfull");
+    callback && callback();
   });
-  socket.on('message', function (message) {
-    io.sockets.in(message.room).emit('message', message.message);
-    console.log("message", message)
+  socket.on('sendMessage', (data, callback) => {
+    //io.sockets.in(data.room).emit('recieveMessage', data);
+    io.to(data.room).emit('recieveMessage', data);
+    // io.sockets.in(message.room).emit('message', message.message);
+    console.log("message", data);
+    callback && callback();
   });
 });
 

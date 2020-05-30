@@ -11,6 +11,8 @@ class Conversation extends Model
     use HasSlug;
 
     protected $fillable = [ 'name' ];
+    protected $hidden = [ 'created_at', 'updated_at' ];
+
 
     public function getSlugOptions() : SlugOptions
     {

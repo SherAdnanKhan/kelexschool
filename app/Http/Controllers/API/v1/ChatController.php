@@ -34,17 +34,16 @@ class ChatController extends BaseController
         $returnData = $userIds = [];
         $user = Auth::guard('api')->user();
         array_push($userIds, $user->id);
-        $user_chatable_check = User::where('slug', $user_slug)->first();
+        $user_chatable_check = User::with('avatars', 'art.parent')->where('slug', $user_slug)->first();
         if( !$user_chatable_check ) {
             return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
         }
-
+        $returnData['user'] = $user_chatable_check; 
         array_push($userIds, $user_chatable_check->id);
         // Check conversation exists
         $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($userIds) {
             $query->whereIn('user_id', $userIds);
         })->first();
-
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
