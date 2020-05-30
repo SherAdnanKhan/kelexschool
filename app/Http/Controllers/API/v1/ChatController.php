@@ -8,6 +8,7 @@ use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
 use App\Models\User;
+use App\Models\Message;
 use App\Models\Conversation;
 
 class ChatController extends BaseController
@@ -66,7 +67,38 @@ class ChatController extends BaseController
      */
     public function store(Request $request)
     {
-        
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'message' => 'required',
+            'conversation_id' => 'required',
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        try {
+            $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->find($request->conversation_id);
+            if (!$hasConversation) {
+                return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+            }
+            $message = new Message;
+            $message->message = $request->message;
+            $message->conversation_id = $request->conversation_id;
+            $message->created_by = $user->id;
+            $message->save(); 
+
+            $returnData['message'] = $message;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Chat Message sent');
     }
 
     /**
