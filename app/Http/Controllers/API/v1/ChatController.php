@@ -20,8 +20,15 @@ class ChatController extends BaseController
      */
     public function index()
     {
+        $returnData = [];
         $user = Auth::guard('api')->user();
+        $conversations = Conversation::with('messages.user.avatars', 'participants')->whereHas('participants', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get();
 
+        $returnData['conversations'] = $conversations;
+
+        return $this->sendResponse($returnData, 'User conversation list');
         
     }
 
