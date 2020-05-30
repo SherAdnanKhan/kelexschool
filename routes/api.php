@@ -33,7 +33,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'chats'], function () {
                     Route::get('/user/{slug}', 'ChatController@create');
-                    Route::post('/', 'ChatController@store');
+                    Route::post('/message', 'ChatController@store');
                     Route::get('/{post_id}', 'ChatController@index');
                 });
                 Route::group(['prefix' => 'comments'], function () {
