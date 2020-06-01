@@ -94,4 +94,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Post::class, 'user_stroke_posts');
     }
 
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'participants');
+    }
+
 }
