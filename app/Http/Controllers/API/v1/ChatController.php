@@ -85,16 +85,17 @@ class ChatController extends BaseController
     public function store(Request $request)
     {
         $returnData = [];
-        $user = Auth::guard('api')->user();
+        //$user = Auth::guard('api')->user();
 
         $validator = Validator::make($request->all(), [
             'message' => 'required',
             'conversation_id' => 'required',
+            'user_id' => 'required'
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-
+        $user = User::with('avatars')->findOrFail($request->user_id);
         try {
             $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -109,6 +110,7 @@ class ChatController extends BaseController
             $message->save(); 
 
             $returnData['message'] = $message;
+            $returnData['user'] = $user;
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
