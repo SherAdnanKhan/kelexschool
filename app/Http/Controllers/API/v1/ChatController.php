@@ -22,6 +22,7 @@ class ChatController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
+        //$user_with_conversation = User::with('conversations')->find($user->id);
         $conversations = Conversation::with('messages.user.avatars', 'participants')->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })->get();
@@ -39,7 +40,7 @@ class ChatController extends BaseController
      */
     public function create($user_slug)
     {
-        $returnData = $userIds = [];
+        $returnData = $userIds = $conversation_all_ids =[];
         $user = Auth::guard('api')->user();
         array_push($userIds, $user->id);
         $user_chatable_check = User::with('avatars', 'art.parent')->where('slug', $user_slug)->first();
@@ -49,9 +50,18 @@ class ChatController extends BaseController
         $returnData['user'] = $user_chatable_check; 
         array_push($userIds, $user_chatable_check->id);
         // Check conversation exists
-        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($userIds) {
-            $query->whereIn('user_id', $userIds);
-        })->first();
+        $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get('id');
+        foreach ($coverations_all as $coveration) {
+            array_push($conversation_all_ids, $coveration->id);
+        }
+        //return $conversation_all_ids;
+        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
+            $query->where('user_id', $user_chatable_check->id);
+        })->whereIn('id', $conversation_all_ids)->first();
+        //dd($hasConversation);
+        
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
