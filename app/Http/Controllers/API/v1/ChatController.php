@@ -195,4 +195,38 @@ class ChatController extends BaseController
     {
         //
     }
+    
+    public function uploadImageOnChat(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'image' => 'image|max:2000|required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        try {
+            
+            $image_recived = $this->uploadImage($request->image, "chats/images/");
+            // $image = new Image();
+            // $image->title = $image_recived['image_name'];
+            // $image->path = $image_recived['image_path'];
+            // $image->image_type = 'App\Models\Message';
+            // $image->image_id = $post->id;
+            // $image->created_by = $user->id;
+            // $image->save();
+
+            $returnData['image'] = $image_recived;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Image Uploaded');
+    }
+    
 }
