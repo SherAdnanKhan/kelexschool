@@ -74,7 +74,7 @@ class ChatController extends BaseController
             $returnData['conversation'] = $new_conversation;
         }
         else {
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
+            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
         }
         return $this->sendResponse($returnData, 'User One to one Conversation');
@@ -123,7 +123,6 @@ class ChatController extends BaseController
                     $message_log->save();
                 }
             }
-            
 
             $returnData['message'] = $message;
             $returnData['user'] = $user;
