@@ -31,4 +31,12 @@ class Conversation extends Model
     {
         return $this->belongsToMany(User::class, 'participants');
     }
+
+    public function unreadMessagesLogs()
+    {
+        //dd(\Auth::guard('api')->user()->id);
+        return $this->hasMany(MessageLog::class, 'conversation_id')->where('status', 0)->where('user_id', \Auth::guard('api')->user()->id);
+    }
+
+    
 }

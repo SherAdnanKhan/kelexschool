@@ -9,6 +9,7 @@ use Validator;
 use Auth;
 use App\Models\User;
 use App\Models\Message;
+use App\Models\MessageLog;
 use App\Models\Conversation;
 
 class ChatController extends BaseController
@@ -23,9 +24,12 @@ class ChatController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
-        $conversations = Conversation::with('messages.user.avatars', 'participants')->whereHas('participants', function($query) use ($user) {
+        $conversations = Conversation::with('messages.user.avatars', 'participants.avatars', 'participants.art.parent', 'unreadMessagesLogs')
+        ->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
-        })->get();
+        })
+        ->withCount('unreadMessagesLogs')
+        ->get();
 
         $returnData['conversations'] = $conversations;
 
@@ -57,7 +61,7 @@ class ChatController extends BaseController
             array_push($conversation_all_ids, $coveration->id);
         }
         //return $conversation_all_ids;
-        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
+        $hasConversation = Conversation::with('messages.user.avatars', 'participants.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
         //dd($hasConversation);
@@ -70,6 +74,7 @@ class ChatController extends BaseController
             $returnData['conversation'] = $new_conversation;
         }
         else {
+            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
             $returnData['conversation'] = $hasConversation;
         }
         return $this->sendResponse($returnData, 'User One to one Conversation');
@@ -109,6 +114,17 @@ class ChatController extends BaseController
             $message->created_by = $user->id;
             $message->save(); 
 
+            foreach($hasConversation->participants as $participant) {
+                if($participant->id != $user->id) {
+                    $message_log = new MessageLog;
+                    $message_log->conversation_id = $request->conversation_id;
+                    $message_log->message_id = $message->id;
+                    $message_log->user_id = $participant->id;
+                    $message_log->save();
+                }
+            }
+            
+
             $returnData['message'] = $message;
             $returnData['user'] = $user;
 
@@ -128,7 +144,23 @@ class ChatController extends BaseController
      */
     public function show($id)
     {
-        //
+        $user = Auth::guard('api')->user();
+        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->find($id);
+
+        if (!$hasConversation) {
+            return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+        }
+        try {
+            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Chat Message Update');
+
     }
 
     /**

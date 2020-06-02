@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MessageLog extends Model
 {
     use SoftDeletes;
+    public $table = 'messages_logs';
 
     protected $fillable = [ 'message_id', 'conversation_id', 'user_id'];
     protected $dates = [ 'deleted_at' ];

@@ -17,4 +17,9 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function messagesLogs() 
+    {
+        return $this->hasMany(MessageLog::class, 'message_id', 'id');
+    }
 }
