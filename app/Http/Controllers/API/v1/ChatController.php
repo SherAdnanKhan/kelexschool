@@ -210,7 +210,7 @@ class ChatController extends BaseController
 
         try {
             
-            $image_recived = $this->uploadImage($request->image, "chats/");
+            $image_recived = $this->uploadImage($request->image, "chats/images/");
             // $image = new Image();
             // $image->title = $image_recived['image_name'];
             // $image->path = $image_recived['image_path'];
