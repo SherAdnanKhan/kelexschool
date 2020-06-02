@@ -123,7 +123,6 @@ class ChatController extends BaseController
                     $message_log->save();
                 }
             }
-            
 
             $returnData['message'] = $message;
             $returnData['user'] = $user;
