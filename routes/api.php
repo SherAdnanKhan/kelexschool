@@ -52,6 +52,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/{slug}', 'GalleryController@show');
                     Route::post('/fav', 'GalleryController@make_fav');
                     Route::post('/unfav', 'GalleryController@make_unfav');
+                    Route::get('/recommended/galleries', 'GalleryController@recommendedGalleries');
                 });
                 Route::group(['prefix' => 'lobby'], function () {
                     Route::get('/', 'LobbyController@index');

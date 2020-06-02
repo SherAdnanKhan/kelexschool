@@ -9,6 +9,7 @@ use Illuminate\Database\QueryException;
 use Validator;
 use App\Models\Gallery;
 use App\Models\Post;
+use App\Models\User;
 use App\Models\UserFavGallery;
 
 class GalleryController extends BaseController
@@ -91,6 +92,16 @@ class GalleryController extends BaseController
         }
         return $this->sendResponse($returnData, 'Mark into Unfav Successfully.');
 
+    }
+
+    public function recommendedGalleries() 
+    {
+        $returnData = $user_with_same_arts = [];
+
+        $user = Auth::guard('api')->user();
+        $users = User::with('galleries.image', 'galleries.posts.image', 'art.parent', 'avatars')->where('art_id', $user->art_id)->where('id', '!=', $user->id)->get();
+        
+        return $this->sendResponse($users, 'All Recommended user galleries');
     }
 
 
