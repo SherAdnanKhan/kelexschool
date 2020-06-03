@@ -36,6 +36,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'ChatController@index');
                     Route::post('/message', 'ChatController@store');
                     Route::post('/message/image', 'ChatController@uploadImageOnChat');
+                    Route::post('/message/video', 'ChatController@uploadVideo');
                     Route::get('/conversation/{id}', 'ChatController@show');
                 });
                 Route::group(['prefix' => 'comments'], function () {

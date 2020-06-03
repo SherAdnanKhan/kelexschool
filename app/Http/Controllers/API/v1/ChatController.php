@@ -246,13 +246,27 @@ class ChatController extends BaseController
         $directory = 'chats/videos/';
         $user = Auth::guard('api')->user();
 
-        $validator = Validator::make($request->all(), [
-            'video' => 'required'
-        ]);
-        if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+        if (!isset($request->video)) {
+            return $this->sendError('No video', ['error'=>'No video', 'message' => 'Please send video attachement']);
         }
-
+        $file = $request->video;
+        //dd($file->filename);
+        try {
+            $fileNameStore = time();
+            $extension = $file->getClientOriginalExtension();
+            $uuid = $this->generateRandomString();
+            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
+            
+            //$disk = Storage::disk('s3');
+            //$disk->getDriver()->put($directory.$imageName, file_get_contents($file), 'public');
+            Storage::disk('s3')->put($directory.$imageName,  fopen($request->file('video'), 'r+'), 'public');
+            $image_path = Storage::disk('s3')->url($directory.$imageName);
+            $returnData['video_path'] = $image_path;
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
         
         return $this->sendResponse($returnData, 'Image Uploaded');
     }
