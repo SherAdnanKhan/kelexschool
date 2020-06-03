@@ -114,6 +114,8 @@ class ChatController extends BaseController
             $message->message = $request->message;
             $message->conversation_id = $request->conversation_id;
             $message->created_by = $user->id;
+            $message->type = isset($request->message_type) ? $request->message_type : 0;
+            $message->url = isset($request->url) ? $request->url : null; 
             $message->save(); 
 
             foreach($hasConversation->participants as $participant) {
@@ -235,6 +237,23 @@ class ChatController extends BaseController
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
+        return $this->sendResponse($returnData, 'Image Uploaded');
+    }
+
+    public function uploadVideo(Request $request)
+    {
+        $returnData = [];
+        $directory = 'chats/videos/';
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'video' => 'required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        
         return $this->sendResponse($returnData, 'Image Uploaded');
     }
     
