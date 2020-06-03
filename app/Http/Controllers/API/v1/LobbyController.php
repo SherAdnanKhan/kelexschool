@@ -25,11 +25,11 @@ class LobbyController extends BaseController
 
         //faved gallery images
         //$user_with_faved_galleries = User::with('avatars', 'art.parent', 'favGalleries.posts.image', 'favGalleries.image')->where('id', $user->id)->get();
-        $user_with_faved_galleries = $user->load('favGalleries.posts.image', 'favGalleries.image', 'favGalleries.posts.user.avatars', 'favGalleries.posts.user.art.parent');
-        
+        $user_with_faved_galleries = $user->load('favGalleries.posts.image', 'favGalleries.image', 'favGalleries.posts.user.avatars', 'favGalleries.posts.user.art.parent', 'unreadMessages');
+        $user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         $returnData['all_faved_users'] = $all_faved_users;
         $returnData['user_with_faved_galleries'] = $user_with_faved_galleries;
-
+        //$returnData['user_with_count_unread'] = $user_unread_msg;
 
         return $this->sendResponse($returnData, '');
     }
