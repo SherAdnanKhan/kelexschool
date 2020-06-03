@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\Conversation;
+use Storage;
+use Image;
 
 class ChatController extends BaseController
 {
@@ -199,27 +201,34 @@ class ChatController extends BaseController
     public function uploadImageOnChat(Request $request)
     {
         $returnData = [];
+        $directory = 'chats/images/';
         $user = Auth::guard('api')->user();
 
         $validator = Validator::make($request->all(), [
-            'image' => 'image|max:2000|required'
+            'image' => 'image|max:3000|required|dimensions:min_width=100,min_height=100'
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-
+        $file = $request->image;
         try {
-            
-            $image_recived = $this->uploadImage($request->image, "chats/images/");
-            // $image = new Image();
-            // $image->title = $image_recived['image_name'];
-            // $image->path = $image_recived['image_path'];
-            // $image->image_type = 'App\Models\Message';
-            // $image->image_id = $post->id;
-            // $image->created_by = $user->id;
-            // $image->save();
+            $fileNameStore = time();
+            $extension = $file->getClientOriginalExtension();
+            $uuid = $this->generateRandomString();
+            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
+            $imageNameThumb = $uuid.'-'.$fileNameStore.'-thumbnail.'.$extension;
+            $image = $file;
+            //$thumbnail = Image::make($file)->resize(100, 100)->save($imageNameThumb);
+            $thumbnail = Image::make($file)->resize(300, null, function ($constraint) {$constraint->aspectRatio();});
 
-            $returnData['image'] = $image_recived;
+            Storage::disk('s3')->put($directory.$imageName, file_get_contents($image), 'public');
+            $image_path = Storage::disk('s3')->url($directory.$imageName);
+
+            Storage::disk('s3')->put($directory.$imageNameThumb, $thumbnail->stream()->__toString(), 'public');
+            $image_path_thumbnail = Storage::disk('s3')->url($directory.$imageNameThumb);
+
+            $returnData['image'] = ['image_path' => $image_path, 'image_name' => $imageName, 'image_thumbnail' => $image_path_thumbnail];
+            
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
