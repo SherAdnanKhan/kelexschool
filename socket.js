@@ -13,11 +13,17 @@ io.sockets.on('connection', function (socket) {
   });
   socket.on('sendMessage', (data, callback) => {
     //io.sockets.in(data.room).emit('recieveMessage', data);
+
     io.to(data.room).emit('recieveMessage', data);
+    //socket.emit('notification',{ description: 'You have a new Message'});
+    socket.broadcast.emit('notification', { description: data.room + ' Have a new message' });
+
     // io.sockets.in(message.room).emit('message', message.message);
     console.log("message", data);
     callback && callback();
   });
+
+
 
   socket.on('leave', (data) => {
     console.log("Leaved")
