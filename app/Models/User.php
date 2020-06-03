@@ -99,4 +99,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Conversation::class, 'participants');
     }
 
+    public function unreadMessages()
+    {
+        return $this->hasMany(MessageLog::class, 'user_id')->where('status', 0);
+    }
+
 }
