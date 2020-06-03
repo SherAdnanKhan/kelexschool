@@ -261,8 +261,7 @@ class ChatController extends BaseController
             //$disk->getDriver()->put($directory.$imageName, file_get_contents($file), 'public');
             Storage::disk('s3')->put($directory.$imageName,  fopen($request->file('video'), 'r+'), 'public');
             $image_path = Storage::disk('s3')->url($directory.$imageName);
-
-            return $image_path;
+            $returnData['video_path'] = $image_path;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
