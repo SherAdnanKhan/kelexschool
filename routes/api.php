@@ -35,7 +35,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/user/{slug}', 'ChatController@create');
                     Route::get('/', 'ChatController@index');
                     Route::post('/message', 'ChatController@store');
-                    Route::post('/message/{message_id}', 'ChatController@readMessage');
+                    Route::post('/message/read/{message_id}', 'ChatController@readMessage');
                     Route::post('/message/image', 'ChatController@uploadImageOnChat');
                     Route::post('/message/video', 'ChatController@uploadVideo');
                     Route::get('/conversation/{id}', 'ChatController@show');
