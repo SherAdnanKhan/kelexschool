@@ -99,7 +99,13 @@ class GalleryController extends BaseController
         $returnData = $user_with_same_arts = [];
 
         $user = Auth::guard('api')->user();
-        $users = User::with('galleries.image', 'galleries.posts.image', 'art.parent', 'avatars')->where('art_id', $user->art_id)->where('id', '!=', $user->id)->get();
+        $users = User::with(['galleries' => function($query) {
+            $query->Has('posts', '>', 0);
+            },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
+                ->Has('galleries.posts', '>', 0)
+                ->where('art_id', $user->art_id)
+                ->where('id', '!=', $user->id)
+                ->get();
         
         return $this->sendResponse($users, 'All Recommended user galleries');
     }
