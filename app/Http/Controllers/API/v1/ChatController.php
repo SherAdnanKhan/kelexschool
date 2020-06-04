@@ -26,7 +26,7 @@ class ChatController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
-        $conversations = Conversation::with('messages.user.avatars', 'participants.avatars', 'participants.art.parent', 'unreadMessagesLogs')
+        $conversations = Conversation::with('messages.user.avatars', 'participants.avatars', 'participants.art.parent', 'messages.userMessageLog')
         ->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })
@@ -63,7 +63,7 @@ class ChatController extends BaseController
             array_push($conversation_all_ids, $coveration->id);
         }
         //return $conversation_all_ids;
-        $hasConversation = Conversation::with('messages.user.avatars', 'participants.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
+        $hasConversation = Conversation::with('messages.user.avatars', 'participants.avatars', 'messages.messagesLogs')->whereHas('participants', function($query) use ($user_chatable_check) {
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
         //dd($hasConversation);
@@ -271,4 +271,35 @@ class ChatController extends BaseController
         return $this->sendResponse($returnData, 'Image Uploaded');
     }
     
+    public function readMessage($message_id, Request $request)
+    {
+        //dd($message_id);
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        $user = User::find($request->user_id);
+        if (!isset($user)) {
+            return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No User exists']);
+        }
+
+        $message = Message::with('messagesLogs')->find($message_id);
+        if (!isset($message)) {
+            return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
+        }
+
+        try {
+            $messages_logs = MessageLog::where('message_id', $message_id)->where('user_id', $request->user_id)->update(['status' => 1]);
+            $returnData['message'] = $message;
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        
+        return $this->sendResponse($returnData, 'Message Status read');
+    }
 }
