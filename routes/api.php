@@ -82,6 +82,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'UserController@getAllUsers');
                     Route::get('search', 'UserController@searchUsers');
                     Route::put('feel-color', 'UserController@updateUserFeel');
+                    Route::get('unread-message-count', 'ChatController@unreadCount');
                 });
             });
         });

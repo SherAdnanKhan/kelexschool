@@ -286,4 +286,15 @@ class ChatController extends BaseController
         
         return $this->sendResponse($returnData, 'Message Status read');
     }
+
+    public function unreadCount()
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $user = User::withCount('unreadMessages')->find($user->id);
+        $returnData['user_unread_count'] = $user->unread_messages_count;
+
+        return $this->sendResponse($returnData, 'Message Status read');
+
+    }
 }
