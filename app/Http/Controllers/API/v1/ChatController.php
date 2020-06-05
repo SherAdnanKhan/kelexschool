@@ -219,6 +219,12 @@ class ChatController extends BaseController
             $extension = $file->getClientOriginalExtension();
             $uuid = $this->generateRandomString();
             $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
+            $fileName = pathinfo($file)['filename'];
+            if(!isset($fileName) || $fileName= ' ') {
+                pathinfo($file)['filename'] = $uuid;
+            }
+            //$file = $_FILES['file_upload'];
+            //dd($_FILES['file_upload']);
 
             if(in_array($extension,$supported_image)) {
                 $file_type = "image";
@@ -238,6 +244,7 @@ class ChatController extends BaseController
         
             $returnData['path'] = $document_path;
             $returnData['doc_type'] = $file_type;
+            $returnData['doc_name'] = $imageName; 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
