@@ -47,8 +47,10 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'favs'], function () {
                     Route::post('/', 'FavController@store');
-                    Route::delete('/{id}', 'FavController@destroy');
-                    Route::get('/get-faved-by', 'FavController@fav_by');
+                    Route::delete('/fave/{id}', 'FavController@destroy');
+                    Route::get('/get-faved-by', 'FavController@faveBy');
+                    Route::post('/search-faved-by', 'FavController@searchByFaveBY');
+                    Route::post('/search-faves', 'FavController@searchByFaves');
                     Route::get('/get-faves', 'FavController@favs');
                     Route::get('/fav-counts', 'FavController@favCounts');
                 });

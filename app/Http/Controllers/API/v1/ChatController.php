@@ -128,7 +128,8 @@ class ChatController extends BaseController
                 }
             }
 
-            $returnData['message'] = $message;
+            $newly_mesage = Message::with('messagesLogs', 'user.avatars')->find($message->id);
+            $returnData['message'] = $newly_mesage;
             $returnData['user'] = $user;
 
         }catch(QueryException $ex) {
