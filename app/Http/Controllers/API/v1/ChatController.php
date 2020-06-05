@@ -201,108 +201,53 @@ class ChatController extends BaseController
         //
     }
     
-    public function uploadImageOnChat(Request $request)
+    public function uploadOnChat(Request $request)
     {
         $returnData = [];
-        $directory = 'chats/images/';
         $user = Auth::guard('api')->user();
+        $file_type = "document";
+        $supported_image = ["jpg","jpeg","gif","png","bmp"];
+        $supported_video = ["mp4", "m4a", "m4v", "f4v", "f4a", "m4b", "m4r", "f4b", "mov", "3gp", "3gp2", "3g2", "3gpp", "3gpp2", "ogg", "oga", "ogv", "ogx", "wmv", "wma", "asf*", "webm", "flv", "MTS", "mpg", "mkv", "mpeg"];
 
-        $validator = Validator::make($request->all(), [
-            'image' => 'image|max:3000|required|dimensions:min_width=100,min_height=100'
-        ]);
-        if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+        $directory = 'chats/uploads/';
+        if (!isset($request->file_upload)) {
+            return $this->sendError('No file', ['error'=>'No file', 'message' => 'Please send attachement to upload']);
         }
-        $file = $request->image;
+        $file = $request->file_upload;
         try {
             $fileNameStore = time();
             $extension = $file->getClientOriginalExtension();
             $uuid = $this->generateRandomString();
             $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
-            $imageNameThumb = $uuid.'-'.$fileNameStore.'-thumbnail.'.$extension;
-            $image = $file;
-            //$thumbnail = Image::make($file)->resize(100, 100)->save($imageNameThumb);
-            $thumbnail = Image::make($file)->resize(300, null, function ($constraint) {$constraint->aspectRatio();});
 
-            Storage::disk('s3')->put($directory.$imageName, file_get_contents($image), 'public');
-            $image_path = Storage::disk('s3')->url($directory.$imageName);
+            if(in_array($extension,$supported_image)) {
+                $file_type = "image";
+                $directory = 'chats/images/';
+            }
+            else if (in_array($extension, $supported_video)) {
+                $file_type = "video";
+                $directory = 'chats/videos/';
+            }
+            else {
+                $file_type = "document";
+                $directory = 'chats/uploads/';
+            }
 
-            Storage::disk('s3')->put($directory.$imageNameThumb, $thumbnail->stream()->__toString(), 'public');
-            $image_path_thumbnail = Storage::disk('s3')->url($directory.$imageNameThumb);
-
-            $returnData['image'] = ['image_path' => $image_path, 'image_name' => $imageName, 'image_thumbnail' => $image_path_thumbnail];
-            
-
-        }catch(QueryException $ex) {
-            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(\Exception $ex) {
-            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
-        }
-        return $this->sendResponse($returnData, 'Image Uploaded');
-    }
-
-    public function uploadVideo(Request $request)
-    {
-        $returnData = [];
-        $directory = 'chats/videos/';
-        $user = Auth::guard('api')->user();
-
-        if (!isset($request->video)) {
-            return $this->sendError('No video', ['error'=>'No video', 'message' => 'Please send video attachement']);
-        }
-        $file = $request->video;
-        //dd($file->filename);
-        try {
-            $fileNameStore = time();
-            $extension = $file->getClientOriginalExtension();
-            $uuid = $this->generateRandomString();
-            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
-            
-            //$disk = Storage::disk('s3');
-            //$disk->getDriver()->put($directory.$imageName, file_get_contents($file), 'public');
-            Storage::disk('s3')->put($directory.$imageName,  fopen($request->file('video'), 'r+'), 'public');
-            $image_path = Storage::disk('s3')->url($directory.$imageName);
-            $returnData['video_path'] = $image_path;
-        }catch(QueryException $ex) {
-            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(\Exception $ex) {
-            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
-        }
-        
-        return $this->sendResponse($returnData, 'Video Uploaded');
-    }
-
-    public function uploadDocument(Request $request)
-    {
-        $returnData = [];
-        $directory = 'chats/documents/';
-        $user = Auth::guard('api')->user();
-
-        if (!isset($request->document)) {
-            return $this->sendError('No Document', ['error'=>'No Document', 'message' => 'Please send Document attachement']);
-        }
-        $file = $request->document;
-        //dd($file->filename);
-        try {
-            $fileNameStore = time();
-            $extension = $file->getClientOriginalExtension();
-            $uuid = $this->generateRandomString();
-            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
-            
-            //$disk = Storage::disk('s3');
-            //$disk->getDriver()->put($directory.$imageName, file_get_contents($file), 'public');
-            Storage::disk('s3')->put($directory.$imageName,  fopen($request->file('document'), 'r+'), 'public');
+            Storage::disk('s3')->put($directory.$imageName,  fopen($file, 'r+'), 'public');
             $document_path = Storage::disk('s3')->url($directory.$imageName);
-            $returnData['document_path'] = $document_path;
+        
+            $returnData['path'] = $document_path;
+            $returnData['doc_type'] = $file_type;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         
-        return $this->sendResponse($returnData, 'Document Uploaded');
+        return $this->sendResponse($returnData, 'File Uploaded');
+
     }
-    
+
     public function readMessage($message_id, Request $request)
     {
         //dd($message_id);
