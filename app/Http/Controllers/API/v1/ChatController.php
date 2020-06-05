@@ -268,7 +268,38 @@ class ChatController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         
-        return $this->sendResponse($returnData, 'Image Uploaded');
+        return $this->sendResponse($returnData, 'Video Uploaded');
+    }
+
+    public function uploadDocument(Request $request)
+    {
+        $returnData = [];
+        $directory = 'chats/documents/';
+        $user = Auth::guard('api')->user();
+
+        if (!isset($request->document)) {
+            return $this->sendError('No Document', ['error'=>'No Document', 'message' => 'Please send Document attachement']);
+        }
+        $file = $request->document;
+        //dd($file->filename);
+        try {
+            $fileNameStore = time();
+            $extension = $file->getClientOriginalExtension();
+            $uuid = $this->generateRandomString();
+            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
+            
+            //$disk = Storage::disk('s3');
+            //$disk->getDriver()->put($directory.$imageName, file_get_contents($file), 'public');
+            Storage::disk('s3')->put($directory.$imageName,  fopen($request->file('document'), 'r+'), 'public');
+            $document_path = Storage::disk('s3')->url($directory.$imageName);
+            $returnData['document_path'] = $document_path;
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        
+        return $this->sendResponse($returnData, 'Document Uploaded');
     }
     
     public function readMessage($message_id, Request $request)
