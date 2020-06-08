@@ -24,6 +24,11 @@ io.sockets.on('connection', function (socket) {
     callback && callback();
   });
 
+  socket.on('onReadAll', (data, callback) => {
+    io.to(data.room).emit('readAll', data);
+    callback && callback();
+  });
+
   socket.on('sendMessage', (data, callback) => {
     io.to(data.room).emit('recieveMessage', data);
     io.to(data.reciver).emit('notify', data);
