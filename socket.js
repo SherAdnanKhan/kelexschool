@@ -13,8 +13,9 @@ io.sockets.on('connection', function (socket) {
     callback && callback();
   });
 
-  socket.on('joinNotification', (room, callback) => {
-    socket.join(room);
+  socket.on('joinUser', (user, callback) => {
+    socket.join(user.slug);
+    console.log(user.slug);
     callback && callback();
   });
 
@@ -25,7 +26,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('sendMessage', (data, callback) => {
     io.to(data.room).emit('recieveMessage', data);
-    io.to('notify').emit('notify', data);
+    io.to(data.reciver).emit('notify', data);
 
     console.log("message", data);
     callback && callback();
@@ -34,6 +35,11 @@ io.sockets.on('connection', function (socket) {
   socket.on('leave', (data) => {
     console.log("Leaved")
     socket.leave(data.room);
+  });
+
+  socket.on('userLeft', (user) => {
+    console.log(`${user.slug} left`);
+    socket.leave(user.slug);
   });
 
   socket.on('disconnect', () => {
