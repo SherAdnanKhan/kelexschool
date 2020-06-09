@@ -17,7 +17,7 @@ class FavController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function favs()
+    public function favs(Request $request)
     {
         $returnData = [];
         $faved_user_ids = [];
@@ -26,13 +26,22 @@ class FavController extends BaseController
         foreach($favs as $fav) {
             array_push($faved_user_ids, $fav->faved_to);
         }
-        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
-        
+        if($request->has('username')) {
+            if ($request->username != '') {
+                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
+            }
+            else {
+                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+            }
+        }
+        else {
+            $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+        }        
         $returnData['faves'] = $all_faved_users;
         return $this->sendResponse($returnData, 'User faves');
     }
 
-    public function faveBy()
+    public function faveBy(Request $request)
     {
         $returnData = [];
         $faved_user_ids = [];
@@ -41,53 +50,18 @@ class FavController extends BaseController
         foreach($favs as $fav) {
             array_push($faved_user_ids, $fav->faved_by);
         }
-        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
-        
-        $returnData['faves'] = $all_faved_users;
-        return $this->sendResponse($returnData, 'User faved By');
-    }
-
-    public function searchByFaveBY(Request $request)
-    {
-        $returnData = $faved_user_ids = [];
-        $user = Auth::guard('api')->user();
-
-        $validator = Validator::make($request->all(), [
-            'username' => 'required',
-        ]);
-        if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+        if($request->has('username')) {
+            if ($request->username != '') {
+                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
+            }
+            else {
+                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+            }
+        }
+        else {
+            $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
         }
 
-        $favs = Fav::where('faved_to', $user->id)->get(['faved_by']);
-        foreach($favs as $fav) {
-            array_push($faved_user_ids, $fav->faved_by);
-        }
-        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
-        
-        $returnData['faves'] = $all_faved_users;
-        return $this->sendResponse($returnData, 'User faved By');
-    }
-
-    public function searchByFaves(Request $request)
-    {
-        $returnData = $faved_user_ids = [];
-        $user = Auth::guard('api')->user();
-
-        $validator = Validator::make($request->all(), [
-            'username' => 'required',
-        ]);
-        if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
-        }
-
-        $favs = Fav::where('faved_by', $user->id)->get(['faved_to']);
-        foreach($favs as $fav) {
-            array_push($faved_user_ids, $fav->faved_to);
-        }
-        
-        $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
-        
         $returnData['faves'] = $all_faved_users;
         return $this->sendResponse($returnData, 'User faved By');
     }
