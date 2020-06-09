@@ -62,4 +62,29 @@ class UserController extends BaseController
         }
         return $this->sendResponse($returnData, 'User feel Successfully.');
     }
+
+    public function updateUserBio(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'bio' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $user->bio = $request->bio;
+            $user->update();
+
+            $return_user = User::with('avatars')->find($user->id);
+            $returnData['user'] = $return_user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'User bio Successfully.');
+
+    }
 }
