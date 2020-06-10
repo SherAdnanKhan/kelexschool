@@ -48,4 +48,10 @@ class Gallery extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function privacy()
+    {
+        return $this->morphOne(UserPrivacy::class, 'privacy');
+    }
+    
 }
