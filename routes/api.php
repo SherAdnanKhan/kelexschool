@@ -83,6 +83,10 @@ Route::namespace('API')->group(function () {
                     Route::put('user-bio', 'UserController@updateUserBio');
                     Route::get('unread-message-count', 'ChatController@unreadCount');
                 });
+                Route::group(['prefix' => 'user/privacy'], function () {
+                    Route::get('/', 'PrivacyController@index');
+                });
+
             });
         });
     });
