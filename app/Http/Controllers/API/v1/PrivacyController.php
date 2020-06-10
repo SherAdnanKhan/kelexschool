@@ -35,9 +35,6 @@ class PrivacyController extends BaseController
         //     array_push($gallery_privacy, $gallery_select);
             
         // }
-
-
-
         $returnData ['user_galleries'] = $user_galleries;
         $returnData ['privacy_types'] = $privacy_types;
         $returnData ['user_other_pages'] = $privacy_pages;
