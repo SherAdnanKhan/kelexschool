@@ -85,6 +85,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'user/privacy'], function () {
                     Route::get('/', 'PrivacyController@index');
+                    Route::post('/', 'PrivacyController@store');
                 });
 
             });

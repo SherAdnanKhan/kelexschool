@@ -21,27 +21,58 @@ class PrivacyController extends BaseController
         $user_galleries = Gallery::with('privacy')->where('created_by', $user->id)->get();
         $privacy_types = PrivacyType::all();
         $privacy_pages = PrivacyPage::with('privacy')->get();
-        // foreach( $user_galleries as $user_gallery) {
-        //     $gallery = [];
-        //     $gallery_select = $user_gallery;
-        //     $selected_privacy = UserPrivacy::where('privacy_type', 'App\Models\Gallery')->where('privacy_id', $user_gallery->id)->get();
-        //     if (isset($selected_privacy)) {
-        //         $gallery_select['selected_privacy'] = null;
-        //     } 
-        //     else {
-        //         $gallery_select['selected_privacy'] = $selected_privacy->privacy_type_id;
-        //     }
 
-        //     array_push($gallery_privacy, $gallery_select);
-            
-        // }
         $returnData ['user_galleries'] = $user_galleries;
         $returnData ['privacy_types'] = $privacy_types;
         $returnData ['user_other_pages'] = $privacy_pages;
         return $this->sendResponse($returnData, 'User privacies');
-
-        //dd($user_galleries);
-
         
+    }
+
+    public function store(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'privacy_type_id' => 'required',
+            'privacy_type' => 'required',
+            'privacy_id' => 'required'
+
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            if ($request->privacy_type == 'gallery') {
+                $privacy_type = 'App\Models\Gallery';
+            }
+            else {
+                $privacy_type = 'App\Models\PrivacyPage';
+            }
+            $privacy_check = UserPrivacy::where([
+                ['user_id',  $user->id], 
+                ['privacy_type', $privacy_type], 
+                ['privacy_id', $request->privacy_id]
+                ])->first();
+            if(isset($privacy_check)) {
+                $privacy_check->update(['privacy_type_id' => $request->privacy_type_id]);
+                $returnData['privacy'] = $privacy_check;
+            }else {
+                $user_privacy = new UserPrivacy();
+                $user_privacy->privacy_type_id = $request->privacy_type_id;
+                $user_privacy->user_id = $user->id;
+                $user_privacy->privacy_id = $request->privacy_id;
+                $user_privacy->privacy_type = $privacy_type;
+                $user_privacy->save();
+                $returnData['privacy'] = $user_privacy;
+            }
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Privacy updated');
     }
 }
