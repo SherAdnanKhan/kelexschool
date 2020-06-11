@@ -87,6 +87,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'PrivacyController@index');
                     Route::post('/', 'PrivacyController@store');
                     Route::post('/sprfvs', 'PrivacyController@addUserToSprfvs');
+                    Route::post('/sprfvs/approved', 'PrivacyController@approveSprfvs');
                     Route::post('/invite-only', 'PrivacyController@addUserToInviteOnly');
                 });
 
