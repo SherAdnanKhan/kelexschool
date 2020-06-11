@@ -162,7 +162,6 @@ class PrivacyController extends BaseController
 
             $returnData['gallery_invite_only'] = $gallery_inviteonly;
 
-
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -170,4 +169,38 @@ class PrivacyController extends BaseController
         }
         return $this->sendResponse($returnData, 'Privacy updated');
     }
+
+    public function approveSprfvs(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'privacy_type_id' => 'required',
+            'user_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+                $privacy_check = UserSprvfsIO::where([
+                    ['created_to',  $user->id], 
+                    ['privacy_type_id', $request->privacy_type_id], 
+                    ['created_by', $request->user_id]
+                    ])->first();
+                if(!isset($privacy_check)) {
+                    return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
+                }
+                $privacy_check->update(['status' => 1]);
+                $returnData['privacy'] = $privacy_check;
+        
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Privacy updated');
+        
+    }
+
+
 }
