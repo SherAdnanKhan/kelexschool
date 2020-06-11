@@ -8,6 +8,7 @@ use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
 use App\Models\Gallery;
+use App\Models\User;
 use App\Models\PrivacyType;
 use App\Models\UserPrivacy;
 use App\Models\PrivacyPage;
@@ -28,6 +29,25 @@ class PrivacyController extends BaseController
         $returnData ['privacy_types'] = $privacy_types;
         $returnData ['user_other_pages'] = $privacy_pages;
         return $this->sendResponse($returnData, 'User privacies');
+        
+    }
+
+    public function getFaveList($privacy_type_id, $status)
+    {
+        $returnData = $user_list_ids = [];
+        $user = Auth::guard('api')->user();
+        $user_lists = UserSprvfsIO::where([
+            ['status',  $status], 
+            ['privacy_type_id', $privacy_type_id], 
+            ['created_by', $user->id]
+            ])->get(); 
+
+        
+        foreach($user_lists as $user_list) {
+            array_push($user_list_ids, $user_list->created_to);
+        }
+        $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $user_list_ids)->get();
+        return $this->sendResponse($returnData, 'users lists');
         
     }
 
