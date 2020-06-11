@@ -11,6 +11,8 @@ use App\Models\Gallery;
 use App\Models\PrivacyType;
 use App\Models\UserPrivacy;
 use App\Models\PrivacyPage;
+use App\Models\UserSprvfsIO;
+use App\Models\UserIOGallery;
 
 class PrivacyController extends BaseController
 {
@@ -67,6 +69,99 @@ class PrivacyController extends BaseController
                 $user_privacy->save();
                 $returnData['privacy'] = $user_privacy;
             }
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Privacy updated');
+    }
+
+    public function addUserToSprfvs(Request $request)
+    {
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'privacy_type_id' => 'required',
+            'user_id' => 'required',
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $returnData['privacy'] = $this->commonAddUserToPrivacy($request); 
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Privacy updated');
+    }
+
+    public function commonAddUserToPrivacy($request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        if ($request->privacy_type_id == 3) {
+            $status = '0';
+        }
+        else {
+            $status = '1';
+        }
+        $privacy_check = UserSprvfsIO::where([
+            ['created_to',  $request->user_id], 
+            ['privacy_type_id', $request->privacy_type_id], 
+            ['created_by', $user->id]
+            ])->first();
+        if(isset($privacy_check)) {
+            //$privacy_check->update(['privacy_type_id' => $request->privacy_type_id]);
+            $returnData = $privacy_check;
+        }else {
+            $user_privacy = new UserSprvfsIO();
+            $user_privacy->privacy_type_id = $request->privacy_type_id;
+            $user_privacy->created_by = $user->id;
+            $user_privacy->created_to = $request->user_id;
+            $user_privacy->status = $status;
+            $user_privacy->save();
+            $returnData = $user_privacy;
+        }
+
+        return $returnData;
+    }
+
+    public function addUserToInviteOnly(Request $request)
+    {
+        $returnData = [];
+
+        $validator = Validator::make($request->all(), [
+            'privacy_type_id' => 'required',
+            'user_id' => 'required',
+            'gallery_id' => 'required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $gallery = Gallery::find($request->gallery_id);
+            if (!isset($gallery)) {
+                return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
+            }
+            $returnData['privacy'] = $this->commonAddUserToPrivacy($request);
+            
+            $check_gallery_io = UserIOGallery::where([ ['user_id', $request->user_id], ['gallery_id', $request->gallery_id] ])->first();
+            if(isset($check_gallery_io)) {
+                return $this->sendError('Already Gallery', ['error'=>'Already Gallery Exists', 'message' => 'already gallery exists']);
+            }
+
+            $gallery_inviteonly = new UserIOGallery();
+            $gallery_inviteonly->gallery_id = $request->gallery_id;
+            $gallery_inviteonly->user_id = $request->user_id;
+            $gallery_inviteonly->save();
+
+            $returnData['gallery_invite_only'] = $gallery_inviteonly;
+
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
