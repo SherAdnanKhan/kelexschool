@@ -14,6 +14,7 @@ use App\Models\UserPrivacy;
 use App\Models\PrivacyPage;
 use App\Models\UserSprvfsIO;
 use App\Models\UserIOGallery;
+use App\Models\UserFavGallery;
 
 class PrivacyController extends BaseController
 {
@@ -211,6 +212,15 @@ class PrivacyController extends BaseController
                     return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
                 }
                 $privacy_check->update(['status' => 1]);
+
+                //add to users fave gallery list
+                $galleries = Gallery::where('created_by', $request->user_id)->get();
+                foreach($galleries as $gallery) {
+                    $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $request->user_id)->first();
+                    if (!isset($user_fav_gallery)) {
+                        $user->favGalleries()->attach($gallery->id); 
+                    }
+                }
                 $returnData['privacy'] = $privacy_check;
         
         }catch(QueryException $ex) {
