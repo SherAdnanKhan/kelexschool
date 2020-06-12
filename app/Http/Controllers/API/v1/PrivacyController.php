@@ -40,12 +40,11 @@ class PrivacyController extends BaseController
         $user_lists = UserSprvfsIO::where([
             ['status',  $status], 
             ['privacy_type_id', $privacy_type_id], 
-            ['created_by', $user->id]
+            ['created_to', $user->id]
             ])->get(); 
 
-        
         foreach($user_lists as $user_list) {
-            array_push($user_list_ids, $user_list->created_to);
+            array_push($user_list_ids, $user_list->created_by);
         }
         $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $user_list_ids)->get();
         return $this->sendResponse($returnData, 'users lists');
