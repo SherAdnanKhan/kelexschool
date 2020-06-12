@@ -65,6 +65,9 @@ Route::namespace('API')->group(function () {
                     Route::post('avatar', 'StudioController@updateMyCubicImage');
                     Route::Delete('avatar/{id}', 'StudioController@deleteMyCubicImage');
                 });
+                Route::group(['prefix' => 'mzflash'], function () {
+                    Route::post('/', 'MzFlashController@store');
+                });
                 Route::group(['prefix' => 'post'], function () {
                     Route::post('/stroke', 'PostController@makeStroke');
                     Route::post('/unstroke', 'PostController@unStroke');
