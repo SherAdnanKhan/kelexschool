@@ -12,4 +12,9 @@ class UserPrivacy extends Model
     protected $hidden = [
         'privacy_type', 'created_at', 'updated_at'
     ];
+
+    public function privacy_type()
+    {
+        return $this->belongsTo(PrivacyType::class, 'privacy_type_id');
+    }
 }

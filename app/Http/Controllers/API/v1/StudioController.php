@@ -9,6 +9,10 @@ use Validator;
 use Auth;
 use App\Models\Image;
 use App\Models\User;
+use App\Models\UserPrivacy;
+use App\Models\UserFavGallery;
+use App\Models\UserSprvfsIO;
+use App\Models\PrivacyPage;
 use App\Models\Fav;
 
 class StudioController extends BaseController
@@ -100,9 +104,10 @@ class StudioController extends BaseController
 
     public function getUserStudio($slug)
     {
-        $returnData = [];
+        $returnData = $gallery_privacy = $other_privacy = [];
+        $is_allowed = 0;
         $my_user = Auth::guard('api')->user();
-        $user = User::with('avatars', 'galleries.image', 'galleries.posts.image' ,'art.parent')->withCount('posts')->where('slug', $slug)->first();
+        $user = User::with('avatars', 'galleries.image', 'galleries.privacy', 'galleries.posts.image' ,'art.parent')->withCount('posts')->where('slug', $slug)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }
@@ -112,6 +117,134 @@ class StudioController extends BaseController
         $returnData['fav_by_count'] = $fav_by_count;
         $returnData['favs_count'] = $fav_to_count;
         $returnData['has_faved'] = $has_faved = Fav::where([ ['faved_by', $my_user->id], ['faved_to', $user->id] ])->exists();
+
+        //privacy settings of user
+        $user_privacy_settings = UserPrivacy::where('user_id', $user->id)->get();
+        
+        //Gallery privacy allowed user 
+        foreach($user->galleries as $user_gallery) {
+            $is_allowed = 0;
+            if(!isset($user_gallery->privacy) || $user_gallery->privacy == null) {
+                array_push($gallery_privacy, [
+                    'gallery_id' => $user_gallery->id,
+                    'is_allowed' => 1
+                ]);
+            }else {
+                if ($user_gallery->privacy->privacy_type_id == 1) {
+                    array_push($gallery_privacy, [
+                        'gallery_id' => $user_gallery->id,
+                        'is_allowed' => 1
+                    ]);
+                }
+                else if ($user_gallery->privacy->privacy_type_id == 2) {
+                    $user_fav_gallery = UserFavGallery::where('gallery_id', $user_gallery->id)->where('user_id', $user->id)->first();
+                    if (isset($user_fav_gallery)) {
+                        array_push($gallery_privacy, [
+                            'gallery_id' => $user_gallery->id,
+                            'is_allowed' => 1
+                        ]);
+                    }
+                    else {
+                        array_push($gallery_privacy, [
+                            'gallery_id' => $user_gallery->id,
+                            'is_allowed' => 0
+                        ]);
+                    }
+                }
+                else if ($user_gallery->privacy->privacy_type_id == 3 || $user_gallery->privacy->privacy_type_id == 4) {
+                    $user_srfvs = UserSprvfsIO::where([
+                        ['created_to',  $my_user->id], 
+                        ['privacy_type_id', $user_gallery->privacy->privacy_type_id], 
+                        ['created_by', $user->id],
+                        ['status' , 1]
+                        ])->first();
+                        if (isset($user_srfvs)) {
+                            array_push($gallery_privacy, [
+                                'gallery_id' => $user_gallery->id,
+                                'is_allowed' => 1
+                            ]);
+                        }
+                        else {
+                            array_push($gallery_privacy, [
+                                'gallery_id' => $user_gallery->id,
+                                'is_allowed' => 0
+                            ]);
+                        }
+                }
+                else {
+                    array_push($gallery_privacy, [
+                        'gallery_id' => $user_gallery->id,
+                        'is_allowed' => 0
+                    ]);
+                }
+                
+            }
+        }
+        $returnData['gallery_privacy'] = $gallery_privacy;
+
+        //other privacy
+        $other_pages = PrivacyPage::all();
+        foreach($other_pages as $other_page) {
+            $user_page_privacy = UserPrivacy::where([ ['user_id', $user->id], ['privacy_type', 'App\Models\PrivacyPage'], ['privacy_id', $other_page->id] ])->first();
+
+            if(!isset($user_page_privacy)) {
+                array_push($other_privacy, [
+                    'privacy_page' => $other_page->name,
+                    'is_allowed' => 1
+                ]);
+            }else {
+                if ($user_page_privacy->privacy_type_id == 1) {
+                    array_push($other_privacy, [
+                        'privacy_page' => $other_page->name,
+                        'is_allowed' => 1
+                    ]);
+                }
+                else if ($user_page_privacy->privacy_type_id == 2) {
+                    $check_fav = Fav::where([ ['faved_by', $user->id], ['faved_to', $my_user->id] ])->first();
+                    if (isset($check_fav)) {
+                        array_push($other_privacy, [
+                            'privacy_page' => $other_page->name,
+                            'is_allowed' => 1
+                        ]);
+                    }
+                    else {
+                        array_push($other_privacy, [
+                            'privacy_page' => $other_page->name,
+                            'is_allowed' => 0
+                        ]);
+                    }
+                }
+                else if ($user_page_privacy->privacy_type_id == 3 || $user_page_privacy->privacy_type_id == 4) {
+                    $user_srfvs = UserSprvfsIO::where([
+                        ['created_to',  $my_user->id], 
+                        ['privacy_type_id', $user_page_privacy->privacy_type_id], 
+                        ['created_by', $user->id],
+                        ['status' , 1]
+                        ])->first();
+                        if (isset($user_srfvs)) {
+                            array_push($other_privacy, [
+                                'privacy_page' => $other_page->name,
+                                'is_allowed' => 1
+                            ]);
+                        }
+                        else {
+                            array_push($other_privacy, [
+                                'privacy_page' => $other_page->name,
+                                'is_allowed' => 0
+                            ]);
+                        }
+                }
+                else {
+                    array_push($other_privacy, [
+                        'privacy_page' => $other_page->name,
+                        'is_allowed' => 0
+                    ]);
+                }
+                
+            }
+        }
+        $returnData['other_privacy'] = $other_privacy;
+        //return $gallery_privacy;
         return $this->sendResponse($returnData, 'User studio');
         
     }
