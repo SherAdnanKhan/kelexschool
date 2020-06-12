@@ -22,7 +22,7 @@ class PrivacyController extends BaseController
     {
         $returnData = $gallery_privacy = $other_pages_privacy = [];
         $user = Auth::guard('api')->user();
-        $user_galleries = Gallery::with('privacy')->where('created_by', $user->id)->get();
+        $user_galleries = Gallery::with('image', 'privacy')->where('created_by', $user->id)->get();
         $privacy_types = PrivacyType::all();
         $privacy_pages = PrivacyPage::with('privacy')->get();
 
