@@ -94,6 +94,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/lists/{privacy_type_id}/{status}', 'PrivacyController@getFaveList');
                     Route::post('/sprfvs', 'PrivacyController@addUserToSprfvs');
                     Route::post('/sprfvs/approved', 'PrivacyController@approveSprfvs');
+                    Route::post('/sprfvs/reject', 'PrivacyController@rejectSprfvs');
                     Route::post('/invite-only', 'PrivacyController@addUserToInviteOnly');
                 });
 
