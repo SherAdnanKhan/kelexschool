@@ -15,6 +15,7 @@ use App\Models\UserSprvfsIO;
 use App\Models\PrivacyPage;
 use App\Models\UserIOGallery;
 use App\Models\Fav;
+use App\Models\Gallery;
 
 class StudioController extends BaseController
 {
@@ -180,11 +181,6 @@ class StudioController extends BaseController
                 }
                 
             }
-            //check galleries inviteonly 
-            $check_gallery_io = UserIOGallery::where([ ['user_id', $my_user->id], ['gallery_id', $user_gallery->id] ])->first();
-            if(isset($check_gallery_io)) {
-                array_push($gallery_invites_only, $user_gallery->id);
-            }
 
         }
         $returnData['gallery_privacy'] = $gallery_privacy;
@@ -226,13 +222,21 @@ class StudioController extends BaseController
                         ['created_to',  $my_user->id], 
                         ['privacy_type_id', $user_page_privacy->privacy_type_id], 
                         ['created_by', $user->id],
-                        ['status' , 1]
                         ])->first();
                         if (isset($user_srfvs)) {
-                            array_push($other_privacy, [
+                            if( $user_srfvs->status == 0) {
+                                array_push($other_privacy, [
+                                    'privacy_page' => $other_page->name,
+                                    'is_allowed' => 2
+                                ]);
+                            }
+                            else {
+                                array_push($other_privacy, [
                                 'privacy_page' => $other_page->name,
                                 'is_allowed' => 1
-                            ]);
+                                ]);
+                            }
+                            
                         }
                         else {
                             array_push($other_privacy, [
@@ -262,6 +266,18 @@ class StudioController extends BaseController
             $is_sprfvs = 1;
         }
         $returnData['is_sprfvs'] = $is_sprfvs;
+
+        //check galleries inviteonly 
+        $my_galleries = Gallery::where('created_by', $my_user->id)->get();
+       //return $my_galleries;
+        foreach ($my_galleries as $my_gallery) {
+            $check_gallery_io = UserIOGallery::where([ ['user_id', $user->id], ['gallery_id', $my_gallery->id] ])->first();
+            if(isset($check_gallery_io)) {
+                array_push($gallery_invites_only, $my_gallery->id);
+            }
+        }
+        
+
         $returnData['gallery_invited_list'] = $gallery_invites_only;
         //return $gallery_privacy;
         return $this->sendResponse($returnData, 'User studio');
