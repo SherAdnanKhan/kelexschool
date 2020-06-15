@@ -19,7 +19,13 @@ class MzFalshController extends BaseController
      */
     public function index()
     {
-        //
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $feeds = Feed::with('image', 'parent')->where('created_by', $user_id)->get();
+        $returnData['feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'All feeds');
+
     }
 
     /**
@@ -57,14 +63,22 @@ class MzFalshController extends BaseController
                     return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
                 }
             }
+            $feedtype = 0;
+            if($request->has('image')) {
+                $feedtype  = 1;
+            }
+            else if ($request->has('video')) {
+                $feedtype  = 2;
+            }
             $feed = new Feed;
             $feed->feed = $request->feed;
             $feed->parent_id = $request->feed_id ? $request->feed_id : null;
+            $feed->feed_type = $feedtype;
             $feed->created_by = $user->id;
             $feed->save(); 
 
-            if($request->has('image')) {
-                $image_recived = $this->uploadImage($request->image, "posts/");
+            if($request->has('image') || $request->has('video')) {
+                $image_recived = $this->uploadImage($request->image, "feeds/");
                 $image = new Image();
                 $image->title = $image_recived['image_name'];
                 $image->path = $image_recived['image_path'];
