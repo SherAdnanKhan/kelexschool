@@ -22,10 +22,20 @@ class MzFalshController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $feeds = Feed::with('image', 'parent')->where('created_by', $user_id)->get();
+        $feeds = Feed::with('image', 'parent')->where('created_by', $user->id)->get();
         $returnData['feeds'] = $feeds;
         return $this->sendResponse($returnData, 'All feeds');
 
+    }
+
+    public function otherFeed($user_id)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $feeds = Feed::with('image', 'parent')->where('created_by', $user_id)->get();
+        $returnData['feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'All feeds');
     }
 
     /**

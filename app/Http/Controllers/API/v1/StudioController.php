@@ -138,7 +138,7 @@ class StudioController extends BaseController
                     ]);
                 }
                 else if ($user_gallery->privacy->privacy_type_id == 2) {
-                    $user_fav_gallery = UserFavGallery::where('gallery_id', $user_gallery->id)->where('user_id', $user->id)->first();
+                    $user_fav_gallery = UserFavGallery::where('gallery_id', $user_gallery->id)->where('user_id', $my_user->id)->first();
                     if (isset($user_fav_gallery)) {
                         array_push($gallery_privacy, [
                             'gallery_id' => $user_gallery->id,

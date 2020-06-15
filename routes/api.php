@@ -67,6 +67,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'mzflash'], function () {
                     Route::get('/', 'MzFlashController@index');
+                    Route::get('/{user_id}', 'MzFlashController@index');
                     Route::post('/', 'MzFlashController@store');
                 });
                 Route::group(['prefix' => 'post'], function () {
