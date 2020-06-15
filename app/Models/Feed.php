@@ -26,4 +26,9 @@ class Feed extends Model
     {
         return $this->hasMany(self::class, 'parent_id');
     }
+
+    public function image()
+    {
+        return $this->morphOne(Image::class, 'image');
+    }
 }

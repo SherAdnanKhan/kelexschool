@@ -66,6 +66,7 @@ Route::namespace('API')->group(function () {
                     Route::Delete('avatar/{id}', 'StudioController@deleteMyCubicImage');
                 });
                 Route::group(['prefix' => 'mzflash'], function () {
+                    Route::get('/', 'MzFlashController@index');
                     Route::post('/', 'MzFlashController@store');
                 });
                 Route::group(['prefix' => 'post'], function () {
