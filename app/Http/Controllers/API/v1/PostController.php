@@ -47,7 +47,8 @@ class PostController extends BaseController
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'gallery_id' => 'required',
-            'image' => 'image|max:2000'
+            'image' => 'image|max:2000',
+            'video' => 'max:2000',
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
@@ -75,6 +76,23 @@ class PostController extends BaseController
                 $image->image_id = $post->id;
                 $image->created_by = $user->id;
                 $image->save();
+
+                //update post type 
+                $post->update(['post_type' => 1]);
+            }
+
+            if($request->has('video')) {
+                $image_recived = $this->uploadImage($request->video, "posts/videos/");
+                $image = new Image();
+                $image->title = $image_recived['image_name'];
+                $image->path = $image_recived['image_path'];
+                $image->image_type = 'App\Models\Post';
+                $image->image_id = $post->id;
+                $image->created_by = $user->id;
+                $image->save();
+
+                //update post type 
+                $post->update(['post_type' => 2]);
             }
 
             $returnData['post'] = $post;
