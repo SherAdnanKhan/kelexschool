@@ -99,13 +99,40 @@ class GalleryController extends BaseController
         $returnData = $user_with_same_arts = [];
 
         $user = Auth::guard('api')->user();
-        $users = User::with(['galleries' => function($query) {
-            $query->Has('posts', '>', 0);
-            },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
-                ->Has('galleries.posts', '>', 0)
-                ->where('art_id', $user->art_id)
-                ->where('id', '!=', $user->id)
-                ->get();
+        try {
+            
+            $users = User::with(['galleries' => function($query) {
+                $query->Has('posts', '>', 0);
+                },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
+                    ->Has('galleries.posts', '>', 0)
+                    ->where('art_id', $user->art_id)
+                    ->where('id', '!=', $user->id)
+                    ->get();
+    
+            if($users->count() == 0) {
+                $users = User::with(['galleries' => function($query) {
+                    $query->Has('posts', '>', 0);
+                    },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
+                        ->Has('galleries.posts', '>', 0)
+                        ->where('id', '!=', $user->id)
+                        ->get()->random(1);
+            }
+            foreach ($users as $other_user) {
+                $galleries = $other_user->galleries;
+                $galery_index = 0;
+                foreach ($galleries as $gallery) {
+                    $other_user->galleries[$galery_index]['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
+                    $galery_index++;
+                }
+            }
+            
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        
         
         return $this->sendResponse($users, 'All Recommended user galleries');
     }
