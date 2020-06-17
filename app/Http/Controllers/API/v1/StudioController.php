@@ -123,6 +123,22 @@ class StudioController extends BaseController
         //privacy settings of user
         $user_privacy_settings = UserPrivacy::where('user_id', $user->id)->get();
         
+        //Check if sprfvs already 
+        $check_user_sprfvs = UserSprvfsIO::where([
+            ['created_to',  $user->id], 
+            ['privacy_type_id', 3], 
+            ['created_by', $my_user->id]
+            ])->first();
+        if(isset($check_user_sprfvs)) {
+            if($check_user_sprfvs->status == 1) {
+                $is_sprfvs = 1;
+            }
+            else {
+                $is_sprfvs = 2;
+            }
+        }
+        $returnData['is_sprfvs'] = $is_sprfvs;
+
         //Gallery privacy allowed user 
         foreach($user->galleries as $user_gallery) {
             $is_allowed = 0;
@@ -153,7 +169,21 @@ class StudioController extends BaseController
                         ]);
                     }
                 }
-                else if ($user_gallery->privacy->privacy_type_id == 3 || $user_gallery->privacy->privacy_type_id == 4) {
+                else if ($user_gallery->privacy->privacy_type_id == 3 ) {
+                    if ($is_sprfvs == 1) {
+                        array_push($gallery_privacy, [
+                            'gallery_id' => $user_gallery->id,
+                            'is_allowed' => 1
+                        ]);
+                    }else {
+                        array_push($gallery_privacy, [
+                            'gallery_id' => $user_gallery->id,
+                            'is_allowed' => 0
+                        ]);
+                    }
+                    
+                }
+                else if ($user_gallery->privacy->privacy_type_id == 4) {
                     $user_srfvs = UserSprvfsIO::where([
                         ['created_to',  $my_user->id], 
                         ['privacy_type_id', $user_gallery->privacy->privacy_type_id], 
@@ -217,25 +247,31 @@ class StudioController extends BaseController
                         ]);
                     }
                 }
-                else if ($user_page_privacy->privacy_type_id == 3 || $user_page_privacy->privacy_type_id == 4) {
+                else if ($user_page_privacy->privacy_type_id == 3) {
+                    if ($is_sprfvs == 1) {
+                        array_push($gallery_privacy, [
+                            'privacy_page' => $other_page->name,
+                            'is_allowed' => 1
+                        ]);
+                    }else {
+                        array_push($gallery_privacy, [
+                            'privacy_page' => $other_page->name,
+                            'is_allowed' => 0
+                        ]);
+                    }
+                        
+                }
+                else if ($user_page_privacy->privacy_type_id == 4) {
                     $user_srfvs = UserSprvfsIO::where([
                         ['created_to',  $my_user->id], 
                         ['privacy_type_id', $user_page_privacy->privacy_type_id], 
                         ['created_by', $user->id],
                         ])->first();
                         if (isset($user_srfvs)) {
-                            if( $user_srfvs->status == 0) {
-                                array_push($other_privacy, [
-                                    'privacy_page' => $other_page->name,
-                                    'is_allowed' => 2
-                                ]);
-                            }
-                            else {
-                                array_push($other_privacy, [
-                                'privacy_page' => $other_page->name,
-                                'is_allowed' => 1
-                                ]);
-                            }
+                            array_push($other_privacy, [
+                            'privacy_page' => $other_page->name,
+                            'is_allowed' => 1
+                            ]);
                             
                         }
                         else {
@@ -255,17 +291,6 @@ class StudioController extends BaseController
             }
         }
         $returnData['other_privacy'] = $other_privacy;
-
-        //Check if sprfvs already 
-        $check_user_sprfvs = UserSprvfsIO::where([
-            ['created_to',  $user->id], 
-            ['privacy_type_id', 3], 
-            ['created_by', $my_user->id]
-            ])->first();
-        if(isset($check_user_sprfvs)) {
-            $is_sprfvs = 1;
-        }
-        $returnData['is_sprfvs'] = $is_sprfvs;
 
         //check galleries inviteonly 
         $my_galleries = Gallery::where('created_by', $my_user->id)->get();
