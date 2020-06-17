@@ -61,6 +61,8 @@ class MzFalshController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'feed' => 'required|max:200',
+            'image' => env('IMAGE_TYPE_SIZE', '1000'),
+            'video' => env('DOCUMENT_SIZE', '2000'),
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
@@ -89,7 +91,14 @@ class MzFalshController extends BaseController
             $feed->save(); 
 
             if($request->has('image') || $request->has('video')) {
-                $image_recived = $this->uploadImage($request->image, "feeds/");
+                if ($request->has('image')) {
+                    $image_recived = $this->uploadImage($request->image, "feeds/");
+                }
+
+                if ($request->has('video')) {
+                    $image_recived = $this->uploadImage($request->video, "feeds/");
+                }
+                
                 $image = new Image();
                 $image->title = $image_recived['image_name'];
                 $image->path = $image_recived['image_path'];
