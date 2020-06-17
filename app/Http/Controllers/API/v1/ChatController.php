@@ -113,6 +113,7 @@ class ChatController extends BaseController
             $message = new Message;
             $message->message = $request->message;
             $message->conversation_id = $request->conversation_id;
+            $message->feel_color = $user->feel_color;
             $message->created_by = $user->id;
             $message->type = isset($request->message_type) ? $request->message_type : 0;
             $message->url = isset($request->url) ? $request->url : null; 
