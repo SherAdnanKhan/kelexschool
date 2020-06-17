@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Feed extends Model
 {
-    protected $fillable = [ 'feed', 'parent_id', 'created_by' ];
+    protected $fillable = [ 'feed', 'parent_id', 'created_by', 'feel_color' ];
 
     protected $hidden = [
         'created_at', 'updated_at', 'deleted_at'
