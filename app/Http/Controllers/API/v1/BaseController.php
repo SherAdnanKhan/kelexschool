@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Storage;
+use App\Models\UserSprvfsIO;
+use App\Models\UserPrivacy;
 
 class BaseController extends Controller
 {
@@ -97,5 +99,83 @@ class BaseController extends Controller
     
         if (!$full) $string = array_slice($string, 0, 1);
         return $string ? implode(', ', $string) . ' ago' : 'just now';
+    }
+
+    public function CheckPrivacyPage($is_sprfvs, $my_user_id, $user_id, $page_id)
+    {
+        $other_privacy = [];
+        $user_page_privacy = UserPrivacy::where([ ['user_id', $user_id], ['privacy_type', 'App\Models\PrivacyPage'], ['privacy_id', 3] ])->first();
+
+        if(!isset($user_page_privacy)) {
+            $other_privacy = [
+                'privacy_page' => "Critiques",
+                'is_allowed' => 1
+            ];
+        }else {
+            if ($user_page_privacy->privacy_type_id == 1) {
+                $other_privacy = [
+                    'privacy_page' => "Critiques",
+                    'is_allowed' => 1
+                ];
+            }
+            else if ($user_page_privacy->privacy_type_id == 2) {
+                $check_fav = Fav::where([ ['faved_by', $user_id], ['faved_to', $my_user_id] ])->first();
+                if (isset($check_fav)) {
+                   $other_privacy = [
+                        'privacy_page' => "Critiques",
+                        'is_allowed' => 1
+                    ];
+                }
+                else {
+                   $other_privacy = [
+                        'privacy_page' => "Critiques",
+                        'is_allowed' => 0
+                    ];
+                }
+            }
+            else if ($user_page_privacy->privacy_type_id == 3) {
+                if ($is_sprfvs == 1) {
+                   $other_privacy = [
+                        'privacy_page' => "Critiques",
+                        'is_allowed' => 1
+                    ];
+                }else {
+                   $other_privacy = [
+                        'privacy_page' => "Critiques",
+                        'is_allowed' => 0
+                    ];
+                }
+                    
+            }
+            else if ($user_page_privacy->privacy_type_id == 4) {
+                $user_srfvs = UserSprvfsIO::where([
+                    ['created_to',  $my_user_id], 
+                    ['privacy_type_id', $user_page_privacy->privacy_type_id], 
+                    ['created_by', $user_id],
+                    ])->first();
+                    if (isset($user_srfvs)) {
+                       $other_privacy = [
+                        'privacy_page' => "Critiques",
+                        'is_allowed' => 1
+                        ];
+                        
+                    }
+                    else {
+                       $other_privacy = [
+                            'privacy_page' => "Critiques",
+                            'is_allowed' => 0
+                        ];
+                    }
+            }
+            else {
+               $other_privacy = [
+                    'privacy_page' => "Critiques",
+                    'is_allowed' => 0
+                ];
+            }
+            
+        }
+
+        return $other_privacy;
     }
 }

@@ -10,6 +10,9 @@ use Auth;
 use App\Models\Post;
 use App\Models\Image;
 use App\Models\Gallery;
+use App\Models\PrivacyPage;
+use App\Models\UserSprvfsIO;
+
 
 class PostController extends BaseController
 {
@@ -169,16 +172,34 @@ class PostController extends BaseController
      */
     public function show($slug)
     {
-        $returnData = [];
-        $user = Auth::guard('api')->user();
+        $returnData = $other_privacy = [];
+        $my_user = Auth::guard('api')->user();
 
         $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
         $returnData['post'] = $post;
-        $returnData['has_stroke'] = $hasStroke = $user->strokePosts()->where('id', $post->id)->exists();
-
+        $returnData['has_stroke'] = $hasStroke = $my_user->strokePosts()->where('id', $post->id)->exists();
+        
+        //Check if sprfvs already 
+        $check_user_sprfvs = UserSprvfsIO::where([
+            ['created_to',  $post->user->id], 
+            ['privacy_type_id', 3], 
+            ['created_by', $my_user->id]
+            ])->first();
+        if(isset($check_user_sprfvs)) {
+            if($check_user_sprfvs->status == 1) {
+                $is_sprfvs = 1;
+            }
+            else {
+                $is_sprfvs = 2;
+            }
+        }
+        $returnData['is_sprfvs'] = $is_sprfvs;
+        //crtiques page
+        
+        $returnData['other_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $my_user->id, $post->user->id, 3);
         return $this->sendResponse($returnData, 'Post');
     }
 

@@ -249,12 +249,12 @@ class StudioController extends BaseController
                 }
                 else if ($user_page_privacy->privacy_type_id == 3) {
                     if ($is_sprfvs == 1) {
-                        array_push($gallery_privacy, [
+                        array_push($other_privacy, [
                             'privacy_page' => $other_page->name,
                             'is_allowed' => 1
                         ]);
                     }else {
-                        array_push($gallery_privacy, [
+                        array_push($other_privacy, [
                             'privacy_page' => $other_page->name,
                             'is_allowed' => 0
                         ]);
