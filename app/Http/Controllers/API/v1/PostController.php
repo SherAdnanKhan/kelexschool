@@ -47,8 +47,8 @@ class PostController extends BaseController
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'gallery_id' => 'required',
-            'image' => 'image|max:2000',
-            'video' => 'max:2000',
+            'image' => env('IMAGE_TYPE_SIZE', '1000'),
+            'video' => env('DOCUMENT_SIZE', '2000'),
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       

@@ -29,7 +29,7 @@ class GalleryController extends BaseController
         $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'title' => 'required',
-            'image' => 'image|max:2000'
+            'image' => env('IMAGE_TYPE_SIZE', '1000')
         ]);
    
         if ($validator->fails()) {
@@ -87,7 +87,7 @@ class GalleryController extends BaseController
         $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'title' => 'required',
-            'image' => 'image|max:2000'
+            'image' => env('IMAGE_TYPE_SIZE', '1000')
         ]);
    
         if ($validator->fails()) {

@@ -38,7 +38,7 @@ class StudioController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
-            'avatar' => 'required|image|max:2000'
+            'avatar' => 'required|'.env('IMAGE_TYPE_SIZE', '1000')
         ]);
    
         if ($validator->fails()){
