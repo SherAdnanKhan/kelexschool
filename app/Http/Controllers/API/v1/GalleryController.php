@@ -122,12 +122,9 @@ class GalleryController extends BaseController
                     $image->created_by = $user->id;
                     $image->save();
                 }
-                
-                //update gallery
-                $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
-               
             }
-
+            //update gallery
+            $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
