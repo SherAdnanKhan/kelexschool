@@ -238,5 +238,24 @@ class GalleryController extends BaseController
         return $this->sendResponse($users, 'All Recommended user galleries');
     }
 
+    public function deleteImage($gallery_id)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $gallery = Gallery::with('image')->find($gallery_id);
+        if (!isset($gallery)) {
+            return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
+        }
+        if ($gallery->created_by != $user->id) {
+            return $this->sendError('Unauthorized Gallery', ['error'=>'Unauthorized Gallery', 'message' => 'Yoh have no rights to update this gallery']);
+        }
+        if(isset($gallery->image)) {
+            $image = Image::where([ ['image_type', 'App\Models\Gallery'], ['image_id', $gallery->id] ])->first();
+            $image->delete();
+        }
+        $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
+        return $this->sendResponse($returnData, 'Gallery Image Removed');
+    }
+
 
 }
