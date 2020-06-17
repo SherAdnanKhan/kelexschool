@@ -38,7 +38,7 @@ class GalleryController extends BaseController
         
         try {
             $gallery = new Gallery();
-            $gallery->title = $$request->title;
+            $gallery->title = $request->title;
             $gallery->created_by = $user->id;
             $gallery->save();
 
@@ -53,7 +53,7 @@ class GalleryController extends BaseController
                 $image->save();
                 
                 //update gallery
-                $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
+                $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery->id);
                
             }
 
