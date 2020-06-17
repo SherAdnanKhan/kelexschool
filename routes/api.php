@@ -52,8 +52,9 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
-                    Route::post('my-gallery/update/{gallery_id}', 'GalleryController@update');
                     Route::post('my-gallery/create', 'GalleryController@store');
+                    Route::post('my-gallery/update/{gallery_id}', 'GalleryController@update');
+                    Route::delete('my-gallery/delete-image/{gallery_id}', 'GalleryController@deleteImage');
                     Route::get('/{slug}', 'GalleryController@show');
                     Route::post('/fav', 'GalleryController@make_fav');
                     Route::post('/unfav', 'GalleryController@make_unfav');
