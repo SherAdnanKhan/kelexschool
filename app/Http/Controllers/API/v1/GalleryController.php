@@ -22,6 +22,49 @@ class GalleryController extends BaseController
         return $this->sendResponse($galleries, 'My all galleries');
     }
 
+    public function store(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'image' => 'image|max:2000'
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        
+        try {
+            $gallery = new Gallery();
+            $gallery->title = $$request->title;
+            $gallery->created_by = $user->id;
+            $gallery->save();
+
+            if($request->has('image')) {
+                $image_recived = $this->uploadImage($request->image, "galleries/");
+                $image = new Image();
+                $image->title = $image_recived['image_name'];
+                $image->path = $image_recived['image_path'];
+                $image->image_type = 'App\Models\Gallery';
+                $image->image_id = $gallery->id;
+                $image->created_by = $user->id;
+                $image->save();
+                
+                //update gallery
+                $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
+               
+            }
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Gallery Created');
+        
+    }
+
     public function show($slug)
     {
         $returnData = [];
