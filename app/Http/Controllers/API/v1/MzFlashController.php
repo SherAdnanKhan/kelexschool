@@ -10,7 +10,7 @@ use Auth;
 use App\Models\Feed;
 use App\Models\Image;
 
-class MzFalshController extends BaseController
+class MzFlashController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +22,7 @@ class MzFalshController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $feeds = Feed::with('image', 'parent')->where('created_by', $user->id)->get();
+        $feeds = Feed::with('image', 'parent')->where('created_by', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['feeds'] = $feeds;
         return $this->sendResponse($returnData, 'All feeds');
 
@@ -33,7 +33,7 @@ class MzFalshController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $feeds = Feed::with('image', 'parent')->where('created_by', $user_id)->get();
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->where('created_by', $user_id)->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['feeds'] = $feeds;
         return $this->sendResponse($returnData, 'All feeds');
     }
@@ -58,6 +58,7 @@ class MzFalshController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
+        $image = null;
 
         $validator = Validator::make($request->all(), [
             'feed' => 'required|max:200',
@@ -125,9 +126,15 @@ class MzFalshController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function favesFeeds()
     {
-        //
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserFavesIds($user->id);
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $faved_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        
+        $returnData['user_faves_feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'User Faves Feed List');
     }
 
     /**
