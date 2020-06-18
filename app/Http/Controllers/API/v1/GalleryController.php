@@ -102,8 +102,8 @@ class GalleryController extends BaseController
             if ($gallery->created_by != $user->id) {
                 return $this->sendError('Unauthorized Gallery', ['error'=>'Unauthorized Gallery', 'message' => 'Yoh have no rights to update this gallery']);
             }
-            $gallery->update(['title', $request->title]);
-
+            $gallery->title = $request->title;
+            $gallery->update();
             if($request->has('image')) {
                 if(isset($gallery->image)) {
                     $image = Image::where([ ['image_type', 'App\Models\Gallery'], ['image_id', $gallery->id] ])->first();

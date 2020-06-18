@@ -104,4 +104,9 @@ class User extends Authenticatable
         return $this->hasMany(MessageLog::class, 'user_id')->where('status', 0);
     }
 
+    public function userFeels()
+    {
+        return $this->hasMany(userFeels::class, 'user_id');
+    }
+
 }
