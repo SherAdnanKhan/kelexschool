@@ -8,6 +8,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Storage;
 use App\Models\UserSprvfsIO;
 use App\Models\UserPrivacy;
+use App\Models\Fav;
 
 class BaseController extends Controller
 {
@@ -177,5 +178,15 @@ class BaseController extends Controller
         }
 
         return $other_privacy;
+    }
+
+    public function UserFavesIds($user_id)
+    {
+        $faved_user_ids = [];
+        $favs = Fav::where('faved_by', $user_id)->get(['faved_to']);
+        foreach($favs as $fav) {
+            array_push($faved_user_ids, $fav->faved_to);
+        }
+        return $faved_user_ids;
     }
 }
