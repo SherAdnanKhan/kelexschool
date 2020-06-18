@@ -121,10 +121,12 @@ class ChatController extends BaseController
 
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
+                    $participant_user = User::find($participant->id);
                     $message_log = new MessageLog;
                     $message_log->conversation_id = $request->conversation_id;
                     $message_log->message_id = $message->id;
                     $message_log->user_id = $participant->id;
+                    $message_log->feel_color = $participant_user->feel_color;
                     $message_log->save();
                 }
             }
