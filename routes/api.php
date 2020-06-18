@@ -87,6 +87,7 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'users'], function () {
                     Route::get('/', 'UserController@getAllUsers');
                     Route::get('search', 'UserController@searchUsers');
+                    Route::get('list-feels', 'UserController@getAllUserFeel');
                     Route::put('feel-color', 'UserController@updateUserFeel');
                     Route::put('user-bio', 'UserController@updateUserBio');
                     Route::get('unread-message-count', 'ChatController@unreadCount');

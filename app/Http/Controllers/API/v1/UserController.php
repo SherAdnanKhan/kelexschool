@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v1;
 use App\Http\Controllers\API\v1\BaseController;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserFeel;
 use Auth;
 use Validator;
 
@@ -53,6 +54,11 @@ class UserController extends BaseController
             $user->feel_color = $request->feel_color;
             $user->update();
 
+            $user_feel = new UserFeel();
+            $user_feel->user_id = $user->id;
+            $user_feel->feel = $request->feel_color;
+            $user_feel->save();
+
             $return_user = User::with('avatars')->find($user->id);
             $returnData['user'] = $return_user;
         }catch(QueryException $ex) {
@@ -86,5 +92,15 @@ class UserController extends BaseController
         }
         return $this->sendResponse($returnData, 'User bio Successfully.');
 
+    }
+
+    public function getAllUserFeel(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+
+        $user_feel_list = UserFeel::where('user_id', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
+        $returnData['user_feel_list'] = $user_feel_list;
+        return $this->sendResponse($returnData, 'User feel list.');
     }
 }
