@@ -126,7 +126,7 @@ class MzFlashController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function favesFeeds()
+    public function favesFeeds(Request $request)
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
@@ -135,6 +135,28 @@ class MzFlashController extends BaseController
         
         $returnData['user_faves_feeds'] = $feeds;
         return $this->sendResponse($returnData, 'User Faves Feed List');
+    }
+
+    public function sprfvsFeeds(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserSprfvsIds($user->id);
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $faved_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        
+        $returnData['user_faves_feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'User SPRFVs Feed List');
+    }
+
+    public function faveSprfvsFeeds(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserSprfvsIds($user->id);
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $faved_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        
+        $returnData['user_faves_feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'User faves and SPRFVs Feed List');
     }
 
     /**

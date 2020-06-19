@@ -159,7 +159,6 @@ class BaseController extends Controller
                         'privacy_page' => "Critiques",
                         'is_allowed' => 1
                         ];
-                        
                     }
                     else {
                        $other_privacy = [
@@ -188,5 +187,37 @@ class BaseController extends Controller
             array_push($faved_user_ids, $fav->faved_to);
         }
         return $faved_user_ids;
+    }
+
+    public function UserSprfvsIds($user_id)
+    {
+        $user_list_ids = [];
+        $user_lists = UserSprvfsIO::where([
+            ['status',  1], 
+            ['privacy_type_id', 3],
+            ['created_to', $user_id] 
+            ])->get(); 
+        foreach($user_lists as $user_list) {
+            array_push($user_list_ids, $user_list->created_by);
+        }
+        return $user_list_ids;
+    }
+
+    public function UserSprfvsFavsIds($user_id)
+    {
+        $user_list_ids = [];
+        $favs = Fav::where('faved_by', $user_id)->get(['faved_to']);
+        foreach($favs as $fav) {
+            array_push($user_list_ids, $fav->faved_to);
+        }
+        $user_lists = UserSprvfsIO::where([
+            ['status',  1], 
+            ['privacy_type_id', 3],
+            ['created_to', $user_id] 
+            ])->get(); 
+        foreach($user_lists as $user_list) {
+            array_push($user_list_ids, $user_list->created_by);
+        }
+        return $user_list_ids;
     }
 }
