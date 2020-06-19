@@ -22,7 +22,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $feeds = Feed::with('image', 'parent')->where('created_by', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->where('created_by', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['feeds'] = $feeds;
         return $this->sendResponse($returnData, 'All feeds');
 
@@ -108,9 +108,9 @@ class MzFlashController extends BaseController
                 $image->created_by = $user->id;
                 $image->save();
             }
-
-            $returnData['feed'] = $feed;
-            $returnData['feed']['image'] = $image;
+            $new_feed = Feed::with('user.avatars', 'image', 'parent')->find($feed->id);
+            $returnData['feed'] = $new_feed;
+            //$returnData['feed']['image'] = $image;
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
