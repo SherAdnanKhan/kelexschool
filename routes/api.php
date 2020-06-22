@@ -103,6 +103,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/sprfvs/approved', 'PrivacyController@approveSprfvs');
                     Route::post('/sprfvs/reject', 'PrivacyController@rejectSprfvs');
                     Route::post('/invite-only', 'PrivacyController@addUserToInviteOnly');
+                    Route::post('/uninvite-only', 'PrivacyController@uninviteUserToInviteOnly');
                 });
 
             });
