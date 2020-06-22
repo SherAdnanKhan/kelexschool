@@ -201,6 +201,37 @@ class PrivacyController extends BaseController
         return $this->sendResponse($returnData, 'Privacy updated');
     }
 
+    public function uninviteUserToInviteOnly(Request $request)
+    {
+        $returnData = [];
+
+        $validator = Validator::make($request->all(), [
+            'privacy_type_id' => 'required',
+            'user_id' => 'required',
+            'gallery_id' => 'required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $gallery = Gallery::find($request->gallery_id);
+            if (!isset($gallery)) {
+                return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
+            }
+            $check_gallery_io = UserIOGallery::where([ ['user_id', $request->user_id], ['gallery_id', $request->gallery_id] ])->first();
+            if(!isset($check_gallery_io)) {
+                return $this->sendError('Not intvited', ['error'=>'No invited to this gallery', 'message' => 'Please invite to gallery first']);
+            }
+            $check_gallery_io->delete();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Privacy updated');
+    }
+
     public function approveSprfvs(Request $request)
     {
         $returnData = [];
