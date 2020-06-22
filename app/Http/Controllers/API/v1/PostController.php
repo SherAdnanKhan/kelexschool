@@ -237,14 +237,14 @@ class PostController extends BaseController
         //
     }
 
-    public function ncomm($slug)
+    public function ncomm($slug, Request $request)
     {
         $returnData = [];
         $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
-        $returnData['ncom_posts'] = $posts = Post::where('art_id', $post->id)->orWhere('title', '%'.$post->title.'%')->with('image', 'user.art.parent', 'user.avatars')->get();
+        $returnData['ncom_posts'] = $posts = Post::where('art_id', $post->id)->orWhere('title', '%'.$post->title.'%')->with('image', 'user.art.parent', 'user.avatars')->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         return $this->sendResponse($returnData, 'Post Ncomm');
     }
 }
