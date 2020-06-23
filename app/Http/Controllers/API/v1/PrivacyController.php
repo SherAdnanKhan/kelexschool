@@ -112,15 +112,19 @@ class PrivacyController extends BaseController
     public function addUserToSprfvs(Request $request)
     {
         $returnData = [];
+        $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
             'user_id' => 'required',
         ]);
         if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+            return $this->sendError('Validation Error.', $validator->errors());
         }
         try {
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request); 
+            // \Mail::send('emails.auth.registration', $data , function($message){
+            //   $message->to(Input::get('Email'), 'itsFromMe')->subject('thisIsMySucject');
+            // });
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
@@ -147,7 +151,6 @@ class PrivacyController extends BaseController
             ['created_by', $user->id]
             ])->first();
         if(isset($privacy_check)) {
-            //$privacy_check->update(['privacy_type_id' => $request->privacy_type_id]);
             $returnData = $privacy_check;
         }else {
             $user_privacy = new UserSprvfsIO();
