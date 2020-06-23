@@ -73,8 +73,10 @@ Route::namespace('API')->group(function () {
                     Route::get('/{user_id}', 'MzFlashController@otherFeed');
                     Route::post('/', 'MzFlashController@store');
                     Route::get('/user/faves-feed', 'MzFlashController@favesFeeds');
+                    Route::get('/user/collective-feed', 'MzFlashController@collectiveFeeds');
                     Route::get('/user/sprfvs-feed', 'MzFlashController@sprfvsFeeds');
                     Route::get('/user/faves-sprfvs-feed', 'MzFlashController@faveSprfvsFeeds');
+                    Route::get('/user/faves-sprfvs-users', 'MzFlashController@faveSprfvsUsers');
                 });
                 Route::group(['prefix' => 'post'], function () {
                     Route::post('/stroke', 'PostController@makeStroke');

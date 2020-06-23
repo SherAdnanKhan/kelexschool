@@ -9,6 +9,7 @@ use Validator;
 use Auth;
 use App\Models\Feed;
 use App\Models\Image;
+use App\Models\User;
 
 class MzFlashController extends BaseController
 {
@@ -137,6 +138,18 @@ class MzFlashController extends BaseController
         return $this->sendResponse($returnData, 'User Faves Feed List');
     }
 
+    public function collectiveFeeds(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserFavesIds($user->id);
+        array_push($faved_users_ids, $user->id);
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $faved_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        
+        $returnData['user_faves_feeds'] = $feeds;
+        return $this->sendResponse($returnData, 'User Collective Faves Feed List');
+    }
+
     public function sprfvsFeeds(Request $request)
     {
         $returnData = [];
@@ -150,14 +163,33 @@ class MzFlashController extends BaseController
 
     public function faveSprfvsFeeds(Request $request)
     {
-        $returnData = [];
+        $returnData = $collective_users_ids = [];
         $user = Auth::guard('api')->user();
-        $faved_users_ids = $this->UserSprfvsIds($user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $faved_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
-        
+        $collective_users_ids = $sprfvs_users_ids = $this->UserSprfvsIds($user->id);
+        foreach($faved_users_ids as $faved_user_id) {
+          if(array_key_exists($faved_user_id, $collective_users_ids)) {
+            array_push($collective_users_ids, $faved_user_id);
+          }
+        } 
+        $feeds = Feed::with('user.avatars', 'image', 'parent')->whereIn('created_by', $collective_users_ids)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['user_faves_feeds'] = $feeds;
         return $this->sendResponse($returnData, 'User faves and SPRFVs Feed List');
-    }
+		}
+		
+		public function faveSprfvsUsers(Request $request)
+		{
+      $returnData = $collective_users_ids = [];
+      $user = Auth::guard('api')->user();
+      $faved_users_ids = $this->UserFavesIds($user->id);
+      $collective_users_ids = $sprfvs_users_ids = $this->UserSprfvsIds($user->id);
+      foreach($faved_users_ids as $faved_user_id) {
+        if(array_key_exists($faved_user_id, $collective_users_ids)) {
+          array_push($collective_users_ids, $faved_user_id);
+        }
+      }
+      $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent')->whereIn('id', $collective_users_ids)->get();
+      return $this->sendResponse($returnData, 'User faves and SPRFVs List');
+		}
 
     /**
      * Show the form for editing the specified resource.
