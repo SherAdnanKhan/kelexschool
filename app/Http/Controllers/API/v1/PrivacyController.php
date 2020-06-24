@@ -166,7 +166,6 @@ class PrivacyController extends BaseController
     public function addUserToInviteOnly(Request $request)
     {
         $returnData = [];
-
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
             'user_id' => 'required',
@@ -180,6 +179,7 @@ class PrivacyController extends BaseController
             if (!isset($gallery)) {
                 return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
             }
+            $other_user = User::findOrFail($request->user_id);
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request);
             
             $check_gallery_io = UserIOGallery::where([ ['user_id', $request->user_id], ['gallery_id', $request->gallery_id] ])->first();
@@ -191,9 +191,10 @@ class PrivacyController extends BaseController
             $gallery_inviteonly->gallery_id = $request->gallery_id;
             $gallery_inviteonly->user_id = $request->user_id;
             $gallery_inviteonly->save();
-
+            $emailData = $this->EmailData($request->user_id);
+            $emailData['gallery_name'] = $gallery->title;
+            \Mail::to($other_user->email)->send(new \App\Mail\InviteOnGalleryMail($emailData));
             $returnData['gallery_invite_only'] = $gallery_inviteonly;
-
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -266,8 +267,6 @@ class PrivacyController extends BaseController
               $returnData['privacy'] = $privacy_check;
               $emailData = $this->EmailData($request->user_id);
               \Mail::to($user->email)->send(new \App\Mail\SprfvsApprovedMail($emailData));
-            
-        
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
