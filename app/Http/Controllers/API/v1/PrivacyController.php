@@ -112,7 +112,6 @@ class PrivacyController extends BaseController
     public function addUserToSprfvs(Request $request)
     {
         $returnData = [];
-        $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
             'user_id' => 'required',
@@ -121,17 +120,16 @@ class PrivacyController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
         try {
+            $to_user = User::with('avatars')->findOrFail($request->user_id);
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request); 
-            // \Mail::send('emails.auth.registration', $data , function($message){
-            //   $message->to(Input::get('Email'), 'itsFromMe')->subject('thisIsMySucject');
-            // });
-
-        }catch(QueryException $ex) {
-            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(\Exception $ex) {
-            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
-        }
-        return $this->sendResponse($returnData, 'Privacy updated');
+            $emailData = $this->EmailData($request->user_id);
+            \Mail::to($to_user->email)->send(new \App\Mail\SprfvsRequestMail($emailData));
+            }catch(QueryException $ex) {
+                return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+            }catch(\Exception $ex) {
+                return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+            }
+            return $this->sendResponse($returnData, 'Privacy updated');
     }
 
     public function commonAddUserToPrivacy($request)
@@ -168,7 +166,6 @@ class PrivacyController extends BaseController
     public function addUserToInviteOnly(Request $request)
     {
         $returnData = [];
-
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
             'user_id' => 'required',
@@ -182,6 +179,7 @@ class PrivacyController extends BaseController
             if (!isset($gallery)) {
                 return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
             }
+            $other_user = User::findOrFail($request->user_id);
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request);
             
             $check_gallery_io = UserIOGallery::where([ ['user_id', $request->user_id], ['gallery_id', $request->gallery_id] ])->first();
@@ -193,9 +191,10 @@ class PrivacyController extends BaseController
             $gallery_inviteonly->gallery_id = $request->gallery_id;
             $gallery_inviteonly->user_id = $request->user_id;
             $gallery_inviteonly->save();
-
+            $emailData = $this->EmailData($request->user_id);
+            $emailData['gallery_name'] = $gallery->title;
+            \Mail::to($other_user->email)->send(new \App\Mail\InviteOnGalleryMail($emailData));
             $returnData['gallery_invite_only'] = $gallery_inviteonly;
-
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -247,26 +246,27 @@ class PrivacyController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-                $privacy_check = UserSprvfsIO::where([
-                    ['created_to',  $user->id], 
-                    ['privacy_type_id', $request->privacy_type_id], 
-                    ['created_by', $request->user_id]
-                    ])->first();
-                if(!isset($privacy_check)) {
-                    return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
-                }
-                $privacy_check->update(['status' => 1]);
+              $privacy_check = UserSprvfsIO::where([
+                  ['created_to',  $user->id], 
+                  ['privacy_type_id', $request->privacy_type_id], 
+                  ['created_by', $request->user_id]
+                  ])->first();
+              if(!isset($privacy_check)) {
+                  return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
+              }
+              $privacy_check->update(['status' => 1]);
 
-                //add to users fave gallery list
-                $galleries = Gallery::where('created_by', $request->user_id)->get();
-                foreach($galleries as $gallery) {
-                    $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $request->user_id)->first();
-                    if (!isset($user_fav_gallery)) {
-                        $user->favGalleries()->attach($gallery->id); 
-                    }
-                }
-                $returnData['privacy'] = $privacy_check;
-        
+              //add to users fave gallery list
+              $galleries = Gallery::where('created_by', $request->user_id)->get();
+              foreach($galleries as $gallery) {
+                  $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $request->user_id)->first();
+                  if (!isset($user_fav_gallery)) {
+                      $user->favGalleries()->attach($gallery->id); 
+                  }
+              }
+              $returnData['privacy'] = $privacy_check;
+              $emailData = $this->EmailData($request->user_id);
+              \Mail::to($user->email)->send(new \App\Mail\SprfvsApprovedMail($emailData));
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -315,6 +315,16 @@ class PrivacyController extends BaseController
         }
         return $this->sendResponse($returnData, 'Privacy updated');
         
+    }
+
+    public function EmailData($other_user_id)
+    {
+      $returnData = [];
+      $returnData['to_user'] = $to_user = User::with('avatars')->findOrFail($other_user_id);
+      $returnData['by_user'] = $by_user = User::with('avatars')->findOrFail(Auth::guard('api')->user()->id);
+      $returnData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
+
+      return $returnData;
     }
 
 

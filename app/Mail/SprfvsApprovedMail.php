@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class SprfvsRequestMail extends Mailable
+class SprfvsApprovedMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $data;
@@ -28,6 +28,7 @@ class SprfvsRequestMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('SPRFVS Request ' . config('app.name') )->markdown('emails.privacy.sprfvs_requests');
+        return $this->subject('SPRFVS Approved ' . config('app.name') )->markdown('emails.privacy.sprfvs_approve');
+
     }
 }
