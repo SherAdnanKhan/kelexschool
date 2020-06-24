@@ -8,6 +8,7 @@ use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
 use App\Models\Feed;
+use App\Models\FeedComment;
 use App\Models\Image;
 use App\Models\User;
 
@@ -62,7 +63,7 @@ class MzFlashController extends BaseController
         $image = null;
 
         $validator = Validator::make($request->all(), [
-            'feed' => 'required|max:200',
+            'feed' => 'max:200',
             'image' => env('IMAGE_TYPE_SIZE', '1000'),
             'video' => env('DOCUMENT_SIZE', '2000'),
         ]);
@@ -224,5 +225,41 @@ class MzFlashController extends BaseController
     public function destroy($id)
     {
         //
+    }
+
+    public function commentStore(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|max:200',
+            'feed_id' => 'required'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        try {
+            $feed = Feed::find($request->feed_id);
+            if (!isset($feed)) {
+                return $this->sendError('Invalid Feed', ['error'=>'No Feed Exists', 'message' => 'No feed exists']);
+            }
+            $feed_comment = new FeedComment;
+            $feed_comment->comment = $request->comment;
+            $feed_comment->created_by = $user->id;
+            $feed_comment->feed_id = $request->feed_id;
+            $feed_comment->save(); 
+
+            $new_feed_comment = FeedComment::with('user.avatars')->find($feed_comment->id);
+            $returnData['feed_comment'] = $new_feed_comment;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Feed Comment Added');
+        
     }
 }
