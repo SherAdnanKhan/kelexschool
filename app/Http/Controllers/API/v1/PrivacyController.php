@@ -112,7 +112,6 @@ class PrivacyController extends BaseController
     public function addUserToSprfvs(Request $request)
     {
         $returnData = [];
-        $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
             'user_id' => 'required',
@@ -121,17 +120,16 @@ class PrivacyController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
         try {
+            $to_user = User::with('avatars')->findOrFail($request->user_id);
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request); 
-            // \Mail::send('emails.auth.registration', $data , function($message){
-            //   $message->to(Input::get('Email'), 'itsFromMe')->subject('thisIsMySucject');
-            // });
-
-        }catch(QueryException $ex) {
-            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
-        }catch(\Exception $ex) {
-            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
-        }
-        return $this->sendResponse($returnData, 'Privacy updated');
+            $emailData = $this->EmailData($request->user_id);
+            \Mail::to($to_user->email)->send(new \App\Mail\SprfvsRequestMail($emailData));
+            }catch(QueryException $ex) {
+                return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+            }catch(\Exception $ex) {
+                return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+            }
+            return $this->sendResponse($returnData, 'Privacy updated');
     }
 
     public function commonAddUserToPrivacy($request)
@@ -315,6 +313,16 @@ class PrivacyController extends BaseController
         }
         return $this->sendResponse($returnData, 'Privacy updated');
         
+    }
+
+    public function EmailData($other_user_id)
+    {
+      $returnData = [];
+      $returnData['to_user'] = $to_user = User::with('avatars')->findOrFail($other_user_id);
+      $returnData['by_user'] = $by_user = User::with('avatars')->findOrFail(Auth::guard('api')->user()->id);
+      $returnData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
+
+      return $returnData;
     }
 
 
