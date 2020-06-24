@@ -4,7 +4,8 @@
 
     Hey, {{ $data['by_user']['username'] }}
 
-    The artist {{ $data['to_user']['username'] }} as just accepted your friend request. Log in to Meuzm to view {{ $data['by_user']['username'] }}’s latest Exhibits, MzFlashes, and more.
+    The artist {{ $data['to_user']['username'] }} as just accepted your friend request.
+    Log in to Meuzm to view {{ $data['by_user']['username'] }}’s latest Exhibits, MzFlashes, and more.
     This access excludes any Special Invite set areas.
     
     Thank you
