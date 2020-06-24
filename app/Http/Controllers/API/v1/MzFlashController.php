@@ -165,6 +165,7 @@ class MzFlashController extends BaseController
     {
         $returnData = $collective_users_ids = [];
         $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserFavesIds($user->id);
         $collective_users_ids = $sprfvs_users_ids = $this->UserSprfvsIds($user->id);
         foreach($faved_users_ids as $faved_user_id) {
           if(array_key_exists($faved_user_id, $collective_users_ids)) {
@@ -178,17 +179,17 @@ class MzFlashController extends BaseController
 		
 		public function faveSprfvsUsers(Request $request)
 		{
-      $returnData = $collective_users_ids = [];
-      $user = Auth::guard('api')->user();
-      $faved_users_ids = $this->UserFavesIds($user->id);
-      $collective_users_ids = $sprfvs_users_ids = $this->UserSprfvsIds($user->id);
-      foreach($faved_users_ids as $faved_user_id) {
-        if(array_key_exists($faved_user_id, $collective_users_ids)) {
-          array_push($collective_users_ids, $faved_user_id);
+        $returnData = $collective_users_ids = [];
+        $user = Auth::guard('api')->user();
+        $faved_users_ids = $this->UserFavesIds($user->id);
+        $collective_users_ids = $sprfvs_users_ids = $this->UserSprfvsIds($user->id);
+        foreach($faved_users_ids as $faved_user_id) {
+            if(array_key_exists($faved_user_id, $collective_users_ids)) {
+            array_push($collective_users_ids, $faved_user_id);
+            }
         }
-      }
-      $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent')->whereIn('id', $collective_users_ids)->get();
-      return $this->sendResponse($returnData, 'User faves and SPRFVs List');
+        $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent')->whereIn('id', $collective_users_ids)->get();
+        return $this->sendResponse($returnData, 'User faves and SPRFVs List');
 		}
 
     /**
