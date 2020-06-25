@@ -73,6 +73,7 @@ Route::namespace('API')->group(function () {
                     Route::get('/{user_id}', 'MzFlashController@otherFeed');
                     Route::post('/', 'MzFlashController@store');
                     Route::post('/feed/comment', 'MzFlashController@commentStore');
+                    Route::get('/feed/{feed_id}', 'MzFlashController@view');
                     Route::get('/user/faves-feed', 'MzFlashController@favesFeeds');
                     Route::get('/user/collective-feed', 'MzFlashController@collectiveFeeds');
                     Route::get('/user/sprfvs-feed', 'MzFlashController@sprfvsFeeds');
