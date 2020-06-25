@@ -8,9 +8,7 @@ class FeedComment extends Model
 {
     protected $fillable = [ 'feed_id', 'comment', 'created_by' ];
 
-    protected $hidden = [
-      'created_at', 'updated_at', 'deleted_at'
-    ];
+    protected $hidden = [ 'updated_at', 'deleted_at' ];
 
     public function user()
     {

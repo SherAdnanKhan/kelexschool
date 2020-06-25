@@ -31,4 +31,14 @@ class Feed extends Model
     {
         return $this->morphOne(Image::class, 'image');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(FeedComment::class);
+    }
+
+    public function limited_comments()
+    {
+        return $this->hasMany(FeedComment::class)->limit(4);
+    }
 }
