@@ -34,11 +34,11 @@ class Feed extends Model
 
     public function comments()
     {
-        return $this->hasMany(FeedComment::class);
+        return $this->hasMany(FeedComment::class)->orderBy('created_at', 'DESC');
     }
 
     public function limited_comments()
     {
-        return $this->hasMany(FeedComment::class)->limit(4);
+        return $this->hasMany(FeedComment::class)->orderBy('created_at', 'DESC')->limit(4);
     }
 }
