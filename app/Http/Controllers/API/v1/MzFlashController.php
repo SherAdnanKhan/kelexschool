@@ -199,9 +199,15 @@ class MzFlashController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function view($feed_id, Request $request)
     {
-        //
+      $returnData = [];
+      $returnData['feed'] = $feed = Feed::with('user.avatars', 'image', 'parent.user.avatars')->find($feed_id);
+      if(!isset($feed)) {
+        return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
+      }
+      $returnData['comments'] = $comments = FeedComment::with('user.avatars')->where('feed_id', $feed_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+      return $this->sendResponse($returnData, 'Feed with comment');
     }
 
     /**
