@@ -33,14 +33,17 @@ class MzFlashController extends BaseController
 
     }
 
-    public function otherFeed($user_id)
+    public function otherFeed($slug)
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-
+        $other_user = User::where('slug', $slug)->first();
+        if(!isset($other_user)) {
+            return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+        }
         $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers')
-                ->where('created_by', $user_id)
+                ->where('created_by', $other_user->id)
                 ->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['feeds'] = $feeds;
         return $this->sendResponse($returnData, 'All feeds');
