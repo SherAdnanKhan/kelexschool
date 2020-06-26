@@ -199,18 +199,30 @@ class GalleryController extends BaseController
         $user = Auth::guard('api')->user();
         try {
             
-            $users = User::with(['galleries' => function($query) {
-                $query->Has('posts', '>', 0);
-                },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
+            $users = User::with([
+                    'galleries' => function($query) {
+                        $query->Has('posts', '>', 0);
+                    },
+                    'galleries.image', 
+                    'galleries.posts' => function($query) {
+                        $query->where('post_type', '!=', 2);
+                    },
+                    'galleries.posts.image', 'art.parent', 'avatars'])
                     ->Has('galleries.posts', '>', 0)
                     ->where('art_id', $user->art_id)
                     ->where('id', '!=', $user->id)
                     ->get();
     
             if($users->count() == 0) {
-                $users = User::with(['galleries' => function($query) {
-                    $query->Has('posts', '>', 0);
-                    },'galleries.image', 'galleries.posts.image', 'art.parent', 'avatars'])
+                $users = User::with([
+                        'galleries' => function($query) {
+                        $query->Has('posts', '>', 0);
+                        },
+                        'galleries.image',
+                        'galleries.posts' => function($query) {
+                            $query->where('post_type', '!=', 2);
+                        },
+                        'galleries.posts.image', 'art.parent', 'avatars'])
                         ->Has('galleries.posts', '>', 0)
                         ->where('id', '!=', $user->id)
                         ->get()->random(1);
