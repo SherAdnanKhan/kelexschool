@@ -94,6 +94,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Post::class, 'user_stroke_posts');
     }
 
+    public function strokeFeeds()
+    {
+        return $this->belongsToMany(Feed::class, 'user_stroke_feeds');
+    }
+
     public function conversations()
     {
         return $this->belongsToMany(Conversation::class, 'participants');

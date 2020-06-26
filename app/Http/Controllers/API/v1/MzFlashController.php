@@ -268,4 +268,57 @@ class MzFlashController extends BaseController
         return $this->sendResponse($returnData, 'Feed Comment Added');
         
     }
+    public function makeStroke(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'feed_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $hasStroke = $user->strokeFeeds()->where('id', $request->feed_id)->exists();
+            if ($hasStroke) {
+                return $this->sendError('Already Stoke Feed', ['error'=>'Already Stroke Feed', 'message' => 'You already stroke this feed']);
+            }
+            
+            $user->strokeFeeds()->attach($request->feed_id);
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Mark Stroke Successfully.');
+    }
+
+    public function unStroke(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'feed_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $hasStroke = $user->strokeFeeds()->where('id', $request->feed_id)->exists();
+            if (!$hasStroke) {
+                return $this->sendError('None Stoke Feed', ['error'=>'None Stroke Feed', 'message' => 'You didn\'t stroke this feed before']);
+            }
+            
+            $user->strokeFeeds()->detach($request->feed_id);
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Mark UnStroke Successfully.');
+    }
 }
