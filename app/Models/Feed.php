@@ -46,4 +46,9 @@ class Feed extends Model
     {
         return $this->belongsToMany(User::class, 'user_stroke_feeds');
     }
+
+    public function has_stroke()
+    {
+        return $this->belongsToMany(User::class, 'user_stroke_feeds')->where('user_id', \Auth::guard('api')->user()->id);
+    }
 }
