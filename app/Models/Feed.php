@@ -41,4 +41,9 @@ class Feed extends Model
     {
         return $this->hasMany(FeedComment::class)->orderBy('created_at', 'DESC')->limit(4);
     }
+
+    public function strokeUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_stroke_feeds');
+    }
 }
