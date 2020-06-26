@@ -236,7 +236,7 @@ class PrivacyController extends BaseController
 
     public function approveSprfvs(Request $request)
     {
-        $returnData = [];
+        $returnData = $emailData=[];
         $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
             'privacy_type_id' => 'required',
@@ -266,7 +266,11 @@ class PrivacyController extends BaseController
                 }
             }
             $returnData['privacy'] = $privacy_check;
-            $emailData = $this->EmailData($request->user_id);
+            $emailData['to_user'] = $by_user = User::with('avatars')->findOrFail($other_user->id);
+            $emailData['by_user'] = $to_user = User::with('avatars')->findOrFail($user->id);
+            $emailData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
+
+            //$emailData = $this->EmailData($user->id);
             \Mail::to($other_user->email)->send(new \App\Mail\SprfvsApprovedMail($emailData));
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
