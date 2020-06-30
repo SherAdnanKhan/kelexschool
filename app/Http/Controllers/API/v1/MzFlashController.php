@@ -119,7 +119,7 @@ class MzFlashController extends BaseController
                 $image->created_by = $user->id;
                 $image->save();
             }
-            $new_feed = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed->id);
+            $new_feed = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed->id);
             $returnData['feed'] = $new_feed;
             //$returnData['feed']['image'] = $image;
 
@@ -142,7 +142,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserFavesIds($user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -158,7 +158,7 @@ class MzFlashController extends BaseController
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserFavesIds($user->id);
         array_push($faved_users_ids, $user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -173,7 +173,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserSprfvsIds($user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -194,7 +194,7 @@ class MzFlashController extends BaseController
             array_push($collective_users_ids, $faved_user_id);
           }
         } 
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $collective_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -227,7 +227,7 @@ class MzFlashController extends BaseController
     public function view($feed_id, Request $request)
     {
       $returnData = [];
-      $returnData['feed'] = $feed = Feed::with('user.avatars', 'image', 'parent.user.avatars')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed_id);
+      $returnData['feed'] = $feed = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed_id);
       if(!isset($feed)) {
         return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
       }
