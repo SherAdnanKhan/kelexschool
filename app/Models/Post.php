@@ -57,6 +57,11 @@ class Post extends Model
 
     public function getCommentsCountAttribute ()
     {
-    return $this->comments()->count();
+        return $this->comments()->count();
+    }
+
+    public function has_stroke()
+    {
+        return $this->belongsToMany(User::class, 'user_stroke_posts')->where('user_id', \Auth::guard('api')->user()->id);
     }
 }
