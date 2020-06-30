@@ -36,7 +36,7 @@ class LobbyController extends BaseController
                                     'favGalleries.posts.comments', 
                                     'favGalleries.posts.user.avatars', 
                                     'favGalleries.posts.user.art.parent' ])
-                                    ->withCount(['favGalleries.posts.has_stroke'])
+                                    //->withCount(['favGalleries.posts.has_stroke'])
                                     ->find($user->id);
         $user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         $returnData['all_faved_users'] = $all_faved_users;
