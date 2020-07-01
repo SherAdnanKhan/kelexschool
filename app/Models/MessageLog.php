@@ -11,7 +11,7 @@ class MessageLog extends Model
     use SoftDeletes;
     public $table = 'messages_logs';
 
-    protected $fillable = [ 'message_id', 'conversation_id', 'user_id', 'feel_color'];
+    protected $fillable = [ 'message_id', 'conversation_id', 'user_id', 'feel_color', 'status', 'read_at'];
     protected $dates = [ 'deleted_at' ];
 
     public function user()
