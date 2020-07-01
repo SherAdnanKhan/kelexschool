@@ -270,7 +270,6 @@ class ChatController extends BaseController
 
     public function readMessage($message_id, Request $request)
     {
-        //dd($message_id);
         $validator = Validator::make($request->all(), [
             'user_id' => 'required'
         ]);
@@ -289,7 +288,15 @@ class ChatController extends BaseController
         }
 
         try {
-            $messages_logs = MessageLog::where('message_id', $message_id)->where('user_id', $request->user_id)->update(['status' => 1]);
+            $messages_logs = MessageLog::where([ ['message_id', $message_id], ['user_id', $request->user_id] ])->first();
+            if (!isset($messages_logs)) {
+                return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
+            }
+            $messages_logs->status = 1;
+            $messages_logs->read_at = now();
+            $messages_logs->update();
+
+            $message = Message::with('messagesLogs')->find($message_id);
             $returnData['message'] = $message;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
