@@ -31,6 +31,7 @@ class ChatController extends BaseController
             $query->where('user_id', $user->id);
         })
         ->withCount('unreadMessagesLogs')
+        ->orderBy('updated_at', 'desc')
         ->get();
 
         $returnData['conversations'] = $conversations;
@@ -118,6 +119,9 @@ class ChatController extends BaseController
             $message->type = isset($request->message_type) ? $request->message_type : 0;
             $message->url = isset($request->url) ? $request->url : null; 
             $message->save(); 
+            
+            //update conversation update time
+            $hasConversation->touch();
 
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
