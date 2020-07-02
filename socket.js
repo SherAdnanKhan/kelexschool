@@ -1,7 +1,10 @@
-const express = require('express');
-const app = express();
+const app = require('express');
 const https = require('https').Server(app);
+const fs = require('fs');
+const path = require('path');
 const io = require('socket.io')(https);
+
+let port = 8080;
 
 io.sockets.on('connection', function (socket) {
   console.log('user connected');
@@ -40,7 +43,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('userLeft', (user) => {
-    socket.leave(user.slug);
+    socket.joinUser(user.slug);
   });
 
   socket.on('userColorChange', (user) => {
@@ -52,6 +55,11 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-const server = https.listen(8080, function () {
-  console.log('listening on *:8080');
+
+const serverOptions = {
+  key: fs.readFileSync(path.join(__dirname, '../certs/privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem'))
+};
+https.createServer(serverOptions, app).listen(port, () => {
+  console.log('Server is running on http://', port);
 });
