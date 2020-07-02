@@ -1,6 +1,7 @@
-const express = require('express');
-const app = express();
-const https = require('http').Server(app);
+const app = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const io = require('socket.io')(https);
 
 let port = 8080;
@@ -55,6 +56,10 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-const server = https.listen(8080, function () {
-  console.log('listening on *:8080');
+const serverOptions = {
+  key: fs.readFileSync(path.join(__dirname, './certs/privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
+};
+https.createServer(serverOptions, app).listen(port, () => {
+  console.log('Server is running on https://', port);
 });
