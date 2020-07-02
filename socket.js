@@ -57,8 +57,8 @@ io.sockets.on('connection', function (socket) {
 
 
 const serverOptions = {
-  key: fs.readFileSync(path.join(__dirname, '../certs/privkey.pem')),
-  cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem'))
+  key: fs.readFileSync(path.join(__dirname, './certs/privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
 };
 https.createServer(serverOptions, app).listen(port, () => {
   console.log('Server is running on http://', port);
