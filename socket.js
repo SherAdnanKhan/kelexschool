@@ -1,5 +1,5 @@
 const app = require('express');
-const https = require('https').Server(app);
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const io = require('socket.io')(https);
@@ -61,5 +61,5 @@ const serverOptions = {
   cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
 };
 https.createServer(serverOptions, app).listen(port, () => {
-  console.log('Server is running on http://', port);
+  console.log('Server is running on https://', port);
 });
