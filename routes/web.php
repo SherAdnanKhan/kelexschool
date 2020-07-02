@@ -17,17 +17,11 @@ Route::get('/', function () {
     return view('welcome_static');
 });
 
-Route::get('fire', function () {
-    // this fires the event
-    //return extension_loaded('redis');
-    event(new App\Events\EventName());
-    return "event fired";
+Route::get('nodejsApp', function () {
+    //$output = exec("node socket");
+    return "test";
+    //return $output;
 });
+//Auth::routes();
 
-Route::get('test', function () {
-    // this checks for the event
-    return view('test');
-});
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
