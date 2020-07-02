@@ -314,7 +314,7 @@ class ChatController extends BaseController
         $user = User::withCount('unreadMessages')->find($user->id);
         $returnData['user_unread_count'] = $user->unread_messages_count;
 
-        return $this->sendResponse($returnData, 'Message Status read');
+        return $this->sendResponse($returnData, 'User unread counts');
 
     }
 }
