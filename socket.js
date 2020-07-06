@@ -1,9 +1,24 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const app = express();
-const https = require('http').Server(app);
-const io = require('socket.io')(https);
+let https, io, fs, path;
+
+if (`${process.env.APP_ENV}` == 'local') {
+  https = require('http').Server(app);
+  io = require('socket.io')(https);
+} else {
+  https = require('https');
+  fs = require('fs');
+  path = require('path');
+  io = require('socket.io')(https);
+
+}
+
 
 let port = 8080;
+
 io.origins('*:*');
 io.sockets.on('connection', function (socket) {
   console.log('user connected');
@@ -54,7 +69,18 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
+if (`${process.env.APP_ENV}` == 'local') {
+  const server = https.listen(8080, function () {
+    console.log('listening on *:8080');
+  });
+} else {
+  const serverOptions = {
+    key: fs.readFileSync(path.join(__dirname, './certs/privkey.pem')),
+    cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
+  };
+  https.createServer(serverOptions, app).listen(port, () => {
+    console.log('Server is running on https://', port);
+  });
 
-const server = https.listen(8080, function () {
-  console.log('listening on *:8080');
-});
+}
+
