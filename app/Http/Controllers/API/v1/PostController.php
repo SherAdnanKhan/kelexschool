@@ -183,6 +183,8 @@ class PostController extends BaseController
         $returnData['post'] = $post;
         $returnData['has_stroke'] = $hasStroke = $my_user->strokePosts()->where('id', $post->id)->exists();
         
+        $other_posts = Post::with('image', 'user.art.parent', 'user.avatars')->where([ ['gallery_id', '=', $post->gallery_id], ['id', '!=', $post->id] ])->get();
+        $returnData['other_posts'] = $other_posts;
         //Check if sprfvs already 
         $check_user_sprfvs = UserSprvfsIO::where([
             ['created_to',  $post->user->id], 
