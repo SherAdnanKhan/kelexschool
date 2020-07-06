@@ -74,8 +74,7 @@ class GalleryController extends BaseController
         if (!isset($gallery)) {
             return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
         }
-        
-        $posts = Post::with('image', 'has_stroke')->where('gallery_id', $gallery->id)->get();
+        $posts = Post::with('image', 'has_stroke')->withCount('strokeUsers')->where('gallery_id', $gallery->id)->get();
         $returnData['posts'] = $posts;
         $returnData['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
         return $this->sendResponse($returnData, 'Gallery posts');
