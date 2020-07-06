@@ -69,6 +69,7 @@ class PostController extends BaseController
             $post->description = $request->description ? $request->description : null;
             $post->created_by = $user->id;
             $post->save(); 
+            $gallery->touch();
 
             if($request->has('image')) {
                 $image_recived = $this->uploadImage($request->image, "posts/");
