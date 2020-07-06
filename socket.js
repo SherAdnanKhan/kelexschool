@@ -4,7 +4,7 @@ const https = require('http').Server(app);
 const io = require('socket.io')(https);
 
 let port = 8080;
-
+io.origins('*:*');
 io.sockets.on('connection', function (socket) {
   console.log('user connected');
 
