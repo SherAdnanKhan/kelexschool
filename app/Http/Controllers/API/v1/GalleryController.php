@@ -75,7 +75,7 @@ class GalleryController extends BaseController
             return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
         }
         
-        $posts = Post::with('image')->where('gallery_id', $gallery->id)->get();
+        $posts = Post::with('image', 'has_stroke')->where('gallery_id', $gallery->id)->get();
         $returnData['posts'] = $posts;
         $returnData['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
         return $this->sendResponse($returnData, 'Gallery posts');
@@ -264,6 +264,25 @@ class GalleryController extends BaseController
         }
         $returnData['gallery'] = $gallery = Gallery::with('image')->find($gallery_id);
         return $this->sendResponse($returnData, 'Gallery Image Removed');
+    }
+
+    public function favedUsers(Request $request)
+    {
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $user_fav_galleries = User::with('favGalleries.image', 'favGalleries.user.avatars')->find($request->user_id);
+        if (!isset($user_fav_galleries)) {
+            return $this->sendError('Not a user', ['error'=>'Not a user', 'message' => 'not a user']);
+        }
+
+        $returnData['user_faved_galleries'] = $user_fav_galleries;
+        return $this->sendResponse($returnData, 'User all faved galleries');
+
     }
 
 
