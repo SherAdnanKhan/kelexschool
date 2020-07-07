@@ -247,7 +247,11 @@ class PostController extends BaseController
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
-        $returnData['ncom_posts'] = $posts = Post::where('art_id', $post->id)->orWhere('title', '%'.$post->title.'%')->with('image', 'user.art.parent', 'user.avatars')->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $returnData['ncom_posts'] = $posts = Post::where('art_id', $post->art_id)
+                                            ->orWhere('title', 'LIKE','%'.$post->title.'%')
+                                            ->orWhere('description', 'LIKE','%'.$post->title.'%')
+                                            ->with('image', 'user.art.parent', 'user.avatars')
+                                            ->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         return $this->sendResponse($returnData, 'Post Ncomm');
     }
 }
