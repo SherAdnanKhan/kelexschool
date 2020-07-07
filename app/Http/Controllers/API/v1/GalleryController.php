@@ -79,7 +79,7 @@ class GalleryController extends BaseController
         foreach($faved_users as $faved_user) {
             array_push($faved_user_ids, $faved_user->user_id);            
         }
-        $gallery_faved_users = User::whereIn('id', $faved_user_ids)->get();
+        $gallery_faved_users = User::with('avatars')->whereIn('id', $faved_user_ids)->get();
         $returnData['posts'] = $posts;
         $returnData['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
         $returnData['faved_users'] = $gallery_faved_users;
