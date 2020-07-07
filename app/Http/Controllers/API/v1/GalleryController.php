@@ -68,15 +68,22 @@ class GalleryController extends BaseController
 
     public function show($slug)
     {
-        $returnData = [];
+        $returnData = $faved_user_ids = [];
         $user = Auth::guard('api')->user();
         $gallery = Gallery::where('slug', $slug)->first();
         if (!isset($gallery)) {
             return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists', 'message' => 'No gallery exists']);
         }
         $posts = Post::with('image', 'has_stroke')->withCount('strokeUsers')->where('gallery_id', $gallery->id)->get();
+        $faved_users = UserFavGallery::where('gallery_id', $gallery->id)->get();
+        foreach($faved_users as $faved_user) {
+            array_push($faved_user_ids, $faved_user->user_id);            
+        }
+        $gallery_faved_users = User::whereIn('id', $faved_user_ids)->get();
         $returnData['posts'] = $posts;
         $returnData['has_faved'] = $has_faved = $user->favGalleries()->where('id', $gallery->id)->exists();
+        $returnData['faved_users'] = $gallery_faved_users;
+
         return $this->sendResponse($returnData, 'Gallery posts');
     }
 
