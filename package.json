@@ -25,6 +25,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "cors": "^2.8.5",
         "express": "^4.17.1",
         "ioredis": "^4.17.1",
         "socket.io": "^2.3.0"
