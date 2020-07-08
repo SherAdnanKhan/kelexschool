@@ -96,7 +96,7 @@ class ChatController extends BaseController
         //$user = Auth::guard('api')->user();
 
         $validator = Validator::make($request->all(), [
-            'message' => 'min:2',
+            'message' => 'min:1',
             'conversation_id' => 'required',
             'user_id' => 'required'
         ]);
