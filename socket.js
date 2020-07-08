@@ -14,8 +14,7 @@ if (`${process.env.APP_ENV}` == 'local') {
   https = require('https');
   fs = require('fs');
   path = require('path');
-  io = require('socket.io')(https);
-
+  io = require('socket.io')(https, { path: '/nodejsApp' });
 }
 
 
