@@ -33,10 +33,17 @@ class PrivacyController extends BaseController
         
     }
 
-    public function getFaveList($privacy_type_id, $status)
+    public function getFaveList($privacy_type_id, $status, Request $request)
     {
         $returnData = $user_list_ids = [];
-        $my_user = Auth::guard('api')->user();
+        if($request->slug) {
+            $my_user = User::where('slug', $request->slug)->first();
+            if (!$my_user) {
+                return $this->sendError('Invalid User', ['error'=>'Unauthorised User', 'message' => 'Please add correct user']);
+            }
+        }else {
+            $my_user = Auth::guard('api')->user();
+        }
         if( $privacy_type_id == 3 ) {
             $user_lists = UserSprvfsIO::where([
                 ['status',  $status], 
