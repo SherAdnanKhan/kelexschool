@@ -7,6 +7,9 @@ if (`${process.env.NODE_APP_ENV}` == 'production') {
   let fs, path;
   fs = require('fs');
   path = require('path');
+  const cors = require('cors');
+  app.use(cors());
+
   const serverOptions = {
     key: fs.readFileSync(path.join(__dirname, './certs/privkey.pem')),
     cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
