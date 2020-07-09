@@ -50,7 +50,7 @@ io.sockets.on('connection', function (socket) {
     socket.leave(data.room);
   });
   socket.on('userLeft', (user) => {
-    socket.joinUser(user.slug);
+    socket.leave(user.slug);
   });
   socket.on('userColorChange', (user) => {
     io.to(user.slug).emit('notifyColrChange', user);
