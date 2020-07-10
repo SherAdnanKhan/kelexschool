@@ -53,5 +53,5 @@ io.sockets.on('connection', function (socket) {
 
 });
 server.listen(`${process.env.NODE_APP_PORT}`, () => {
-  console.log('Server (', `${process.env.NODE_APP_ENV}`, ') is running on: ', `${process.env.NODE_APP_PORT}`);
+  console.log('Server is running on: ', `${process.env.NODE_APP_PORT}`);
 });
