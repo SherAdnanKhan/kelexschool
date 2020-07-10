@@ -32,7 +32,7 @@ class ChatController extends BaseController
         })
         ->withCount('unreadMessagesLogs')
         ->orderBy('updated_at', 'desc')
-        ->paginate(env('PAGINATE_LENGTH', 15));
+        ->get();
 
         $returnData['conversations'] = $conversations;
 
@@ -45,7 +45,7 @@ class ChatController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($user_slug)
+    public function create($user_slug, Request $request)
     {
         $returnData = $userIds = $conversation_all_ids =[];
         $user = Auth::guard('api')->user();
@@ -64,16 +64,18 @@ class ChatController extends BaseController
             array_push($conversation_all_ids, $coveration->id);
         }
         //return $conversation_all_ids;
-        $hasConversation = Conversation::with('messages.user.avatars', 'participants.avatars', 'messages.messagesLogs')->whereHas('participants', function($query) use ($user_chatable_check) {
+        $hasConversation = Conversation::with('participants.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
-        //dd($hasConversation);
+        $coversation_id = $hasConversation->id;
+        $hasConversation['messages'] = Message::with('messagesLogs', 'user.avatars')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
 
-            $new_conversation = Conversation::with('messages.user.avatars')->find($conversation->id);
+            $new_conversation = Conversation::find($conversation->id);
+            $new_conversation['messages'] = Message::with('messagesLogs', 'user.avatars')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
         }
         else {
