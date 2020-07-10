@@ -3,23 +3,11 @@ dotenv.config();
 const express = require('express');
 const app = express();
 let server, io;
-if (`${process.env.NODE_APP_ENV}` == 'production') {
-  let fs, path;
-  fs = require('fs');
-  path = require('path');
-  const cors = require('cors');
-  app.use(cors());
 
-  const serverOptions = {
-    key: fs.readFileSync(path.join(__dirname, './certs/privkey.pem')),
-    cert: fs.readFileSync(path.join(__dirname, './certs/cert.pem'))
-  };
-  server = require('https').createServer(serverOptions, app);
-} else {
-  server = require('http').createServer(app);
-}
+server = require('http').createServer(app);
 io = require('socket.io')(server);
 io.origins('*:*');
+
 io.sockets.on('connection', function (socket) {
   console.log('user connected');
   socket.on('join', (data, callback) => {
@@ -58,6 +46,11 @@ io.sockets.on('connection', function (socket) {
   socket.on('disconnect', () => {
     console.log('disconnected');
   });
+  socket.on('onUserNotifications', (data, notification_type, callback) => {
+    io.to(data.reciever.slug).emit('reciveUserNotifications', data, notification_type);
+    callback && callback();
+  });
+
 });
 server.listen(`${process.env.NODE_APP_PORT}`, () => {
   console.log('Server (', `${process.env.NODE_APP_ENV}`, ') is running on: ', `${process.env.NODE_APP_PORT}`);
