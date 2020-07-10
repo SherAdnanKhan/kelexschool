@@ -32,7 +32,7 @@ class ChatController extends BaseController
         })
         ->withCount('unreadMessagesLogs')
         ->orderBy('updated_at', 'desc')
-        ->get();
+        ->paginate(env('PAGINATE_LENGTH', 15));
 
         $returnData['conversations'] = $conversations;
 
