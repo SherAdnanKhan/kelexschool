@@ -26,7 +26,10 @@ class Conversation extends Model
     {
         return $this->hasMany(Message::class, 'conversation_id', 'id');
     }
-
+    public function lastMessage()
+    {
+        return $this->hasOne(Message::class, 'conversation_id', 'id')->latest();
+    }
     public function participants()
     {
         return $this->belongsToMany(User::class, 'participants');
