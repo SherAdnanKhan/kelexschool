@@ -11,7 +11,12 @@ module.exports = {
     });
   },
 
-  readMessage: function () {
-    // whatever
+  readMessage: function (message_id, user, token) {
+    return axios.post(base_url + `chats/message/read/${message_id}`, user, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
   }
 };
