@@ -1,0 +1,39 @@
+version: '3.3'
+volumes: 
+  mysql-data: 
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/data-sql/mysql
+  meuzm-app-dir:
+    driver: local
+    driver_opts: 
+      o: bind
+      type: none
+      device: /home/projects/dock-meuzm-laravel
+services:
+  my-mysql:
+    image: mysql:5.7.18
+    environment: 
+      MYSQL_ROOT_PASSWORD: "imgettingitroot"
+    ports: 
+      - "3307:3306"
+    # volumes: 
+    #   - mysql-data:/var/lib/mysql
+  meuzm:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    # volumes:
+    #   - meuzm-app-dir:/meuzm-app
+    environment:
+      DB_HOST: "my-mysql"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "imgettingitroot"
+      DB_PORT: "3307"
+      DB_DATABASE: "dockmeuzm"
+    ports:
+      - "8001:8001"
+    depends_on: 
+      - my-mysql
