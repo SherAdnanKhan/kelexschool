@@ -10,16 +10,9 @@ module.exports = {
         Accept: 'application/json'
       }
     });
-    // .then(res => {
-    //   const response = res.data.data;
-    //   console.log(response);
-    //   return response;
-    // })
-    // .catch(err => {
-    //   throw new Error(err.response.data);
-    // });
   },
-  bar: function () {
+
+  readMessage: function () {
     // whatever
   }
 };
