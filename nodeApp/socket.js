@@ -10,19 +10,28 @@ module.exports = function (server) {
       socket.join(data.room);
       callback && callback();
     });
+
     socket.on('joinUser', (user, callback) => {
       socket.join(user.slug);
       console.log('user join user ' + user.slug);
       callback && callback();
     });
-    socket.on('onRead', (data, callback) => {
-      io.to(data.room).emit('read', data);
+
+    socket.on('onRead', async (message_id, user, data, token, callback) => {
+      try {
+        await requestServices.readMessage(message_id, user, token);
+        io.to(data.message.conversation_id).emit('read', data);
+      } catch (ex) {
+        //console.log(ex);
+      }
       callback && callback();
     });
+
     socket.on('onReadAll', (data, callback) => {
       io.to(data.room).emit('readAll', data);
       callback && callback();
     });
+
     socket.on('sendMessage', async (data, token, callback) => {
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
@@ -32,18 +41,23 @@ module.exports = function (server) {
         callback && callback('Could not send message try again.');
       }
     });
+
     socket.on('leave', (data) => {
       socket.leave(data.room);
     });
+
     socket.on('userLeft', (user) => {
       socket.leave(user.slug);
     });
+
     socket.on('userColorChange', (user) => {
       io.to(user.slug).emit('notifyColrChange', user);
     });
+
     socket.on('disconnect', () => {
       console.log('disconnected');
     });
+
     socket.on('onUserNotifications', (data, notification_type, callback) => {
       io.to(data.reciever.slug).emit('reciveUserNotifications', data, notification_type);
       callback && callback();
