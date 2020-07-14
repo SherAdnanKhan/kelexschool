@@ -1,6 +1,8 @@
 module.exports = function (server) {
-  io = require('socket.io')(server);
+
+  const io = require('socket.io')(server);
   io.origins('*:*');
+  const requestServices = require('./requestServices');
 
   io.sockets.on('connection', function (socket) {
     console.log('user connected');
@@ -11,8 +13,7 @@ module.exports = function (server) {
     });
     socket.on('joinUser', (user, callback) => {
       socket.join(user.slug);
-      console.log(user.slug);
-      console.log('user join user');
+      console.log('user join user' + user.slug);
       callback && callback();
     });
     socket.on('onRead', (data, callback) => {
@@ -23,9 +24,15 @@ module.exports = function (server) {
       io.to(data.room).emit('readAll', data);
       callback && callback();
     });
-    socket.on('sendMessage', (data, callback) => {
-      io.to(data.room).emit('recieveMessage', data);
-      io.to(data.reciver).emit('notify', data);
+    socket.on('sendMessage', async (data, token, callback) => {
+      const reciver = data.reciver;
+      try {
+        const { data: { data: response } } = await requestServices.sendMessage(data, token);
+        io.to(response.message.conversation_id).emit('recieveMessage', response);
+        io.to(reciver).emit('notify', data);
+      } catch (ex) {
+        console.log(ex);
+      }
       callback && callback();
     });
     socket.on('leave', (data) => {
