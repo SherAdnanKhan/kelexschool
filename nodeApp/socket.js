@@ -24,15 +24,13 @@ module.exports = function (server) {
       callback && callback();
     });
     socket.on('sendMessage', async (data, token, callback) => {
-      const reciver = data.reciver;
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
         io.to(response.message.conversation_id).emit('recieveMessage', response);
-        io.to(reciver).emit('notify', data);
+        io.to(data.reciver).emit('notify', response);
       } catch (ex) {
-        console.log('chat message send socket issue');
+        callback && callback('Could not send message try again.');
       }
-      callback && callback();
     });
     socket.on('leave', (data) => {
       socket.leave(data.room);
