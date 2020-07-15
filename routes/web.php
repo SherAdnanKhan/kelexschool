@@ -17,11 +17,11 @@ Route::get('/', function () {
     return view('welcome_static');
 });
 
-Route::get('nodejsApp', function () {
-    //$output = exec("node socket");
-    return "test";
-    //return $output;
+Route::group(['prefix' => 'admin'], function () { 
+    Route::get('/', function() {
+        return redirect('admin/login');
+    });
+    Route::get('/login', function() {
+        return view('admin.auth.login');
+    });
 });
-//Auth::routes();
-
-//Route::get('/home', 'HomeController@index')->name('home');
