@@ -3,7 +3,7 @@ var base_url = process.env.BACKEND_APP_URL;
 
 module.exports = {
   sendMessage: function (data, token) {
-    return axios.post(base_url + '/chats/message', data, {
+    return axios.post(base_url + 'chats/message', data, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json'
@@ -12,7 +12,7 @@ module.exports = {
   },
 
   readMessage: function (message_id, user, token) {
-    return axios.post(base_url + `/chats/message/read/${message_id}`, user, {
+    return axios.post(base_url + `chats/message/read/${message_id}`, user, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json'
@@ -21,7 +21,7 @@ module.exports = {
   },
 
   readAll: function (data, token) {
-    return axios.post(base_url + `/chats/message/read-all`, { conversation_id: data.room }, {
+    return axios.post(base_url + `chats/message/read-all`, { conversation_id: data.room }, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json'
