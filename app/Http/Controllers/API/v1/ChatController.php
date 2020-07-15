@@ -311,23 +311,23 @@ class ChatController extends BaseController
     public function readAllMessage(Request $request)
     {
         $returnData = [];
+        $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
             'conversation_id' => 'required'
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
-        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($request) {
-            $query->where('user_id', $request->user_id);
+        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
+            $query->where('user_id', $user->id);
         })->find($request->conversation_id);
 
         if (!$hasConversation) {
             return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
         }
         try {
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $request->user_id)->update(['status' => 1]);
+            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
