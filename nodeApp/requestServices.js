@@ -18,5 +18,14 @@ module.exports = {
         Accept: 'application/json'
       }
     });
+  },
+
+  readAll: function (conversation, token) {
+    return axios.post(base_url + `chats/message/read-all`, conversation.room, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
   }
 };

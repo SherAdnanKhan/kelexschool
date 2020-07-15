@@ -27,8 +27,14 @@ module.exports = function (server) {
       callback && callback();
     });
 
-    socket.on('onReadAll', (data, callback) => {
-      io.to(data.room).emit('readAll', data);
+    socket.on('onReadAll', async (data, token, callback) => {
+      try {
+        await requestServices.readAll(data, token);
+        io.to(data.room).emit('readAll', data);
+      } catch (ex) {
+        //console.log(ex);
+      }
+
       callback && callback();
     });
 
