@@ -22,8 +22,9 @@ module.exports = function (server) {
         await requestServices.readMessage(message_id, user, token);
         io.to(data.message.conversation_id).emit('read', data);
       } catch (ex) {
-        //console.log(ex);
+        console.log(ex.message);
       }
+
       callback && callback();
     });
 
@@ -32,7 +33,7 @@ module.exports = function (server) {
         await requestServices.readAll(data, token);
         io.to(data.room).emit('readAll', data);
       } catch (ex) {
-        //console.log(ex);
+        console.log(ex);
       }
 
       callback && callback();
