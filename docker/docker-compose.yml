@@ -28,7 +28,8 @@ services:
     # volumes:
     #   - meuzm-app-dir:/meuzm-app
     environment:
-      DB_HOST: "my-mysql"
+      DB_CONNECTION: "mysql"
+      DB_HOST: "127.0.0.1"
       DB_USERNAME: "root"
       DB_PASSWORD: "imgettingitroot"
       DB_PORT: "3307"

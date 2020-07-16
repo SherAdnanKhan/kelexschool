@@ -9,6 +9,8 @@ COPY . /meuzm-app
 
 RUN composer install
 RUN chmod -R 0777 "/meuzm-app/storage"
+RUN chmod +x "/meuzm-app/docker/docker-entrypoint-staging.sh"
+RUN docker-php-ext-install pdo pdo_mysql
 EXPOSE 8000
 
-ENTRYPOINT [“/meuzm-app/app/Console/docker-entrypoint-staging.sh”]
+ENTRYPOINT [ "/bin/sh","/meuzm-app/docker/docker-entrypoint-staging.sh" ]
