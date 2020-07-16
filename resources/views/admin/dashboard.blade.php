@@ -1,5 +1,7 @@
 @extends('admin.layouts.template')
 
+@section('page_title', 'Dashboard')
+
 @section('content')
 <div class="kt-widget17">
   <div class="kt-widget17__stats">
