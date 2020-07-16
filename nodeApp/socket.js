@@ -17,6 +17,11 @@ module.exports = function (server) {
       callback && callback();
     });
 
+    socket.on('onType', (data) => {
+      console.log(data);
+      io.to(data.conversation_id).emit('typing', data);
+    });
+
     socket.on('onRead', async (message_id, user, data, token, callback) => {
       try {
         await requestServices.readMessage(message_id, user, token);
