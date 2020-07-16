@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         //$this->call(ArtSeeder::class);
-        $this->call(PrivacyPageTableSeeder::class);
+        //$this->call(PrivacyPageTableSeeder::class);
+        $this->call(AdminSeeder::class);
     }
 }
