@@ -1,4 +1,5 @@
 @extends('admin.layouts.auth_template')
+@section('page_title', 'Sign In')
 
 @section('content')
 
@@ -30,7 +31,8 @@
           <div class="kt-login__head">
             <h3 class="kt-login__title">Sign In To Admin</h3>
           </div>
-          <form class="kt-form" action="">
+          <form class="kt-form login-form" method="POST" action="{{ route('admin.login') }}">
+            @csrf
             <div class="input-group">
               <input class="form-control" type="text" placeholder="Email" name="email" autocomplete="off">
             </div>
@@ -58,7 +60,7 @@
             <h3 class="kt-login__title">Sign Up</h3>
             <div class="kt-login__desc">Enter your details to create your account:</div>
           </div>
-          <form class="kt-form" action="{{ route('login') }}">
+          <form class="kt-form">
             @csrf
             <div class="input-group">
               <input class="form-control" type="text" placeholder="Fullname" name="fullname">

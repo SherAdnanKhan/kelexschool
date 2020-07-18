@@ -16,10 +16,10 @@
             </g>
           </svg> </span>
         <span class="kt-widget17__subtitle">
-          Delivered
+          Users
         </span>
         <span class="kt-widget17__desc">
-          15 New Paskages
+          {{$user_count}} Total Users
         </span>
       </div>
       <div class="kt-widget17__item">
@@ -32,10 +32,10 @@
             </g>
           </svg> </span>
         <span class="kt-widget17__subtitle">
-          Ordered
+          Feels
         </span>
         <span class="kt-widget17__desc">
-          72 New Items
+          8 Total Feels
         </span>
       </div>
       <div class="kt-widget17__item">
@@ -48,10 +48,10 @@
             </g>
           </svg> </span>
         <span class="kt-widget17__subtitle">
-          Reported
+          Posts
         </span>
         <span class="kt-widget17__desc">
-          72 Support Cases
+          {{$post_count}} Total posts
         </span>
       </div>
       <div class="kt-widget17__item">
@@ -64,10 +64,10 @@
             </g>
           </svg> </span>
         <span class="kt-widget17__subtitle">
-          Arrived
+          Popular Feel
         </span>
         <span class="kt-widget17__desc">
-          34 Upgraded Boxes
+          Gold
         </span>
       </div>
     </div>

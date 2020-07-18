@@ -32,23 +32,23 @@
   <div class="kt-aside-menu-wrapper kt-grid__item kt-grid__item--fluid" id="kt_aside_menu_wrapper">
     <div id="kt_aside_menu" class="kt-aside-menu " data-ktmenu-vertical="1" data-ktmenu-scroll="1" data-ktmenu-dropdown-timeout="500">
       <ul class="kt-menu__nav ">
-        <li class="kt-menu__item  kt-menu__item--active" aria-haspopup="true">
-          <a href="#" class="kt-menu__link ">
+        <li class="kt-menu__item  {{ (stripos($_SERVER['REQUEST_URI'], '/dashboard') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
+          <a href="{{action('Admin\DashboardController@index')}}" class="kt-menu__link ">
             <span class="kt-menu__link-icon">
               <i class="flaticon2-layers nav-icon"></i>
             </span>
             <span class="kt-menu__link-text">Dashboard</span>
           </a>
         </li>
-        <li class="kt-menu__item" aria-haspopup="true">
-          <a href="#" class="kt-menu__link ">
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/users') !== false)? 'kt-menu__item--active': '' }}"  aria-haspopup="true">
+          <a href="{{action('Admin\UserController@index')}}" class="kt-menu__link ">
             <span class="kt-menu__link-icon">
               <i class="flaticon-users-1 nav-icon"></i>
             </span>
             <span class="kt-menu__link-text">Users</span>
           </a>
         </li>
-        <li class="kt-menu__item" aria-haspopup="true">
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/feel') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
           <a href="#" class="kt-menu__link ">
             <span class="kt-menu__link-icon">
               <i class="flaticon2-contrast nav-icon"></i>

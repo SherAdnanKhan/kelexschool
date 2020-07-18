@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('page_title') | {{ trans('common.project_name') }}</title>
+    <title>@yield('page_title') | {{ env('APP_NAME') }}</title>
 
 
     <!-- Fonts -->
@@ -87,8 +87,7 @@
 		<!--end::Global Theme Bundle -->
 
 		<!--begin::Page Scripts(used by this page) -->
-		<script src="{{ asset('assets/js/pages/custom/login/login-general.js') }}" type="text/javascript"></script>
-
+		<script src="{{ asset('pages/js/login.js') }}" type="text/javascript"></script>
 		<!--end::Page Scripts -->
   </body>
 
