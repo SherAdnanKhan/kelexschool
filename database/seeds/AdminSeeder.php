@@ -11,12 +11,14 @@ class AdminSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('admin')->insert([
+        \DB::table('admins')->delete();
+        DB::table('admins')->insert([
+            'id' => 1,
             'username'=> 'Administrator',
             'first_name'=> 'Admin',
             'last_name'=> 'Meuzum',
             'email'=> 'admin@meuzum.com',
-            'password'=> bcrypt('admin@123'),
+            'password'=> \Hash::make("admin@123"),
         ]);
     }
 }

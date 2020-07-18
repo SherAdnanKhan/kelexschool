@@ -16,15 +16,26 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome_static');
 });
+Route::namespace('Admin')->group(function () {
+    Route::group(['prefix' => 'admin'], function () { 
+        Route::get('/', function() {
+            return redirect('admin/login');
+        });
 
-Route::group(['prefix' => 'admin'], function () { 
-    Route::get('/', function() {
-        return redirect('admin/login');
-    });
-    Route::get('/login', function() {
-        return view('admin.auth.login');
-    });
-    Route::get('/dashboard', function() {
-        return view('admin.dashboard');
+        Route::namespace('Auth')->group(function () {
+            Route::get('/login', 'LoginController@showLogin')->name('admin.login');
+            Route::post('/login', 'LoginController@login');
+            Route::post('/logout', 'LoginController@logout')->name('admin.logout');
+        });
+        
+        Route::group(['middleware' => 'auth:admin'], function () {
+            Route::get('/dashboard', 'DashboardController@index')->name('admin.dashboard');
+            
+            Route::group(['prefix' => 'users'], function () {
+                Route::get('/', 'UserController@index');
+                Route::get('/get-data', 'UserController@getUserData');                
+            });
+
+        });
     });
 });

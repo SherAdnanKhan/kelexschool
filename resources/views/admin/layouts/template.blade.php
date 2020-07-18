@@ -59,6 +59,7 @@
 
           <div class="kt-content  kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor" id="kt_content">
             <!-- begin:: Content -->
+            @yield('content_head')
             <div class="kt-container  kt-container--fluid  kt-grid__item kt-grid__item--fluid">
               <div class="kt-portlet__body kt-portlet__body--fit">
                 @yield('content')
@@ -118,6 +119,8 @@
     <script src="{{ asset('assets/js/scripts.bundle.js')}}" type="text/javascript"></script>
     <script src="{{ asset('assets/js/pages/dashboard.js')}}" type="text/javascript"></script>
     <!--end::Page Scripts -->
+
+    @yield('pageJs')
   </body>
 
   

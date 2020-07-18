@@ -19,7 +19,7 @@
     <div class="kt-header__topbar-wrapper" data-toggle="dropdown" data-offset="0px,0px">
       <div class="kt-header__topbar-user">
         <span class="kt-header__topbar-welcome kt-hidden-mobile">Hi,</span>
-        <span class="kt-header__topbar-username kt-hidden-mobile">Sean</span>
+        <span class="kt-header__topbar-username kt-hidden-mobile">{{ Auth::user()->username }}</span>
         <img class="kt-hidden" alt="Pic" src="{{ asset('assets/media/users/300_25.jpg') }}" />
 
         <!--use below badge element instead the user avatar to display username's first letter(remove kt-hidden class to display it) -->
@@ -41,7 +41,15 @@
           </div>
         </a>
         <div class="kt-notification__custom kt-space-between">
-          <a href="custom/user/login-v2.html" target="_blank" class="btn btn-label btn-label-brand btn-sm btn-bold">Sign Out</a>
+        <a class="btn btn-label btn-label-brand btn-sm btn-bold" href="{{ route('admin.logout') }}"
+            onclick="event.preventDefault();
+                              document.getElementById('logout-form').submit();">
+            <i class="icon-logout"></i> Logout
+        </a>
+        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+          <!-- <a href="custom/user/login-v2.html" target="_blank" class="btn btn-label btn-label-brand btn-sm btn-bold">Sign Out</a> -->
         </div>
       </div>
       <!--end: Navigation -->
