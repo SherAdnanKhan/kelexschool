@@ -16,6 +16,7 @@ var KTUserListDatatable = function () {
         source: {
           read: {
             url: base_url + '/admin/users/get-data',
+            method: 'GET'
           },
         },
         pageSize: 10, // display 20 records per page
@@ -60,14 +61,14 @@ var KTUserListDatatable = function () {
           var output = '';
           if (avatars.length > 0) {
             output = '<div class="kt-user-card-v2">\
-								<div class="kt-user-card-v2__pic">\
-									<img src="assets/media/users/' + avatars[0] + '" alt="photo">\
-								</div>\
-								<div class="kt-user-card-v2__details">\
-									<a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
-									<span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
-								</div>\
-							</div>';
+                        <div class="kt-user-card-v2__pic">\
+                          <img src="'+ avatars[0].path + ' alt="photo">\
+                        </div>\
+                        <div class="kt-user-card-v2__details">\
+                          <a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
+                          <span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
+                        </div>\
+                      </div>';
           } else {
             var stateNo = KTUtil.getRandomInt(0, 6);
             var states = [
@@ -82,22 +83,24 @@ var KTUserListDatatable = function () {
             var state = states[stateNo];
 
             output = '<div class="kt-user-card-v2">\
-								<div class="kt-user-card-v2__pic">\
-									<div class="kt-badge kt-badge--xl kt-badge--' + state + '">' + data.username.substring(0, 1) + '</div>\
-								</div>\
-								<div class="kt-user-card-v2__details">\
-									<a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
-									<span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
-								</div>\
-							</div>';
+                      <div class="kt-user-card-v2__pic">\
+                        <div class="kt-badge kt-badge--xl kt-badge--' + state + '">' + data.username.substring(0, 1) + '</div>\
+                      </div>\
+                      <div class="kt-user-card-v2__details">\
+                        <a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
+                        <span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
+                      </div>\
+                    </div>';
           }
 
           return output;
         }
       }, {
         field: 'posts_count',
-        title: 'Country',
-        width: 20,
+        title: 'Total Posts',
+      }, {
+        field: 'galleries_count',
+        title: 'Total Galleries',
       }, {
         field: 'Actions',
         width: 80,
@@ -107,22 +110,13 @@ var KTUserListDatatable = function () {
         overflow: 'visible',
         template: function () {
           return '\
-							<div class="dropdown">\
-								<a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-icon-md" data-toggle="dropdown">\
-									<i class="flaticon-more-1"></i>\
-								</a>\
-								<div class="dropdown-menu dropdown-menu-right">\
-									<ul class="kt-nav">\
-										<li class="kt-nav__item">\
-											<a href="#" class="kt-nav__link">\
-												<i class="kt-nav__link-icon flaticon2-expand"></i>\
-												<span class="kt-nav__link-text">View</span>\
-											</a>\
-										</li>\
-									</ul>\
-								</div>\
-							</div>\
-						';
+              <div class="dropdown">\
+                <a href="#" class="kt-nav__link">\
+                <i class="kt-nav__link-icon flaticon2-expand"></i>\
+                <span class="kt-nav__link-text">View</span>\
+                </a>\
+              </div>\
+            ';
         },
       }]
     });
