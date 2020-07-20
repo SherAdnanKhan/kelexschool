@@ -79,6 +79,16 @@ class User extends Authenticatable
         return $this->hasMany(Post::class, 'created_by', 'id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'created_by', 'id');
+    }
+
+    public function feeds()
+    {
+        return $this->hasMany(Feed::class, 'created_by', 'id');
+    }
+
     public function postsImagesRandom()
     {
         return $this->hasMany(Image::class, 'created_by', 'id')->where('image_type', 'App\Models\Post');

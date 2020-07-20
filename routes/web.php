@@ -35,6 +35,10 @@ Route::namespace('Admin')->group(function () {
                 Route::get('/', 'UserController@index');
                 Route::get('/get-data', 'UserController@getUserData');                
             });
+            Route::group(['prefix' => 'user'], function () {
+                Route::get('/{user_slug}', 'UserController@show');
+            });
+            
 
         });
     });

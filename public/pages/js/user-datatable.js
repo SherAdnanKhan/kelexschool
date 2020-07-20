@@ -20,9 +20,9 @@ var KTUserListDatatable = function () {
           },
         },
         pageSize: 10, // display 20 records per page
-        //serverPaging: true,
-        //serverFiltering: true,
-        //serverSorting: true,
+        // serverPaging: true,
+        // serverFiltering: true,
+        // serverSorting: true,
       },
 
       // layout definition
@@ -45,7 +45,7 @@ var KTUserListDatatable = function () {
       columns: [{
         field: 'id',
         title: '#',
-        sortable: false,
+        sortable: true,
         width: 20,
         // selector: {
         //   class: 'kt-checkbox--solid'
@@ -62,10 +62,10 @@ var KTUserListDatatable = function () {
           if (avatars.length > 0) {
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ avatars[0].path + ' alt="photo">\
+                          <img src="'+ avatars[0].path + '" alt="photo">\
                         </div>\
                         <div class="kt-user-card-v2__details">\
-                          <a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
+                          <a href="'+ base_url + '/admin/user/' + data.slug + '" class="kt-user-card-v2__name">' + data.username + '</a>\
                           <span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
                         </div>\
                       </div>';
@@ -87,7 +87,7 @@ var KTUserListDatatable = function () {
                         <div class="kt-badge kt-badge--xl kt-badge--' + state + '">' + data.username.substring(0, 1) + '</div>\
                       </div>\
                       <div class="kt-user-card-v2__details">\
-                        <a href="#" class="kt-user-card-v2__name">' + data.username + '</a>\
+                        <a href="'+ base_url + '/admin/user/' + data.slug + '" class="kt-user-card-v2__name">' + data.username + '</a>\
                         <span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
                       </div>\
                     </div>';
@@ -108,10 +108,10 @@ var KTUserListDatatable = function () {
         sortable: false,
         autoHide: false,
         overflow: 'visible',
-        template: function () {
+        template: function (data) {
           return '\
               <div class="dropdown">\
-                <a href="#" class="kt-nav__link">\
+                <a href="'+ base_url + '/admin/user/' + data.slug + '" class="kt-nav__link">\
                 <i class="kt-nav__link-icon flaticon2-expand"></i>\
                 <span class="kt-nav__link-text">View</span>\
                 </a>\
