@@ -268,8 +268,17 @@ class PrivacyController extends BaseController
             $galleries = Gallery::where('created_by', $request->user_id)->get();
             foreach($galleries as $gallery) {
                 $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $request->user_id)->first();
-                if (!isset($user_fav_gallery)) {
+                $check_gallery_io = UserIOGallery::where([ ['user_id', $request->user_id], ['gallery_id', $gallery->id] ])->first();
+                if (!isset($user_fav_gallery) && !isset($check_gallery_io)) {
                     $user->favGalleries()->attach($gallery->id); 
+                }
+            }
+            $galleries = Gallery::where('created_by', $user->id)->get();
+            foreach($galleries as $gallery) {
+                $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $user->id)->first();
+                $check_gallery_io = UserIOGallery::where([ ['user_id', $user->id], ['gallery_id', $gallery->id] ])->first();
+                if (!isset($user_fav_gallery) && !isset($check_gallery_io)) {
+                    $other_user->favGalleries()->attach($gallery->id); 
                 }
             }
             $returnData['privacy'] = $privacy_check;
