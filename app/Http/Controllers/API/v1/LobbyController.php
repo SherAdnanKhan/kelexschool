@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Auth;
 use App\Models\Fav;
 use App\Models\User;
+use App\Models\Post;
 
 
 class LobbyController extends BaseController
@@ -14,7 +15,7 @@ class LobbyController extends BaseController
     public function index()
     {
         $returnData = [];
-        $faved_user_ids = [];
+        $faved_user_ids= $faved_gallery_ids = [];
         $user = Auth::guard('api')->user();
         $faved_users = Fav::where('faved_by', $user->id)->get(['faved_to']);
 
@@ -33,7 +34,7 @@ class LobbyController extends BaseController
                                     {
                                         return $query->orderBy('created_at','DESC');
                                     },
-                                    'favGalleries.posts.image',  
+                                    'favGalleries.posts.image',
                                     'favGalleries.image',
                                     'favGalleries.posts.strokeUsers', 
                                     'favGalleries.posts.has_stroke', 
@@ -42,11 +43,19 @@ class LobbyController extends BaseController
                                     'favGalleries.posts.user.art.parent' ])
                                     //->withCount(['favGalleries.posts.has_stroke'])
                                     ->find($user->id);
+        $user_faved_galleries = User::with(['favGalleries'])->find($user->id);
+        foreach($user_faved_galleries->favGalleries as $faved_gallery){
+            array_push($faved_gallery_ids, $faved_gallery->id);
+        }
+        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();
+                                
+        //$faved_galleries_posts = 
         $user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         $returnData['all_faved_users'] = $all_faved_users;
         $returnData['user_with_faved_galleries'] = $user_with_faved_galleries;
         $returnData['user_with_count_unread'] = $user_unread_msg->unread_messages_count;
-
-        return $this->sendResponse($returnData, '');
+        $returnData['faved_galleries_posts'] = $faved_galleries_posts; 
+        
+        return $this->sendResponse($returnData, 'Lobby Data');
     }
 }

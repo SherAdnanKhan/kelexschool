@@ -50,6 +50,11 @@ class Post extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function gallery()
+    {
+        return $this->belongsTo(Gallery::class, 'gallery_id');
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'post_id');
