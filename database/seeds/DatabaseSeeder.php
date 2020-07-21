@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         //$this->call(ArtSeeder::class);
         //$this->call(PrivacyPageTableSeeder::class);
-        $this->call(AdminSeeder::class);
+        //$this->call(AdminSeeder::class);
+        $this->call(FeelSeeder::class);
     }
 }

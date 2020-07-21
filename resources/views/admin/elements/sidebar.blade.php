@@ -48,8 +48,8 @@
             <span class="kt-menu__link-text">Users</span>
           </a>
         </li>
-        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/feel') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
-          <a href="#" class="kt-menu__link ">
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/feels') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
+          <a href="{{action('Admin\FeelController@index')}}" class="kt-menu__link ">
             <span class="kt-menu__link-icon">
               <i class="flaticon2-contrast nav-icon"></i>
             </span>

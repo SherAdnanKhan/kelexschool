@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // Class Definition
 var KTLoginGeneral = function () {
@@ -7,11 +7,11 @@ var KTLoginGeneral = function () {
 
   var showErrorMsg = function (form, type, msg) {
     var alert = $('<div class="alert alert-' + type + ' alert-dismissible" role="alert">\
-			<div class="alert-text">'+ msg + '</div>\
-			<div class="alert-close">\
+      <div class="alert-text">'+ msg + '</div>\
+      <div class="alert-close">\
                 <i class="flaticon2-cross kt-icon-sm" data-dismiss="alert"></i>\
             </div>\
-		</div>');
+    </div>');
 
     form.find('.alert').remove();
     alert.prependTo(form);

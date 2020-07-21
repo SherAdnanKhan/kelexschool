@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome_static');
 });
+
 Route::namespace('Admin')->group(function () {
     Route::group(['prefix' => 'admin'], function () { 
         Route::get('/', function() {
@@ -29,6 +30,7 @@ Route::namespace('Admin')->group(function () {
         });
         
         Route::group(['middleware' => 'auth:admin'], function () {
+            
             Route::get('/dashboard', 'DashboardController@index')->name('admin.dashboard');
             
             Route::group(['prefix' => 'users'], function () {
@@ -38,7 +40,12 @@ Route::namespace('Admin')->group(function () {
             Route::group(['prefix' => 'user'], function () {
                 Route::get('/{user_slug}', 'UserController@show');
             });
-            
+            Route::group(['prefix' => 'feels'], function () {
+                Route::get('/', 'FeelController@index');
+                Route::post('/', 'FeelController@create');
+                Route::get('view/{id}', 'FeelController@show');
+                Route::post('update/{id}', 'FeelController@update');
+            });
 
         });
     });
