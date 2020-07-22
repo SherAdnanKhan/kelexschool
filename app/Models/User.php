@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->belongsTo(Art::class, 'art_id');
     }
 
+    public function feel()
+    {
+        return $this->belongsTo(Feel::class, 'feel_id');
+    }
+
     public function galleries()
     {
         return $this->hasMany(Gallery::class, 'created_by', 'id');
