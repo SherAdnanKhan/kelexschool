@@ -22,11 +22,11 @@ class UserController extends BaseController
         $returnData = [];
         try {
             if($request->has('name')) {
-                $users = User::with(['avatars', 'art.parent', 'postsImagesRandom' => function($query) {
+                $users = User::with(['avatars', 'feel', 'art.parent', 'postsImagesRandom' => function($query) {
                     return $query->limit(4);
                 }])->where('username', 'LIKE', '%'.$request->name.'%')->get();
             }else {
-              $users = User::with(['avatars', 'art.parent', 'postsImagesRandom' => function($query) {
+              $users = User::with(['avatars', 'feel', 'art.parent', 'postsImagesRandom' => function($query) {
                 return $query->limit(4);
                 }])->all();  
             }
@@ -84,7 +84,7 @@ class UserController extends BaseController
             $user->bio = $request->bio;
             $user->update();
 
-            $return_user = User::with('avatars')->find($user->id);
+            $return_user = User::with('avatars', 'feel')->find($user->id);
             $returnData['user'] = $return_user;
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
