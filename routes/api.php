@@ -115,6 +115,10 @@ Route::namespace('API')->group(function () {
                     Route::post('/uninvite-only', 'PrivacyController@uninviteUserToInviteOnly');
                 });
 
+                Route::group(['prefix' => 'feel'], function () {
+                    Route::get('/', 'FeelController@index');
+                });
+
             });
         });
     });

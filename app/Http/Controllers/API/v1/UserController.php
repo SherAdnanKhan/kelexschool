@@ -44,22 +44,23 @@ class UserController extends BaseController
     {
         $user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
-            'feel_color' => 'required',
+            'feel_id' => 'required',
         ]);
    
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-            $user->feel_color = $request->feel_color;
+            $user->feel_id = $request->feel_id;
             $user->update();
 
             $user_feel = new UserFeel();
             $user_feel->user_id = $user->id;
-            $user_feel->feel = $request->feel_color;
+            $user_feel->feel = 'red';
+            $user_feel->feel_id = $request->feel_id;
             $user_feel->save();
 
-            $return_user = User::with('avatars')->find($user->id);
+            $return_user = User::with(['avatars', 'feel'])->find($user->id);
             $returnData['user'] = $return_user;
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
