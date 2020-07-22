@@ -19,7 +19,7 @@ class CommentController extends BaseController
      */
     public function index($post_id)
     {
-        $returnData['comments'] = $comments = Comment::with('user.avatars')->where('post_id', $post_id)->get();
+        $returnData['comments'] = $comments = Comment::with('user.avatars', 'user.feel')->where('post_id', $post_id)->get();
         return $this->sendResponse($returnData, 'comments');
     }
 
@@ -61,7 +61,7 @@ class CommentController extends BaseController
             $comment->created_by = $user->id;
             $comment->save(); 
 
-            $comment_return = Comment::with('user.avatars')->find($comment->id);
+            $comment_return = Comment::with('user.avatars', 'user.feel')->find($comment->id);
             $returnData['comment'] = $comment_return;
 
         }catch(QueryException $ex) {

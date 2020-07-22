@@ -214,7 +214,7 @@ class MzFlashController extends BaseController
             array_push($collective_users_ids, $faved_user_id);
             }
         }
-        $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent')->whereIn('id', $collective_users_ids)->get();
+        $returnData['faves'] = $all_faved_users = User::with('avatars', 'feel', 'art.parent')->whereIn('id', $collective_users_ids)->get();
         return $this->sendResponse($returnData, 'User faves and SPRFVs List');
 		}
 

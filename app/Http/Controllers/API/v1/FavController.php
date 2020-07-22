@@ -28,14 +28,14 @@ class FavController extends BaseController
         }
         if($request->has('username')) {
             if ($request->username != '') {
-                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
+                $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
             }
             else {
-                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+                $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
             }
         }
         else {
-            $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+            $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
         }        
         $returnData['faves'] = $all_faved_users;
         return $this->sendResponse($returnData, 'User faves');
@@ -52,14 +52,14 @@ class FavController extends BaseController
         }
         if($request->has('username')) {
             if ($request->username != '') {
-                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
+                $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->where('username', 'LIKE', '%'.$request->username.'%')->get();
             }
             else {
-                $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+                $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
             }
         }
         else {
-            $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
+            $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $faved_user_ids)->get();
         }
 
         $returnData['faves'] = $all_faved_users;

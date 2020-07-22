@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Feed extends Model
 {
-    protected $fillable = [ 'feed', 'parent_id', 'created_by', 'feel_color' ];
+    protected $fillable = [ 'feed', 'parent_id', 'created_by', 'feel_color', 'feel_id' ];
 
     protected $hidden = [
         'updated_at', 'deleted_at'
@@ -16,7 +16,10 @@ class Feed extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
+    public function feel()
+    {
+        return $this->belongsTo(Feel::class, 'feel_id');
+    }
     public function parent()
     {
         return $this->belongsTo(Feed::class,'parent_id');

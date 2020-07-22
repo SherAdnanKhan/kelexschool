@@ -22,7 +22,7 @@ class LobbyController extends BaseController
         foreach($faved_users as $faved_user) {
             array_push($faved_user_ids, $faved_user->faved_to);
         }
-        $all_faved_users = User::with('avatars', 'art.parent')->withCount('posts')->whereIn('id', $faved_user_ids)->get();
+        $all_faved_users = User::with('avatars', 'feel', 'art.parent')->withCount('posts')->whereIn('id', $faved_user_ids)->get();
 
         //faved gallery images
         //$user_with_faved_galleries = User::with('avatars', 'art.parent', 'favGalleries.posts.image', 'favGalleries.image')->where('id', $user->id)->get();
@@ -47,7 +47,7 @@ class LobbyController extends BaseController
         foreach($user_faved_galleries->favGalleries as $faved_gallery){
             array_push($faved_gallery_ids, $faved_gallery->id);
         }
-        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();
+        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();
                                 
         //$faved_galleries_posts = 
         $user_unread_msg = User::withCount('unreadMessages')->find($user->id);

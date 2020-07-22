@@ -50,7 +50,7 @@ class ChatController extends BaseController
         $returnData = $userIds = $conversation_all_ids =[];
         $user = Auth::guard('api')->user();
         array_push($userIds, $user->id);
-        $user_chatable_check = User::with('avatars', 'art.parent')->where('slug', $user_slug)->first();
+        $user_chatable_check = User::with('feel', 'avatars', 'art.parent')->where('slug', $user_slug)->first();
         if( !$user_chatable_check ) {
             return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
         }
@@ -68,14 +68,14 @@ class ChatController extends BaseController
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
         $coversation_id = $hasConversation->id;
-        $hasConversation['messages'] = Message::with('messagesLogs', 'user.avatars')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
 
             $new_conversation = Conversation::find($conversation->id);
-            $new_conversation['messages'] = Message::with('messagesLogs', 'user.avatars')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
         }
         else {
@@ -107,7 +107,7 @@ class ChatController extends BaseController
         }
         $user = User::with('avatars')->findOrFail($request->user_id);
         try {
-            $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
+            $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->find($request->conversation_id);
             if (!$hasConversation) {
@@ -117,6 +117,7 @@ class ChatController extends BaseController
             $message->message = $request->message;
             $message->conversation_id = $request->conversation_id;
             $message->feel_color = $user->feel_color;
+            $message->feel_id = $user->feel_id;
             $message->created_by = $user->id;
             $message->type = isset($request->message_type) ? $request->message_type : 0;
             $message->url = isset($request->url) ? $request->url : null; 
@@ -133,11 +134,12 @@ class ChatController extends BaseController
                     $message_log->message_id = $message->id;
                     $message_log->user_id = $participant->id;
                     $message_log->feel_color = $participant_user->feel_color;
+                    $message_log->feel_id = $participant_user->feel_id;
                     $message_log->save();
                 }
             }
 
-            $newly_mesage = Message::with('messagesLogs', 'user.avatars')->find($message->id);
+            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->find($message->id);
             $returnData['message'] = $newly_mesage;
             $returnData['user'] = $user;
 
@@ -158,7 +160,7 @@ class ChatController extends BaseController
     public function show($id)
     {
         $user = Auth::guard('api')->user();
-        $hasConversation = Conversation::with('messages.user.avatars')->whereHas('participants', function($query) use ($user) {
+        $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })->find($id);
 
@@ -284,7 +286,7 @@ class ChatController extends BaseController
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No User exists']);
         }
 
-        $message = Message::with('messagesLogs')->find($message_id);
+        $message = Message::with('messagesLogs.feel')->find($message_id);
         if (!isset($message)) {
             return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
         }
@@ -298,7 +300,7 @@ class ChatController extends BaseController
             $messages_logs->read_at = now();
             $messages_logs->update();
 
-            $message = Message::with('messagesLogs')->find($message_id);
+            $message = Message::with('messagesLogs.feel')->find($message_id);
             $returnData['message'] = $message;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);

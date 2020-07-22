@@ -64,7 +64,7 @@ class PrivacyController extends BaseController
             }
         }
         
-        $returnData['faves'] = $all_faved_users = User::with('avatars', 'art.parent', 'galleries')->whereIn('id', $user_list_ids)->get();
+        $returnData['faves'] = $all_faved_users = User::with('avatars', 'feel', 'art.parent', 'galleries')->whereIn('id', $user_list_ids)->get();
         return $this->sendResponse($returnData, 'users lists');
         
     }

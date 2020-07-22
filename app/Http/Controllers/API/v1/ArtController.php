@@ -62,7 +62,7 @@ class ArtController extends BaseController
         try {
             $user->art_id = $request->art_id;
             $user->update();
-            $updated_user = User::with('art.parent')->find($user->id);
+            $updated_user = User::with('feel', 'art.parent')->find($user->id);
             $returnData['user'] = $updated_user;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);

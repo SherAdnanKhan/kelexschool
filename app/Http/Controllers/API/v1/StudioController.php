@@ -23,7 +23,7 @@ class StudioController extends BaseController
     {
         $returnData = [];
         $auth_user = Auth::guard('api')->user();
-        $user = User::with('avatars', 'art.parent')->withCount('posts')->find($auth_user->id);
+        $user = User::with('avatars', 'feel', 'art.parent')->withCount('posts')->find($auth_user->id);
         $returnData['user'] = $user;
         $fav_by_count = Fav::where('faved_to', $user->id)->get()->count();
         $fav_to_count = Fav::where('faved_by', $user->id)->get()->count();
@@ -109,7 +109,7 @@ class StudioController extends BaseController
         $returnData = $gallery_privacy = $other_privacy = $gallery_invites_only = [];
         $is_allowed = $is_sprfvs = 0;
         $my_user = Auth::guard('api')->user();
-        $user = User::with('avatars', 'galleries.image', 'galleries.privacy', 'galleries.posts.image' ,'art.parent')->withCount('posts')->where('slug', $slug)->first();
+        $user = User::with('avatars', 'feel', 'galleries.image', 'galleries.privacy', 'galleries.posts.image' ,'art.parent')->withCount('posts')->where('slug', $slug)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }

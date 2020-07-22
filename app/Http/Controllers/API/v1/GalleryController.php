@@ -213,7 +213,7 @@ class GalleryController extends BaseController
                     'galleries.posts' => function($query) {
                         $query->where('post_type', '!=', 2);
                     },
-                    'galleries.posts.image', 'art.parent', 'avatars'])
+                    'galleries.posts.image', 'art.parent', 'avatars', 'feel'])
                     ->Has('galleries.posts', '>', 0)
                     ->where('art_id', $user->art_id)
                     ->where('id', '!=', $user->id)
@@ -228,7 +228,7 @@ class GalleryController extends BaseController
                         'galleries.posts' => function($query) {
                             $query->where('post_type', '!=', 2);
                         },
-                        'galleries.posts.image', 'art.parent', 'avatars'])
+                        'galleries.posts.image', 'art.parent', 'avatars', 'feel'])
                         ->Has('galleries.posts', '>', 0)
                         ->where('id', '!=', $user->id)
                         ->get()->random(1);
@@ -281,7 +281,7 @@ class GalleryController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-        $user_fav_galleries = User::with('favGalleries.image', 'favGalleries.user.avatars')->find($request->user_id);
+        $user_fav_galleries = User::with('favGalleries.image', 'favGalleries.user.avatars', 'favGalleries.user.feel')->find($request->user_id);
         if (!isset($user_fav_galleries)) {
             return $this->sendError('Not a user', ['error'=>'Not a user', 'message' => 'not a user']);
         }
