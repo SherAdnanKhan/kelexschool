@@ -46,8 +46,6 @@ class AuthController extends BaseController
             $input['last_login'] = now();
             $user = User::create($input);
             $returnData['token'] =  $user->createToken('User Register')->accessToken;
-            
-            $returnData['user'] =  $user;
 
             if($request->has('avatar')) {
                 $image_recived = $this->uploadImage($request->avatar, "artists/");
@@ -58,11 +56,10 @@ class AuthController extends BaseController
                 $image->image_id = $user->id;
                 $image->created_by = $user->id;
                 $image->save();
-
-                $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
-                $returnData['user']['avatars'] = $avatar;
-
             }
+
+            $user = User::with(['avatars', 'feel', 'art.parent'])->find($user->id);               
+            $returnData['user'] =  $user;
             //default galleries on registeration
             $galleries = config('constants.galleries');
             foreach($galleries as $gallery) {
@@ -71,6 +68,7 @@ class AuthController extends BaseController
                 $new_gallery->created_by = $user->id;
                 $new_gallery->save();
             }
+            
             \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
 
         }catch(QueryException $ex) {
@@ -97,11 +95,11 @@ class AuthController extends BaseController
         try {
             $field = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
             if (Auth::attempt([$field => $request->email, 'password' => $request->password])){ 
-                $user = Auth::user();                 
+                $user = Auth::user();
+                $user = User::with(['avatars', 'feel', 'art.parent'])->find($user->id);               
                 $avatar = Image::where('image_type', 'App\Models\User')->where('created_by', $user->id)->get();
                 $returnData['token'] =  $user->createToken('User Login')-> accessToken; 
                 $returnData['user'] = $user;
-                $returnData['user']['avatars'] = $avatar;
        
                 return $this->sendResponse($returnData, 'User login successfully.');
             } 
