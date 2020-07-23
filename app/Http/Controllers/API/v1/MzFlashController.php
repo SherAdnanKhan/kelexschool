@@ -24,7 +24,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
 
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->where('created_by', $user->id)
                 ->paginate(env('PAGINATE_LENGTH', 15));
@@ -41,7 +41,7 @@ class MzFlashController extends BaseController
         if(!isset($other_user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->where('created_by', $other_user->id)
                 ->paginate(env('PAGINATE_LENGTH', 15));
@@ -99,6 +99,7 @@ class MzFlashController extends BaseController
             $feed->parent_id = $request->feed_id ? $request->feed_id : null;
             $feed->feed_type = $feedtype;
             $feed->feel_color = $user->feel_color;
+            $feed->feel_id = $user->feel_id;
             $feed->created_by = $user->id;
             $feed->save(); 
 
@@ -119,7 +120,7 @@ class MzFlashController extends BaseController
                 $image->created_by = $user->id;
                 $image->save();
             }
-            $new_feed = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed->id);
+            $new_feed = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image', 'limited_comments.user.avatars')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed->id);
             $returnData['feed'] = $new_feed;
             //$returnData['feed']['image'] = $image;
 
@@ -142,7 +143,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserFavesIds($user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -158,7 +159,7 @@ class MzFlashController extends BaseController
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserFavesIds($user->id);
         array_push($faved_users_ids, $user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -173,7 +174,7 @@ class MzFlashController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $faved_users_ids = $this->UserSprfvsIds($user->id);
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $faved_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -194,7 +195,7 @@ class MzFlashController extends BaseController
             array_push($collective_users_ids, $faved_user_id);
           }
         } 
-        $feeds = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image', 'limited_comments.user.avatars')
+        $feeds = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image', 'limited_comments.user.avatars')
                 ->withCount('comments', 'strokeUsers', 'has_stroke')
                 ->whereIn('created_by', $collective_users_ids)
                 ->orderBy('created_at', 'DESC')
@@ -227,7 +228,7 @@ class MzFlashController extends BaseController
     public function view($feed_id, Request $request)
     {
       $returnData = [];
-      $returnData['feed'] = $feed = Feed::with('user.avatars', 'image', 'parent.user.avatars', 'parent.image')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed_id);
+      $returnData['feed'] = $feed = Feed::with('user.avatars', 'user.feel', 'feel', 'image', 'parent.user.avatars', 'parent.user.feel', 'parent.image')->withCount('comments', 'strokeUsers', 'has_stroke')->find($feed_id);
       if(!isset($feed)) {
         return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
       }
@@ -282,7 +283,7 @@ class MzFlashController extends BaseController
             $feed_comment->feed_id = $request->feed_id;
             $feed_comment->save(); 
 
-            $new_feed_comment = FeedComment::with('user.avatars')->find($feed_comment->id);
+            $new_feed_comment = FeedComment::with('user.avatars', 'user.feel')->find($feed_comment->id);
             $returnData['feed_comment'] = $new_feed_comment;
 
         }catch(QueryException $ex) {
