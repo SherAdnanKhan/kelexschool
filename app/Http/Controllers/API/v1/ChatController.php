@@ -68,14 +68,14 @@ class ChatController extends BaseController
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
         $coversation_id = $hasConversation->id;
-        $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
 
             $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
-            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
         }
         else {
@@ -139,7 +139,7 @@ class ChatController extends BaseController
                 }
             }
 
-            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->find($message->id);
+            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
             $returnData['message'] = $newly_mesage;
             $returnData['user'] = $user;
 
@@ -160,7 +160,7 @@ class ChatController extends BaseController
     public function show($id)
     {
         $user = Auth::guard('api')->user();
-        $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+        $hasConversation = Conversation::with('messages.user.avatars', 'messages.feel', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })->find($id);
 
@@ -168,7 +168,7 @@ class ChatController extends BaseController
             return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
         }
         try {
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
+            $messages_logs = MessageLog::with('feel')->where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -286,7 +286,7 @@ class ChatController extends BaseController
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No User exists']);
         }
 
-        $message = Message::with('messagesLogs.feel')->find($message_id);
+        $message = Message::with('messagesLogs.feel', 'feel')->find($message_id);
         if (!isset($message)) {
             return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
         }
@@ -300,7 +300,7 @@ class ChatController extends BaseController
             $messages_logs->read_at = now();
             $messages_logs->update();
 
-            $message = Message::with('messagesLogs.feel')->find($message_id);
+            $message = Message::with('messagesLogs.feel', 'feel')->find($message_id);
             $returnData['message'] = $message;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
