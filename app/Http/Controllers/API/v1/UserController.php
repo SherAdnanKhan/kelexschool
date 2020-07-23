@@ -100,7 +100,7 @@ class UserController extends BaseController
         $user = Auth::guard('api')->user();
         $returnData = [];
 
-        $user_feel_list = UserFeel::where('user_id', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
+        $user_feel_list = UserFeel::with('feel')->where('user_id', $user->id)->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['user_feel_list'] = $user_feel_list;
         return $this->sendResponse($returnData, 'User feel list.');
     }

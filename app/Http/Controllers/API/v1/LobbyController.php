@@ -23,36 +23,13 @@ class LobbyController extends BaseController
             array_push($faved_user_ids, $faved_user->faved_to);
         }
         $all_faved_users = User::with('avatars', 'feel', 'art.parent')->withCount('posts')->whereIn('id', $faved_user_ids)->get();
-
-        //faved gallery images
-        //$user_with_faved_galleries = User::with('avatars', 'art.parent', 'favGalleries.posts.image', 'favGalleries.image')->where('id', $user->id)->get();
-        $user_with_faved_galleries = User::with([ 'favGalleries' => function ($query)
-                                    {
-                                        return $query->orderBy('updated_at','DESC');
-                                    },
-                                    'favGalleries.posts' => function ($query)
-                                    {
-                                        return $query->orderBy('created_at','DESC');
-                                    },
-                                    'favGalleries.posts.image',
-                                    'favGalleries.image',
-                                    'favGalleries.posts.strokeUsers', 
-                                    'favGalleries.posts.has_stroke', 
-                                    'favGalleries.posts.comments', 
-                                    'favGalleries.posts.user.avatars', 
-                                    'favGalleries.posts.user.art.parent' ])
-                                    //->withCount(['favGalleries.posts.has_stroke'])
-                                    ->find($user->id);
         $user_faved_galleries = User::with(['favGalleries'])->find($user->id);
         foreach($user_faved_galleries->favGalleries as $faved_gallery){
             array_push($faved_gallery_ids, $faved_gallery->id);
         }
-        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();
-                                
-        //$faved_galleries_posts = 
+        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();                                
         $user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         $returnData['all_faved_users'] = $all_faved_users;
-        $returnData['user_with_faved_galleries'] = $user_with_faved_galleries;
         $returnData['user_with_count_unread'] = $user_unread_msg->unread_messages_count;
         $returnData['faved_galleries_posts'] = $faved_galleries_posts; 
         

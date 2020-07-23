@@ -176,14 +176,14 @@ class PostController extends BaseController
         $returnData = $other_privacy = [];
         $my_user = Auth::guard('api')->user();
         $is_sprfvs = 0;
-        $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars')->withCount('strokeUsers')->first();
+        $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars', 'user.feel')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
         $returnData['post'] = $post;
         $returnData['has_stroke'] = $hasStroke = $my_user->strokePosts()->where('id', $post->id)->exists();
         
-        $other_posts = Post::with('image', 'user.art.parent', 'user.avatars')->where([ ['gallery_id', '=', $post->gallery_id], ['id', '!=', $post->id] ])->get();
+        $other_posts = Post::with('image', 'user.art.parent', 'user.avatars', 'user.feel')->where([ ['gallery_id', '=', $post->gallery_id], ['id', '!=', $post->id] ])->get();
         $returnData['other_posts'] = $other_posts;
         //Check if sprfvs already 
         $check_user_sprfvs = UserSprvfsIO::where([
@@ -243,7 +243,7 @@ class PostController extends BaseController
     public function ncomm($slug, Request $request)
     {
         $returnData = [];
-        $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars')->withCount('strokeUsers')->first();
+        $post = Post::where('slug', $slug)->with('image', 'user.art.parent', 'user.avatars', 'user.feel')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
