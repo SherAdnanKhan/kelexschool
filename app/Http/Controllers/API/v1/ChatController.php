@@ -26,7 +26,7 @@ class ChatController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
-        $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.art.parent')
+        $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent')
         ->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })
@@ -64,7 +64,7 @@ class ChatController extends BaseController
             array_push($conversation_all_ids, $coveration->id);
         }
         //return $conversation_all_ids;
-        $hasConversation = Conversation::with('participants.avatars')->whereHas('participants', function($query) use ($user_chatable_check) {
+        $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
             $query->where('user_id', $user_chatable_check->id);
         })->whereIn('id', $conversation_all_ids)->first();
         $coversation_id = $hasConversation->id;
@@ -74,7 +74,7 @@ class ChatController extends BaseController
             $conversation = Conversation::create(['name', 'room_com']);
             $conversation->participants()->attach($userIds);
 
-            $new_conversation = Conversation::find($conversation->id);
+            $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
             $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
         }
