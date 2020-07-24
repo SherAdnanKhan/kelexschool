@@ -10,7 +10,7 @@ class Message extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [ 'message', 'conversation_id', 'feel_color', 'created_by', 'feel_id'];
+    protected $fillable = [ 'message', 'conversation_id', 'created_by', 'feel_id'];
     protected $dates = [ 'deleted_at' ];
 
     public function user()

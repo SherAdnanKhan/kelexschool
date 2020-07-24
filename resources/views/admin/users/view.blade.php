@@ -108,7 +108,7 @@
               </div>
               <div class="kt-widget__details">
                 <div class="kt-section__content kt-section__content--solid">
-                  {{ $user->feel_color }}
+                  {{ $user->feel->name }}
                 </div>
               </div>
             </div>
