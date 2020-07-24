@@ -28,7 +28,7 @@ class FeelController extends BaseController
       $feel =[];
         try {
             $feel = Feel::find($id);
-            if($request->has('feel_icon')) {
+            if($request->has('feel_icon') && isset($request->feel_icon)) {
                 $image_recived = $this->uploadImage($request->feel_icon, "feels/");
                 $feel->image_path = $image_recived['image_path'];
             }

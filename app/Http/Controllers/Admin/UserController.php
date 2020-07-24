@@ -19,7 +19,7 @@ class UserController extends BaseController
     {
         $data = [];
         $user_count = User::count();
-        $data = User::with('avatars')->withCount('posts', 'galleries')->paginate();
+        $data = User::with('avatars')->withCount('posts', 'galleries')->get();
 
         return response()->json($data);
     }
