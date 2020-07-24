@@ -19,15 +19,7 @@ class UserController extends BaseController
     {
         $data = [];
         $user_count = User::count();
-        $data['meta'] = [
-          "page"=> 1,
-          "pages"=> 1,
-          "perpage"=> -1,
-          "total"=> $user_count,
-          "sort"=> "asc",
-          "field"=> "id"
-        ];
-        $data['data'] = User::with('avatars')->withCount('posts', 'galleries')->get();
+        $data = User::with('avatars')->withCount('posts', 'galleries')->paginate();
 
         return response()->json($data);
     }

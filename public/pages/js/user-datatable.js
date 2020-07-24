@@ -20,9 +20,9 @@ var KTUserListDatatable = function () {
           },
         },
         pageSize: 10, // display 20 records per page
-        // serverPaging: true,
-        // serverFiltering: true,
-        // serverSorting: true,
+        serverPaging: true,
+        serverFiltering: true,
+        serverSorting: true,
       },
 
       // layout definition

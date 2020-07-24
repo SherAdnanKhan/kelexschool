@@ -39,7 +39,9 @@
 .feel-icon-img {
   width: 100%;
 }
-
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
 @media only screen and (orientation: landscape){
   .color-changer-screen .center-center .feel-img div{
     width: 16vh;
