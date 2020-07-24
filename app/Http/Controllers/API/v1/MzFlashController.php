@@ -98,7 +98,6 @@ class MzFlashController extends BaseController
             $feed->feed = $request->feed;
             $feed->parent_id = $request->feed_id ? $request->feed_id : null;
             $feed->feed_type = $feedtype;
-            $feed->feel_color = $user->feel_color;
             $feed->feel_id = $user->feel_id;
             $feed->created_by = $user->id;
             $feed->save(); 

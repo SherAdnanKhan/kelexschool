@@ -116,7 +116,6 @@ class ChatController extends BaseController
             $message = new Message;
             $message->message = $request->message;
             $message->conversation_id = $request->conversation_id;
-            $message->feel_color = $user->feel_color;
             $message->feel_id = $user->feel_id;
             $message->created_by = $user->id;
             $message->type = isset($request->message_type) ? $request->message_type : 0;
@@ -133,7 +132,6 @@ class ChatController extends BaseController
                     $message_log->conversation_id = $request->conversation_id;
                     $message_log->message_id = $message->id;
                     $message_log->user_id = $participant->id;
-                    $message_log->feel_color = $participant_user->feel_color;
                     $message_log->feel_id = $participant_user->feel_id;
                     $message_log->save();
                 }
