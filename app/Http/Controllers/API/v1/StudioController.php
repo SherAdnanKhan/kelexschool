@@ -301,10 +301,8 @@ class StudioController extends BaseController
                 array_push($gallery_invites_only, $my_gallery->id);
             }
         }
-        
 
         $returnData['gallery_invited_list'] = $gallery_invites_only;
-        //return $gallery_privacy;
         return $this->sendResponse($returnData, 'User studio');
         
     }

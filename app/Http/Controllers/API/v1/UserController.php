@@ -56,7 +56,6 @@ class UserController extends BaseController
 
             $user_feel = new UserFeel();
             $user_feel->user_id = $user->id;
-            $user_feel->feel = 'red';
             $user_feel->feel_id = $request->feel_id;
             $user_feel->save();
 

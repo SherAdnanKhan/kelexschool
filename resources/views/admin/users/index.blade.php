@@ -48,10 +48,23 @@
 <div class="kt-portlet kt-portlet--mobile">
   <div class="kt-portlet__body kt-portlet__body--fit">
 
-    <!--begin: Datatable -->
+    <!-- begin: Datatable -->
     <div class="kt-datatable" id="kt_apps_user_list_datatable"></div>
-
     <!--end: Datatable -->
+
+    <!-- <table class="table table-striped table-bordered table-hover user-table" id="user_table" data-order-column-dir="asc" data-order-column-no="2">
+      <thead>
+        <tr role="row" class="heading">
+          <th>#</th>
+          <th width="20%"> User Name</th>
+          <th width="20%"> Category 2</th>
+          <th width="20%"> Category 3</th>
+          <th width="12%" class="text-center"> </th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table> -->
   </div>
 </div>
 
@@ -60,5 +73,10 @@
 @endsection
 
 @section('pageJs')
+<!-- <script>
+  $(document).ready(function() {
+    $('#user_table').KTDatatable();
+} );
+ </script> -->
 <script src="{{ asset('pages/js/user-datatable.js') }}" type="text/javascript"></script>
 @endsection('pageJs')
