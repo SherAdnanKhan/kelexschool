@@ -108,11 +108,17 @@ class UserController extends BaseController
     {
         $user = Auth::guard('api')->user();
         $returnData = [];
-        $user->online = $status;
-        $user->last_login = now();
-        $user->update();
+        try {
+            $user->online = $status;
+            $user->last_login = now();
+            $user->update();
 
-        $user = User::with(['avatars', 'feel', 'art.parent'])->find($user->id);               
+            $user = User::with(['avatars', 'feel', 'art.parent'])->find($user->id); 
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
         $returnData['user'] =  $user;
 
         return $this->sendResponse($returnData, 'User update online status');
