@@ -104,6 +104,7 @@ Route::namespace('API')->group(function () {
                     Route::put('user-bio', 'UserController@updateUserBio');
                     Route::get('unread-message-count', 'ChatController@unreadCount');
                 });
+                Route::get('user/online-status/{status}', 'UserController@updateStatusOnline');
                 Route::group(['prefix' => 'user/privacy'], function () {
                     Route::get('/', 'PrivacyController@index');
                     Route::post('/', 'PrivacyController@store');

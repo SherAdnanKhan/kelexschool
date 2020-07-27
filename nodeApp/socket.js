@@ -5,20 +5,25 @@ module.exports = function (server) {
   const requestServices = require('./requestServices');
 
   io.sockets.on('connection', function (socket) {
-    console.log('user connected');
+
     socket.on('join', (data, callback) => {
       socket.join(data.room);
       callback && callback();
     });
 
-    socket.on('joinUser', (user, callback) => {
+    socket.on('joinUser', async (user, token, callback) => {
       socket.join(user.slug);
       console.log('user join user ' + user.slug);
+      try {
+        await requestServices.setOnlineStatus(1, token);
+      } catch (ex) {
+        console.log(ex.message);
+      }
+
       callback && callback();
     });
 
     socket.on('onType', (data) => {
-      console.log(data);
       io.to(data.conversation_id).emit('typing', data);
     });
 
@@ -66,7 +71,13 @@ module.exports = function (server) {
       io.to(user.slug).emit('notifyColrChange', user);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async (token) => {
+      console.log(token);
+      try {
+        await requestServices.setOnlineStatus(0, token);
+      } catch (ex) {
+        console.log(ex.message);
+      }
       console.log('disconnected');
     });
 
