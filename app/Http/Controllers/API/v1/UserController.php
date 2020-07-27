@@ -103,4 +103,19 @@ class UserController extends BaseController
         $returnData['user_feel_list'] = $user_feel_list;
         return $this->sendResponse($returnData, 'User feel list.');
     }
+
+    public function updateStatusOnline($status)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $user->online = $status;
+        $user->last_login = now();
+        $user->update();
+
+        $user = User::with(['avatars', 'feel', 'art.parent'])->find($user->id);               
+        $returnData['user'] =  $user;
+
+        return $this->sendResponse($returnData, 'User update online status');
+        
+    }
 }
