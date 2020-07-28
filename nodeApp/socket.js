@@ -1,5 +1,6 @@
 module.exports = function (server) {
 
+  let online_users = [];
   const io = require('socket.io')(server);
   io.origins('*:*');
   const requestServices = require('./requestServices');
@@ -15,12 +16,13 @@ module.exports = function (server) {
       socket.user = user.slug;
       socket.token = token;
       console.log('user join user ' + user.slug);
+      online_users.push(user.slug);
       try {
         await requestServices.setOnlineStatus(1, token);
       } catch (ex) {
         console.log(ex.message);
       }
-
+      io.emit('onlineUsers', online_users);
       callback && callback();
     });
 
@@ -46,7 +48,6 @@ module.exports = function (server) {
       } catch (ex) {
         console.log(ex);
       }
-
       callback && callback();
     });
 
@@ -76,11 +77,15 @@ module.exports = function (server) {
     socket.on('disconnect', async () => {
       var connectionMessage = socket.user + ' Disconnected from Socket ';
       console.log(connectionMessage);
-      try {
-        await requestServices.setOnlineStatus(0, socket.token);
-      } catch (ex) {
-        console.log(ex.message);
+      if (socket.user != undefined) {
+        online_users = online_users.filter(slug => slug !== socket.user);
+        try {
+          await requestServices.setOnlineStatus(0, socket.token);
+        } catch (ex) {
+          console.log(ex.message);
+        }
       }
+      io.emit('onlineUsers', online_users);
     });
 
     socket.on('onUserNotifications', (data, notification_type, callback) => {
