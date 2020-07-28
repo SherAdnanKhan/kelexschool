@@ -9,6 +9,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Storage;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -32,6 +33,10 @@ class User extends Authenticatable
         'password', 'remember_token', 'created_at', 'updated_at', 'deleted_at'
     ];
 
+    protected $dates = [
+        'last_login'
+    ];
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -52,6 +57,13 @@ class User extends Authenticatable
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+
+    public function getLastLoginAttribute($value)
+    {
+        return (new Carbon($value))->diffForHumans(['options' => Carbon::JUST_NOW | Carbon::ONE_DAY_WORDS | Carbon::TWO_DAY_WORDS]);
+        //return Carbon::createFromFormat('Y-m-d H:i:s', $value);
     }
 
     public function avatars()
