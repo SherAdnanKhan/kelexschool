@@ -3,7 +3,9 @@ const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/../.env' });
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
+app.use(cors);
 const server = require('http').createServer(app);
 require('./socket')(server);
 
