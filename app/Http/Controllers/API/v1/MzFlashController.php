@@ -69,7 +69,7 @@ class MzFlashController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-        $image = null;
+        $image = $last_parent = null;
 
         $validator = Validator::make($request->all(), [
             'feed' => 'max:200',
@@ -82,10 +82,11 @@ class MzFlashController extends BaseController
 
         try {
             if (isset($request->feed_id)) {
-                $isFeed = Feed::find($request->feed_id);
+                $isFeed = Feed::with('parent')->find($request->feed_id);
                 if(!isset($isFeed)) {
                     return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
                 }
+                $last_parent = $this->last_parent_feed_id($isFeed->parent_id, $isFeed->id);
             }
             $feedtype = 0;
             if($request->has('image')) {
@@ -94,9 +95,10 @@ class MzFlashController extends BaseController
             else if ($request->has('video')) {
                 $feedtype  = 2;
             }
+            
             $feed = new Feed;
             $feed->feed = $request->feed;
-            $feed->parent_id = $request->feed_id ? $request->feed_id : null;
+            $feed->parent_id = $last_parent;
             $feed->feed_type = $feedtype;
             $feed->feel_id = $user->feel_id;
             $feed->created_by = $user->id;
@@ -233,6 +235,24 @@ class MzFlashController extends BaseController
       }
       $returnData['comments'] = $comments = FeedComment::with('user.avatars')->where('feed_id', $feed_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
       return $this->sendResponse($returnData, 'Feed with comment');
+    }
+
+    public function last_parent_feed_id($parent_id, $feed_id)
+    {
+        if($parent_id == null) {
+            return $feed_id;
+        }else {
+            $feed = Feed::with('parent')->find($parent_id);
+            if(isset($feed->parent)) {
+                return $this->last_parent_feed_id($feed->parent_id, $feed->id); 
+            }else {
+                return $feed->id;
+            }
+        }
+
+        
+        
+
     }
 
     /**
