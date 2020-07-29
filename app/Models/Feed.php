@@ -25,6 +25,11 @@ class Feed extends Model
         return $this->belongsTo(Feed::class,'parent_id');
     }
 
+    public function parents() 
+    {
+        return $this->belongsTo(Feed::class,'parent_id')->with('parent');
+    }
+
     public function children()
     {
         return $this->hasMany(self::class, 'parent_id');
