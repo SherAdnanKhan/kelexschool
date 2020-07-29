@@ -86,6 +86,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'post'], function () {
                     Route::post('/stroke', 'PostController@makeStroke');
+                    Route::post('/update/{id}', 'PostController@update');
                     Route::post('/unstroke', 'PostController@unStroke');
                     Route::get('/ncomm/{slug}', 'PostController@ncomm');
                     Route::delete('/{id}', 'PostController@destroy');
