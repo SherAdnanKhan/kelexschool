@@ -310,7 +310,18 @@ class PostController extends BaseController
      */
     public function destroy($id)
     {
-        //
+        $my_user = Auth::guard('api')->user();
+
+        $post = Post::findOrFail($id);
+        if (!isset($post)) {
+            return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+        }
+
+        if($post->created_by != $my_user->id) {
+            return $this->sendError('Unauthorized Post', ['error'=>'Unauthorized post', 'message' => 'This post is unauthorized to you']);
+        }
+        $post->delete();
+        return $this->sendResponse([], 'Post Deleted Sucessfully');
     }
 
     public function ncomm($slug, Request $request)
