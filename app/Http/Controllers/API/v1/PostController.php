@@ -378,4 +378,30 @@ class PostController extends BaseController
 
         return $this->sendResponse($returnData, 'Post report');
     }
+
+    public function critiqueStatus($id, Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $post = Post::with('image')->find($id);
+        if (!isset($post)) {
+            return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+        }
+        if($post->created_by != $user->id) {
+            return $this->sendError('Unauthorized Post', ['error'=>'Unauthorized post', 'message' => 'This post is unauthorized to you']);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'critiques_status' => 'required',
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        $post->critiques_status = $request->critiques_status;
+        $post->update();
+
+        $returnData['post'] = Post::with('image')->find($id);
+        return $this->sendResponse($returnData, 'Post Crtiquies status update');
+    }
 }
