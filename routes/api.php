@@ -88,6 +88,8 @@ Route::namespace('API')->group(function () {
                     Route::post('/stroke', 'PostController@makeStroke');
                     Route::post('/update/{id}', 'PostController@update');
                     Route::post('/unstroke', 'PostController@unStroke');
+                    Route::post('/share/{id}', 'PostController@share');
+                    Route::post('/report/{id}', 'PostController@report');
                     Route::get('/ncomm/{slug}', 'PostController@ncomm');
                     Route::delete('/{id}', 'PostController@destroy');
                 });

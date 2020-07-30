@@ -12,7 +12,7 @@ class Post extends Model
     use HasSlug, SoftDeletes;
     
     protected $fillable = [
-        'title', 'slug', 'description', 'created_by', 'gallery_id', 'post_type'
+        'title', 'slug', 'description', 'created_by', 'gallery_id', 'post_type', 'shares', 'reports'
     ];
     protected $hidden = [ 'deleted_by', 'deleted_at', 'updated_at', 'updated_by' ];
     protected $dates = [ 'deleted_at' ];

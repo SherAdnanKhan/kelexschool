@@ -338,4 +338,44 @@ class PostController extends BaseController
                                             ->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         return $this->sendResponse($returnData, 'Post Ncomm');
     }
+
+    public function share(Resquest $request, $id)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $post = Post::with('image')->find($id);
+        if (!isset($post)) {
+            return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+        }
+        //share post on chat as a message
+        //type = 1 for repost, type = 2 for chat message
+        // if($request->has('post_share_type')) {
+        //     if ($request->post_share_type == 1) {
+
+        //     }
+        // }
+        $post->increment('shares');
+        $post->update();
+
+
+        $this->NotificationStore('App\Models\Post', $post->id, 'Post shared', $user->id);
+
+        return $this->sendResponse($returnData, 'Post shared');
+    }
+
+    public function report($id)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $post = Post::with('image')->find($id);
+        if (!isset($post)) {
+            return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+        }
+        $post->increment('reports');
+        $post->update();
+
+        $this->NotificationStore('App\Models\Post', $post->id, 'Post report', $user->id);
+
+        return $this->sendResponse($returnData, 'Post report');
+    }
 }

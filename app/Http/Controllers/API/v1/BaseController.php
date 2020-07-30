@@ -9,6 +9,7 @@ use Storage;
 use App\Models\UserSprvfsIO;
 use App\Models\UserPrivacy;
 use App\Models\Fav;
+use App\Models\UserLog;
 
 class BaseController extends Controller
 {
@@ -219,5 +220,18 @@ class BaseController extends Controller
             array_push($user_list_ids, $user_list->created_by);
         }
         return $user_list_ids;
+    }
+
+    public function NotificationStore($activity_type, $activity_id, $description, $user_id)
+    {
+        $user_log = new UserLog();
+        $user_log->activity_type = $activity_type;
+        $user_log->activity_id = $activity_id;
+        $user_log->description = $description;
+        $user_log->user_id = $user_id;
+        $user_log->save();
+
+        return;
+
     }
 }
