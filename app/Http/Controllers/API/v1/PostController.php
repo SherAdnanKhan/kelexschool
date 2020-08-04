@@ -339,7 +339,7 @@ class PostController extends BaseController
         return $this->sendResponse($returnData, 'Post Ncomm');
     }
 
-    public function share(Resquest $request, $id)
+    public function share($id, Request $request)
     {
         $user = Auth::guard('api')->user();
         $returnData = [];
