@@ -12,7 +12,10 @@ use App\Models\Image;
 use App\Models\Gallery;
 use App\Models\PrivacyPage;
 use App\Models\UserSprvfsIO;
-
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\MessageLog;
+use App\Models\User;
 
 class PostController extends BaseController
 {
@@ -348,14 +351,54 @@ class PostController extends BaseController
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
         //share post on chat as a message
-        //type = 1 for repost, type = 2 for chat message
-        // if($request->has('post_share_type')) {
-        //     if ($request->post_share_type == 1) {
+        if($request->has('send_to')) {
+            $conversation_all_ids = $userIds = [];
+            $user = Auth::guard('api')->user();
+            $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->get('id');
+            foreach ($coverations_all as $coveration) {
+                array_push($conversation_all_ids, $coveration->id);
+            }
 
-        //     }
-        // }
-        $post->increment('shares');
-        $post->update();
+            $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($request) {
+                $query->where('user_id', $request->send_to);
+            })->whereIn('id', $conversation_all_ids)->first();
+            
+            if (!$hasConversation) {
+                $conversation = Conversation::create(['name', 'room_com']);
+                $conversation->participants()->attach([$user->id, $request->send_to]);
+                $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($request) {
+                    $query->where('user_id', $request->send_to);
+                })->whereIn('id', $conversation_all_ids)->first();
+            }
+            $url = env('FRONT_APP_URL', 'https://staging.meuzm.com/')."dashboard/viewpost/".$post->slug;
+
+            $message = new Message;
+            $message->message = $url;
+            $message->conversation_id = $hasConversation->id;
+            $message->feel_id = $user->feel_id;
+            $message->created_by = $user->id;
+            $message->type = 0;
+            $message->url = null; 
+            $message->save();
+
+            $hasConversation->touch();
+            foreach($hasConversation->participants as $participant) {
+                if($participant->id != $user->id) {
+                    $participant_user = User::find($participant->id);
+                    $message_log = new MessageLog;
+                    $message_log->conversation_id = $hasConversation->id;
+                    $message_log->message_id = $message->id;
+                    $message_log->user_id = $participant->id;
+                    $message_log->feel_id = $participant_user->feel_id;
+                    $message_log->save();
+                }
+            }
+            //return $url;
+        }
+        // $post->increment('shares');
+        // $post->update();
 
 
         $this->NotificationStore('App\Models\Post', $post->id, 'Post shared', $user->id);
