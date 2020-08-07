@@ -16,6 +16,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\User;
+use App\Models\Feed;
 
 class PostController extends BaseController
 {
@@ -500,5 +501,51 @@ class PostController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'Exhibit Reposted');
+    }
+
+    public function toMzflash(Request $request)
+    {
+        $returnData = $image = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'post_id' => 'required',
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        try {
+            $post = Post::with('image')->find($request->post_id);
+            if (!isset($post)) {
+                return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+            }
+            
+            $feed = new Feed;
+            $feed->feed = $post->title." ".$post->description;
+            $feed->parent_id = null;
+            $feed->feed_type = $post->post_type;
+            $feed->feel_id = $user->feel_id;
+            $feed->created_by = $user->id;
+            $feed->save(); 
+
+            if(isset($post->image) && !empty($post->image)) {
+                $image = new Image();
+                $image->title = $post->image->title;
+                $image->path = $post->image->path;
+                $image->image_type = 'App\Models\Feed';
+                $image->image_id = $feed->id;
+                $image->created_by = $user->id;
+                $image->save();
+            }
+
+            $returnData['feed'] = $feed;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Exhibit Reposted to Feed');
     }
 }
