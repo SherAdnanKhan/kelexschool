@@ -90,6 +90,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/unstroke', 'PostController@unStroke');
                     Route::post('/share/{id}', 'PostController@share');
                     Route::post('/report/{id}', 'PostController@report');
+                    Route::post('/repost', 'PostController@repost');
                     Route::post('/critiques/{id}', 'PostController@critiqueStatus');
                     Route::get('/ncomm/{slug}', 'PostController@ncomm');
                     Route::delete('/{id}', 'PostController@destroy');

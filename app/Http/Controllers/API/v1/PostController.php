@@ -447,4 +447,58 @@ class PostController extends BaseController
         $returnData['post'] = Post::with('image')->find($id);
         return $this->sendResponse($returnData, 'Post Crtiquies status update');
     }
+
+    public function repost(Request $request)
+    {
+        $returnData = $image = [];
+        $user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'gallery_id' => 'required',
+            'post_id' => 'required',
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        try {
+            $gallery = Gallery::findOrFail($request->gallery_id);
+            if ($gallery->created_by != $user->id) {
+                return $this->sendError('Invalid Gallery', ['error'=>'Unauthorised Gallery', 'message' => 'Please post into your gallery']);
+            }
+            $post = Post::with('image')->find($request->post_id);
+            if (!isset($post)) {
+                return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+            }
+            $post_new = new Post;
+            $post_new->title = $post->title;
+            $post_new->gallery_id = $request->gallery_id;
+            $post_new->art_id = $post->art_id;
+            $post_new->description = $post->description;
+            $post_new->created_by = $user->id;
+            $post_new->parent_id = $post->id;
+            $post_new->post_type = $post->post_type;
+            $post_new->save(); 
+            //return $post;
+
+            if(isset($post->image) && !empty($post->image)) {
+                $image = new Image();
+                $image->title = $post->image->title;
+                $image->path = $post->image->path;
+                $image->image_type = 'App\Models\Post';
+                $image->image_id = $post_new->id;
+                $image->created_by = $user->id;
+                $image->save();
+            }
+
+            $returnData['post'] = $post_new;
+            $returnData['post']['image'] = $image;
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Exhibit Reposted');
+    }
 }
