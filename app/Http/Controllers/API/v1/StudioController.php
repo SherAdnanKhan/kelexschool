@@ -137,6 +137,14 @@ class StudioController extends BaseController
                 $is_sprfvs = 2;
             }
         }
+
+        //count of user sprfvs
+        $count_user_sprfvs = UserSprvfsIO::where([
+            ['created_to',  $user->id], 
+            ['privacy_type_id', 3], 
+            ['status', 1]
+            ])->get()->count();
+        $returnData['sprfvs_count'] =  $count_user_sprfvs;
         $returnData['is_sprfvs'] = $is_sprfvs;
 
         //Gallery privacy allowed user 
