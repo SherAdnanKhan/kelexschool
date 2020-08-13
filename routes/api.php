@@ -128,6 +128,10 @@ Route::namespace('API')->group(function () {
                     Route::get('/', 'FeelController@index');
                 });
 
+                Route::group(['prefix' => 'vault'], function() {
+                    Route::post('/', 'VaultController@store');
+                });
+
             });
         });
     });
