@@ -16,7 +16,11 @@ class VaultController extends BaseController
 {
     public function index()
     {
-        # code...
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $returnData['vault_posts'] = $vaults = vault::with('post')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->get();
+        $returnData['vault_feeds'] = $vaults = vault::with('post')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
+        return $this->sendResponse($returnData, 'Fetched Vault list');
     }
 
     public function store(Request $request)

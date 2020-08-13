@@ -69,4 +69,9 @@ class Post extends Model
     {
         return $this->belongsToMany(User::class, 'user_stroke_posts')->where('user_id', \Auth::guard('api')->user()->id);
     }
+
+    public function vaults()
+    {
+        return $this->morphMany(Vault::class, 'vault');
+    }
 }
