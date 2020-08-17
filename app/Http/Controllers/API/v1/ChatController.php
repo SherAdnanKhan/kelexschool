@@ -45,43 +45,50 @@ class ChatController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($user_slug, Request $request)
+    public function create($user_slug, $chat_type = null, Request $request)
     {
         $returnData = $userIds = $conversation_all_ids =[];
-        $user = Auth::guard('api')->user();
-        array_push($userIds, $user->id);
-        $user_chatable_check = User::with('feel', 'avatars', 'art.parent')->where('slug', $user_slug)->first();
-        if( !$user_chatable_check ) {
-            return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
-        }
-        $returnData['user'] = $user_chatable_check; 
-        array_push($userIds, $user_chatable_check->id);
-        // Check conversation exists
-        $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get('id');
-        foreach ($coverations_all as $coveration) {
-            array_push($conversation_all_ids, $coveration->id);
-        }
-        //return $conversation_all_ids;
-        $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
-            $query->where('user_id', $user_chatable_check->id);
-        })->whereIn('id', $conversation_all_ids)->first();
-        $coversation_id = $hasConversation->id;
-        $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
-        
-        if( !$hasConversation ) {
-            $conversation = Conversation::create(['name', 'room_com']);
-            $conversation->participants()->attach($userIds);
+        if(isset($chat_type) ) {
+          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->findOrFail($user_slug);
+          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+          $returnData['conversation'] = $hasConversation;
+        }else {
+          $user = Auth::guard('api')->user();
+          array_push($userIds, $user->id);
+          $user_chatable_check = User::with('feel', 'avatars', 'art.parent')->where('slug', $user_slug)->first();
+          if( !$user_chatable_check ) {
+              return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
+          }
+          $returnData['user'] = $user_chatable_check; 
+          array_push($userIds, $user_chatable_check->id);
+          // Check conversation exists
+          $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
+              $query->where('user_id', $user->id);
+          })->get('id');
+          foreach ($coverations_all as $coveration) {
+              array_push($conversation_all_ids, $coveration->id);
+          }
+          //return $conversation_all_ids;
+          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
+              $query->where('user_id', $user_chatable_check->id);
+          })->whereIn('id', $conversation_all_ids)->first();
+          $coversation_id = $hasConversation->id;
+          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+          
+          if( !$hasConversation ) {
+              $conversation = Conversation::create(['name', 'room_com']);
+              $conversation->participants()->attach($userIds);
 
-            $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
-            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
-            $returnData['conversation'] = $new_conversation;
+              $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
+              $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+              $returnData['conversation'] = $new_conversation;
+          }
+          else {
+              $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
+              $returnData['conversation'] = $hasConversation;
+          }
         }
-        else {
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
-            $returnData['conversation'] = $hasConversation;
-        }
+        
         return $this->sendResponse($returnData, 'User One to one Conversation');
 
     }
@@ -155,10 +162,11 @@ class ChatController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
+        $returnData = [];
         $user = Auth::guard('api')->user();
-        $hasConversation = Conversation::with('messages.user.avatars', 'messages.feel', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+        $hasConversation = Conversation::whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
         })->find($id);
 
@@ -166,7 +174,8 @@ class ChatController extends BaseController
             return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
         }
         try {
-            $messages_logs = MessageLog::with('feel')->where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status', 1]);
+          $returnData['conversation'] = $hasConversation;
+          $returnData['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -182,9 +191,29 @@ class ChatController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function groupChat(Request $request)
     {
-        //
+      $returnData = [];
+      $user = Auth::guard('api')->user();
+      $validator = Validator::make($request->all(), [
+        'user_ids' => 'required|array',
+      ]);
+      if ($validator->fails()){
+          return $this->sendError('Validation Error.', $validator->errors());       
+      }
+      try {
+        $conversation = Conversation::create(['name', 'room_com']);
+        $conversation->participants()->attach($user->id);
+        $conversation->participants()->attach($request->user_ids);
+        $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
+        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $returnData['conversation'] = $new_conversation;
+      }catch(QueryException $ex) {
+        return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+      }catch(\Exception $ex) {
+        return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+      }
+      return $this->sendResponse($returnData, 'Group chat created');
     }
 
     /**
