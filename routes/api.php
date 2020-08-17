@@ -32,12 +32,14 @@ Route::namespace('API')->group(function () {
                     Route::get('search', 'ArtController@searchArt');
                 });
                 Route::group(['prefix' => 'chats'], function () {
+                    Route::get('/user/{slug}/{test}', 'ChatController@create');
                     Route::get('/user/{slug}', 'ChatController@create');
                     Route::get('/', 'ChatController@index');
                     Route::post('/message', 'ChatController@store');
                     Route::post('/message/read/{message_id}', 'ChatController@readMessage');
                     Route::post('/message/read-all', 'ChatController@readAllMessage');
                     Route::post('/message/uploads', 'ChatController@uploadOnChat');
+                    Route::post('/group-chat', 'ChatController@groupChat');
                     Route::get('/conversation/{id}', 'ChatController@show');
                 });
                 Route::group(['prefix' => 'comments'], function () {
