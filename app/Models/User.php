@@ -135,6 +135,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(userFeels::class, 'user_id');
     }
+    public function privacyPages()
+    {
+        return $this->belongsToMany(UserPrivacy::class, 'user_id')->where('privacy_type', 'App\Models\PrivacyPage');
+    }
 
+    public function privacyStrq()
+    {
+        return $this->hasOne(UserPrivacy::class, 'user_id')->where('privacy_type', 'App\Models\PrivacyPage')->where('privacy_id', 1);
+    }
 
 }
