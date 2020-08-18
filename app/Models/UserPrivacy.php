@@ -17,4 +17,9 @@ class UserPrivacy extends Model
     {
         return $this->belongsTo(PrivacyType::class, 'privacy_type_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
