@@ -1,6 +1,7 @@
 module.exports = function (server) {
 
   let online_users = [];
+
   const io = require('socket.io')(server);
   io.origins('*:*');
   const requestServices = require('./requestServices');
@@ -15,8 +16,8 @@ module.exports = function (server) {
       socket.join(user.slug);
       socket.user = user.slug;
       socket.token = token;
-      console.log('user join user ' + user.slug);
       online_users.push(user.slug);
+
       try {
         await requestServices.setOnlineStatus(1, token);
       } catch (ex) {
@@ -55,7 +56,10 @@ module.exports = function (server) {
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
         io.to(response.message.conversation_id).emit('recieveMessage', response);
-        io.to(data.reciver).emit('notify', response);
+
+        for (let reciever of data.recievers) {
+          io.to(reciever).emit('notify', response);
+        }
       } catch (ex) {
         callback && callback('Could not send message try again.');
       }
