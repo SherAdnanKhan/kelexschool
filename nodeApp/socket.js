@@ -1,6 +1,7 @@
 module.exports = function (server) {
 
   let online_users = [];
+  const videoRooms = {};
 
   const io = require('socket.io')(server);
   io.origins('*:*');
@@ -10,6 +11,33 @@ module.exports = function (server) {
     socket.on('join', (data, callback) => {
       socket.join(data.room);
       callback && callback();
+    });
+
+    socket.on('joinVideo', (data) => {
+      if (!videoRooms[data.room]) {
+        videoRooms[data.room] = [{ user: data.user, socketId: socket.id }];
+      } else {
+        videoRooms[data.room].push({ user: data.user, socketId: socket.id });
+        socket.emit('userList', videoRooms[data.room].filter(obj => obj.socketId !== socket.id))
+      }
+    });
+
+    socket.on('call-user', data => {
+      socket.to(data.userToCall).emit('call-made', data);
+    });
+
+    socket.on('make-answer', data => {
+      socket.to(data.to).emit('answer-made', data);
+    });
+
+    socket.on('leave-call', data => {
+      if (videoRooms[data.room]) {
+        videoRooms[data.room] = videoRooms[data.room].filter(user => user.socketId !== socket.id);
+
+        videoRooms[data.room].forEach(user => {
+          socket.to(user.socketId).emit('user-leave', { user: data.user, socketId: socket.id });
+        });
+      }
     });
 
     socket.on('joinUser', async (user, token, callback) => {
@@ -79,8 +107,8 @@ module.exports = function (server) {
     });
 
     socket.on('disconnect', async () => {
-      var connectionMessage = socket.user + ' Disconnected from Socket ';
-      console.log(connectionMessage);
+      // var connectionMessage = socket.user + ' Disconnected from Socket ';
+      console.log(`${socket.id} is disconnected`);
       if (socket.user != undefined) {
         online_users = online_users.filter(slug => slug !== socket.user);
         try {
