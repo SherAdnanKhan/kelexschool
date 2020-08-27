@@ -7,6 +7,7 @@ module.exports = function (server) {
   io.origins('*:*');
   const requestServices = require('./requestServices');
 
+
   io.sockets.on('connection', function (socket) {
     socket.on('join', (data, callback) => {
       socket.join(data.room);
@@ -106,9 +107,26 @@ module.exports = function (server) {
       io.to(user.slug).emit('notifyColrChange', user);
     });
 
+    socket.on('logout', () => {
+      for (let room in videoRooms) {
+        videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
+        videoRooms[room].forEach(data => {
+          socket.to(data.socketId).emit('user-leave', socket.id);
+        });
+      }
+    });
+
     socket.on('disconnect', async () => {
       // var connectionMessage = socket.user + ' Disconnected from Socket ';
       console.log(`${socket.id} is disconnected`);
+
+      for (let room in videoRooms) {
+        videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
+        videoRooms[room].forEach(data => {
+          socket.to(data.socketId).emit('user-leave', socket.id);
+        });
+      }
+
       if (socket.user != undefined) {
         online_users = online_users.filter(slug => slug !== socket.user);
         try {
