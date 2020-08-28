@@ -123,7 +123,7 @@ module.exports = function (server) {
       for (let room in videoRooms) {
         videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
         videoRooms[room].forEach(data => {
-          socket.to(data.socketId).emit('user-leave', socket.id);
+          io.to(data.socketId).emit('user-leave', socket.id);
         });
       }
 
