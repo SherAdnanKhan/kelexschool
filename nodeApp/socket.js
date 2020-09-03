@@ -15,6 +15,7 @@ module.exports = function (server) {
     });
 
     socket.on('joinVideo', (data) => {
+      socket.join(data.room);
       if (!videoRooms[data.room]) {
         videoRooms[data.room] = [{ user: data.user, socketId: socket.id }];
       } else {
@@ -34,10 +35,12 @@ module.exports = function (server) {
     socket.on('leave-call', data => {
       if (videoRooms[data.room]) {
         videoRooms[data.room] = videoRooms[data.room].filter(user => user.socketId !== socket.id);
+        socket.to(data.room).emit('user-leave', { user: data.user, socketId: socket.id });
+        socket.leave(data.room)
 
-        videoRooms[data.room].forEach(user => {
-          socket.to(user.socketId).emit('user-leave', { user: data.user, socketId: socket.id });
-        });
+        // videoRooms[data.room].forEach(user => {
+        //   socket.to(user.socketId).emit('user-leave', { user: data.user, socketId: socket.id });
+        // });
       }
     });
 
@@ -122,9 +125,8 @@ module.exports = function (server) {
 
       for (let room in videoRooms) {
         videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
-        videoRooms[room].forEach(data => {
-          io.to(data.socketId).emit('user-leave', socket.id);
-        });
+        io.to(room).emit('user-leave', { socketId: socket.id });
+        socket.leave(room);
       }
 
       if (socket.user != undefined) {
