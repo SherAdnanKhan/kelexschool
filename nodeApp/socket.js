@@ -37,12 +37,12 @@ module.exports = function (server) {
         videoRooms[data.room] = videoRooms[data.room].filter(user => user.socketId !== socket.id);
         socket.to(data.room).emit('user-leave', { user: data.user, socketId: socket.id });
         socket.leave(data.room)
-
-        // videoRooms[data.room].forEach(user => {
-        //   socket.to(user.socketId).emit('user-leave', { user: data.user, socketId: socket.id });
-        // });
       }
     });
+
+    socket.on('on-toggle-microphone', data => {
+      socket.to(data.room).emit('toggle-microphone', data);
+    })
 
     socket.on('joinUser', async (user, token, callback) => {
       socket.join(user.slug);
