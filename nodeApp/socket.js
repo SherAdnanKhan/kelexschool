@@ -24,6 +24,39 @@ module.exports = function (server) {
       }
     });
 
+    socket.on('outgoing-call', data => {
+      const payload = {
+        caller: data.caller,
+        room: data.room,
+        socketId: socket.id
+      };
+
+      data.participants.forEach(participant => {
+        socket.to(participant.slug).emit('incoming-call', payload)
+      });
+    });
+
+    socket.on('accept-call', data => {
+      socket.to(data.callerSocket).emit('call-accepted', data)
+    });
+
+    socket.on('reject-call', data => {
+      socket.to(data.callerSocket).emit('call-rejected', data)
+    });
+
+    socket.on('decline-call', data => {
+      const payload = {
+        caller: data.caller,
+        room: data.room,
+        socketId: socket.id
+      };
+
+      data.participants.forEach(participant => {
+        socket.to(participant.slug).emit('call-declined', payload)
+      });
+      // socket.to(data.callerSocket).emit('call-rejected', data)
+    });
+
     socket.on('call-user', data => {
       socket.to(data.userToCall).emit('call-made', data);
     });
