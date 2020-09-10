@@ -14,14 +14,34 @@ module.exports = function (server) {
       callback && callback();
     });
 
-    socket.on('joinVideo', (data) => {
+    socket.on('joinVideo', (data, error) => {
       socket.join(data.room);
       if (!videoRooms[data.room]) {
         videoRooms[data.room] = [{ user: data.user, socketId: socket.id }];
       } else {
-        videoRooms[data.room].push({ user: data.user, socketId: socket.id });
-        socket.emit('userList', videoRooms[data.room].filter(obj => obj.socketId !== socket.id))
+        if (videoRooms[data.room].some(item => item.user.id === data.user.id)) {
+          error && error('You are already in the room');
+        } else {
+          videoRooms[data.room].push({ user: data.user, socketId: socket.id });
+          socket.emit('userList', videoRooms[data.room].filter(obj => obj.socketId !== socket.id))
+        }
       }
+    });
+
+    socket.on('rejoin-call', (data) => {
+      const payload = {
+        user: data.user,
+        socketId: socket.id
+      };
+
+      socket.join(data.room);
+
+      if (!videoRooms[data.room]) {
+        videoRooms[data.room] = [payload];
+      } else {
+        videoRooms[data.room].push(payload);
+      }
+      socket.to(data.room).emit('call-rejoined', payload);
     });
 
     socket.on('outgoing-call', data => {
@@ -54,7 +74,6 @@ module.exports = function (server) {
       data.participants.forEach(participant => {
         socket.to(participant.slug).emit('call-declined', payload)
       });
-      // socket.to(data.callerSocket).emit('call-rejected', data)
     });
 
     socket.on('call-user', data => {
@@ -69,7 +88,11 @@ module.exports = function (server) {
       if (videoRooms[data.room]) {
         videoRooms[data.room] = videoRooms[data.room].filter(user => user.socketId !== socket.id);
         socket.to(data.room).emit('user-leave', { user: data.user, socketId: socket.id });
-        socket.leave(data.room)
+        socket.leave(data.room);
+
+        if (videoRooms[data.room].length === 0) {
+          delete videoRooms[data.room];
+        }
       }
     });
 
@@ -158,7 +181,6 @@ module.exports = function (server) {
 
       for (let room in videoRooms) {
         videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
-        io.to(room).emit('user-leave', { socketId: socket.id });
         socket.leave(room);
       }
 
