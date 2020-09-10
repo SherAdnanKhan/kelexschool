@@ -85,9 +85,15 @@ module.exports = function (server) {
     });
 
     socket.on('leave-call', data => {
+      console.log('leaved call')
       if (videoRooms[data.room]) {
-        videoRooms[data.room] = videoRooms[data.room].filter(user => user.socketId !== socket.id);
-        socket.to(data.room).emit('user-leave', { user: data.user, socketId: socket.id });
+        videoRooms[data.room] = videoRooms[data.room]
+          .filter(user => user.user.id !== data.user.id);
+
+        socket
+          .to(data.room)
+          .emit('user-leave', { user: data.user, socketId: socket.id });
+
         socket.leave(data.room);
 
         if (videoRooms[data.room].length === 0) {
