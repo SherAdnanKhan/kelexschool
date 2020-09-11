@@ -48,12 +48,12 @@ class ChatController extends BaseController
     public function create($user_slug, $chat_type = null, Request $request)
     {
         $returnData = $userIds = $conversation_all_ids =[];
+        $user = Auth::guard('api')->user();
         if(isset($chat_type) ) {
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->findOrFail($user_slug);
           $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
           $returnData['conversation'] = $hasConversation;
         }else {
-          $user = Auth::guard('api')->user();
           array_push($userIds, $user->id);
           $user_chatable_check = User::with('feel', 'avatars', 'art.parent')->where('slug', $user_slug)->first();
           if( !$user_chatable_check ) {
@@ -72,21 +72,20 @@ class ChatController extends BaseController
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
               $query->where('user_id', $user_chatable_check->id);
           })->whereIn('id', $conversation_all_ids)->first();
-          $coversation_id = $hasConversation->id;
-          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
-          
-          if( !$hasConversation ) {
-              $conversation = Conversation::create(['name', 'room_com']);
-              $conversation->participants()->attach($userIds);
+          //$coversation_id = $hasConversation->id;
+          //$hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        }
+        if( !$hasConversation ) {
+            $conversation = Conversation::create(['name', 'room_com']);
+            $conversation->participants()->attach($userIds);
 
-              $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
-              $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $$conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
-              $returnData['conversation'] = $new_conversation;
-          }
-          else {
-              $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
-              $returnData['conversation'] = $hasConversation;
-          }
+            $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
+            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            $returnData['conversation'] = $new_conversation;
+        }
+        else {
+            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
+            $returnData['conversation'] = $hasConversation;
         }
         
         return $this->sendResponse($returnData, 'User One to one Conversation');
