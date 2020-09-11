@@ -72,8 +72,7 @@ class ChatController extends BaseController
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
               $query->where('user_id', $user_chatable_check->id);
           })->whereIn('id', $conversation_all_ids)->first();
-          //$coversation_id = $hasConversation->id;
-          //$hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+          
         }
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
@@ -84,6 +83,8 @@ class ChatController extends BaseController
             $returnData['conversation'] = $new_conversation;
         }
         else {
+            $coversation_id = $hasConversation->id;
+            $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
         }
