@@ -7,8 +7,37 @@ module.exports = function (server) {
   io.origins('*:*');
   const requestServices = require('./requestServices');
 
+  const removeDuplicates = (users) => {
+    const uniqueUsers = [];
+
+    for (let user of users) {
+      if (!uniqueUsers.some(uniqueUser => uniqueUser.slug === user.slug)) {
+        uniqueUsers.push(user);
+      };
+    };
+    return uniqueUsers;
+  }
 
   io.sockets.on('connection', function (socket) {
+    socket.on('joinUser', async (user, token, callback) => {
+      socket.join(user.slug);
+      socket.user = user.slug;
+      socket.token = token;
+
+      online_users.push({ slug: user.slug, socketId: socket.id, token });
+
+      try {
+        await requestServices.setOnlineStatus(1, token);
+      } catch (ex) {
+        console.log(ex.message);
+      }
+
+      const users = removeDuplicates(online_users);
+
+      io.emit('onlineUsers', users.map(user => user.slug));
+      callback && callback();
+    });
+
     socket.on('join', (data, callback) => {
       socket.join(data.room);
       callback && callback();
@@ -85,7 +114,6 @@ module.exports = function (server) {
     });
 
     socket.on('leave-call', data => {
-      console.log('leaved call')
       if (videoRooms[data.room]) {
         videoRooms[data.room] = videoRooms[data.room]
           .filter(user => user.user.id !== data.user.id);
@@ -105,21 +133,6 @@ module.exports = function (server) {
     socket.on('on-toggle-microphone', data => {
       socket.to(data.room).emit('toggle-microphone', data);
     })
-
-    socket.on('joinUser', async (user, token, callback) => {
-      socket.join(user.slug);
-      socket.user = user.slug;
-      socket.token = token;
-      online_users.push(user.slug);
-
-      try {
-        await requestServices.setOnlineStatus(1, token);
-      } catch (ex) {
-        console.log(ex.message);
-      }
-      io.emit('onlineUsers', online_users);
-      callback && callback();
-    });
 
     socket.on('onType', (data) => {
       io.to(data.conversation_id).emit('typing', data);
@@ -165,24 +178,21 @@ module.exports = function (server) {
 
     socket.on('userLeft', (user) => {
       socket.leave(user.slug);
-      console.log('user left');
     });
 
     socket.on('userColorChange', (user) => {
       io.to(user.slug).emit('notifyColrChange', user);
     });
 
-    socket.on('logout', () => {
-      for (let room in videoRooms) {
-        videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
-        videoRooms[room].forEach(data => {
-          socket.to(data.socketId).emit('user-leave', socket.id);
-        });
-      }
+    socket.on('logout', (data) => {
+      online_users = online_users.filter(user => user.token !== data.token);
+      const users = removeDuplicates(online_users);
+
+      socket.to(data.user.slug).emit('logout-called', { token: data.token });
+      io.emit('onlineUsers', users.map(user => user.slug));
     });
 
     socket.on('disconnect', async () => {
-      // var connectionMessage = socket.user + ' Disconnected from Socket ';
       console.log(`${socket.id} is disconnected`);
 
       for (let room in videoRooms) {
@@ -190,21 +200,25 @@ module.exports = function (server) {
         socket.leave(room);
       }
 
-      if (socket.user != undefined) {
-        online_users = online_users.filter(slug => slug !== socket.user);
+      const userFound = online_users.find(user => user.socketId === socket.id);
+      online_users = online_users.filter(user => user.socketId !== socket.id);
+
+      if (!online_users.some(user => user.slug === userFound.slug)) {
         try {
-          await requestServices.setOnlineStatus(0, socket.token);
+          await requestServices.setOnlineStatus(0, userFound.token);
         } catch (ex) {
           console.log(ex.message);
         }
       }
-      io.emit('onlineUsers', online_users);
+
+      const users = removeDuplicates(online_users);
+
+      io.emit('onlineUsers', users.map(user => user.slug));
     });
 
     socket.on('onUserNotifications', (data, notification_type, callback) => {
       io.to(data.reciever.slug).emit('reciveUserNotifications', data, notification_type);
       callback && callback();
     });
-
   });
 };
