@@ -21,6 +21,13 @@ class UserController extends BaseController
     
     public function searchUsers(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'min:1|regex:/(^[A-Za-z0-9 ]+$)+/'
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
         $returnData = $users =[];
         $my_user = Auth::guard('api')->user();
         try {
