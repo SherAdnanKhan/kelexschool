@@ -111,6 +111,7 @@ Route::namespace('API')->group(function () {
                     Route::get('list-feels', 'UserController@getAllUserFeel');
                     Route::put('feel-color', 'UserController@updateUserFeel');
                     Route::put('user-bio', 'UserController@updateUserBio');
+                    Route::put('user-name', 'UserController@updateUserName');
                     Route::get('unread-message-count', 'ChatController@unreadCount');
                 });
                 Route::get('user/online-status/{status}', 'UserController@updateStatusOnline');
