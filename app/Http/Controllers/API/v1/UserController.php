@@ -161,6 +161,40 @@ class UserController extends BaseController
 
     }
 
+    public function updateUserName(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $check_name_already = User::where('username', $request->username)->first();
+            if(isset($check_name_already)) {
+                if($check_name_already->id == $user->id) {
+                    $user->username = $request->username;
+                    $user->update();
+                }else {
+                    return $this->sendError('user name is already taken', ['error'=>'User name already taken', 'message' => 'User name already taken']);
+                }
+            }else {
+                $user->username = $request->username;
+                $user->update();
+            }
+            $return_user = User::with('avatars', 'feel')->find($user->id);
+            $returnData['user'] = $return_user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'User name updated Successfully.');
+
+    }
+
     public function getAllUserFeel(Request $request)
     {
         $user = Auth::guard('api')->user();
