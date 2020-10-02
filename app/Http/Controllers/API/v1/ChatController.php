@@ -69,7 +69,7 @@ class ChatController extends BaseController
               array_push($conversation_all_ids, $coveration->id);
           }
           //return $conversation_all_ids;
-          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check) {
+          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check, $user) {
               $query->where('user_id', $user_chatable_check->id)->where('user_id', $user->id);
           })->whereIn('id', $conversation_all_ids)->first();
           
