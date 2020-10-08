@@ -12,7 +12,7 @@ use App\Models\Post;
 
 class LobbyController extends BaseController
 {
-    public function index()
+    public function index(Request $request)
     {
         $returnData = [];
         $faved_user_ids= $faved_gallery_ids = [];
@@ -27,7 +27,7 @@ class LobbyController extends BaseController
         foreach($user_faved_galleries->favGalleries as $faved_gallery){
             array_push($faved_gallery_ids, $faved_gallery->id);
         }
-        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->get();                                
+        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->paginate(env('PAGINATE_LENGTH', 15));
         $user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         $returnData['all_faved_users'] = $all_faved_users;
         $returnData['user_with_count_unread'] = $user_unread_msg->unread_messages_count;
