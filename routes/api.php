@@ -65,7 +65,8 @@ Route::namespace('API')->group(function () {
                     Route::get('/faved/gallery', 'GalleryController@favedUsers');
                 });
                 Route::group(['prefix' => 'lobby'], function () {
-                    Route::get('/', 'LobbyController@index');
+                    Route::get('/posts', 'LobbyController@posts');
+                    Route::get('/faved-users', 'LobbyController@allfavedUsers');
                 });
                 Route::group(['prefix' => 'my-studio'], function () {
                     Route::get('/', 'StudioController@getMyStudio');
