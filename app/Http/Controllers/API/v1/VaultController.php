@@ -18,8 +18,8 @@ class VaultController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-        $returnData['vault_posts'] = $vaults = vault::with('post')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->get();
-        $returnData['vault_feeds'] = $vaults = vault::with('post')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
+        $returnData['vault_posts'] = $vaults = vault::with('post.image')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->get();
+        $returnData['vault_feeds'] = $vaults = vault::with('post.image')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
         return $this->sendResponse($returnData, 'Fetched Vault list');
     }
 
@@ -38,7 +38,7 @@ class VaultController extends BaseController
 
         try{
             if($request->vaultable_type == 1) {
-                $post = Post::find($request->vaultable_id);
+                $post = Post::with('image')->find($request->vaultable_id);
                 if (!isset($post)) {
                     return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
                 }
@@ -47,11 +47,12 @@ class VaultController extends BaseController
                 $vault->vaultable_type = 'App\Models\Post';
                 $vault->user_id = $user->id;
                 $vault->save();
+                $returnData['valut'] = $post;
                 return $this->sendResponse($returnData, 'Post Added to Vault');
 
             }
-            else if($request->vaultable_type == 2) {
-                $isFeed = Feed::find($request->vaultable_id);
+            else if($request->vaultable_type == 2 ) {
+                $isFeed = Feed::with('image')->find($request->vaultable_id);
                 if(!isset($isFeed)) {
                     return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
                 }
@@ -60,6 +61,7 @@ class VaultController extends BaseController
                 $vault->vaultable_type = 'App\Models\Feed';
                 $vault->user_id = $user->id;
                 $vault->save();
+                $returnData['valut'] = $isFeed;
                 return $this->sendResponse($returnData, 'Feed Added to Vault');
             }
         }catch(QueryException $ex) {
