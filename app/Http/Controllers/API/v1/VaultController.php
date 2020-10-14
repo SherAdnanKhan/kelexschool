@@ -14,12 +14,12 @@ use App\Models\Vault;
 
 class VaultController extends BaseController
 {
-    public function index()
+    public function index(Request $request)
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-        $returnData['vault_posts'] = $vaults = vault::with('post.image', 'post.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->get();
-        $returnData['vault_feeds'] = $vaults = vault::with('feed.image', 'feed.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
+        $returnData['vault_posts'] = $vaults = vault::with('post.image', 'post.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->paginate(env('PAGINATE_LENGTH', 15));
+        //$returnData['vault_feeds'] = $vaults = vault::with('feed.image', 'feed.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
         return $this->sendResponse($returnData, 'Fetched Vault list');
     }
 
