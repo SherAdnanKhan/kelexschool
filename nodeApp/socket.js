@@ -2,6 +2,7 @@ module.exports = function (server) {
 
   let online_users = [];
   const videoRooms = {};
+  const draws = {};
 
   const io = require('socket.io')(server);
   io.origins('*:*');
@@ -190,6 +191,14 @@ module.exports = function (server) {
 
       socket.to(data.user.slug).emit('logout-called', { token: data.token });
       io.emit('onlineUsers', users.map(user => user.slug));
+    });
+
+    socket.on('draw', payload => {
+      socket.to(payload.room).emit('drawing', payload)
+    });
+
+    socket.on('open draw', payload => {
+      socket.to(payload.room).emit('drawOpened', payload)
     });
 
     socket.on('disconnect', async () => {
