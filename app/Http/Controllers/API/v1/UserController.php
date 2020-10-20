@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserFeel;
 use App\Models\Fav;
 use App\Models\UserSprvfsIO;
+use App\Models\UserReport;
 use Auth;
 use Validator;
 
@@ -222,7 +223,50 @@ class UserController extends BaseController
         }              
         $returnData['user'] =  $user;
 
-        return $this->sendResponse($returnData, 'User update online status');
-        
+        return $this->sendResponse($returnData, 'User update online status');        
+    }
+
+    public function reportUser(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'report_user_id' => 'required',
+            'reason' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+
+            $report_user = User::find($request->report_user_id);
+            if (!isset($report_user)) {
+                return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+            }
+
+            $report = new UserReport();
+            $report->report_to = $request->report_user_id;
+            $report->report_by = $user->id;
+            $report->reason = $request->reason;
+            $report->save();
+
+            //email to reported user
+            $emailData['by_user'] = $by_user = User::with('avatars')->findOrFail($user->id);
+            $emailData['to_user'] = $to_user = User::with('avatars')->findOrFail($request->report_user_id);
+            $emailData['report_reason'] = $request->reason;
+            $emailData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
+
+            \Mail::to($report_user->email)->send(new \App\Mail\ReportUserMail($emailData));
+
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
+        $returnData['report'] =  $report;
+
+        return $this->sendResponse($returnData, 'User is Reported');   
     }
 }
