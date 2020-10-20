@@ -40,6 +40,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/message/read-all', 'ChatController@readAllMessage');
                     Route::post('/message/uploads', 'ChatController@uploadOnChat');
                     Route::post('/group-chat', 'ChatController@groupChat');
+                    Route::post('/invite-people/{coversation_id}', 'ChatController@addPeopleToChat');
                     Route::get('/conversation/{id}', 'ChatController@show');
                 });
                 Route::group(['prefix' => 'comments'], function () {
