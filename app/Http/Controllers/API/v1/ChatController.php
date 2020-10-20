@@ -57,22 +57,21 @@ class ChatController extends BaseController
           array_push($userIds, $user->id);
           $user_chatable_check = User::with('feel', 'avatars', 'art.parent')->where('slug', $user_slug)->first();
           if( !$user_chatable_check ) {
-              return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
+            return $this->sendError('Invalid User', ['error'=>'Unauthorized User', 'message' => 'No user exists']);
           }
           $returnData['user'] = $user_chatable_check; 
           array_push($userIds, $user_chatable_check->id);
           // Check conversation exists
           $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
-              $query->where('user_id', $user->id);
+            $query->where('user_id', $user->id);
           })->get('id');
           foreach ($coverations_all as $coveration) {
-              array_push($conversation_all_ids, $coveration->id);
+            array_push($conversation_all_ids, $coveration->id);
           }
           //return $conversation_all_ids;
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check, $user) {
-              $query->where('user_id', $user_chatable_check->id)->where('user_id', $user->id);
+            $query->where('user_id', $user_chatable_check->id)->where('user_id', $user->id);
           })->whereIn('id', $conversation_all_ids)->first();
-          
         }
         if( !$hasConversation ) {
             $conversation = Conversation::create(['name', 'room_com']);
@@ -167,11 +166,11 @@ class ChatController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         $hasConversation = Conversation::whereHas('participants', function($query) use ($user) {
-            $query->where('user_id', $user->id);
+          $query->where('user_id', $user->id);
         })->find($id);
 
         if (!$hasConversation) {
-            return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+          return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
         }
         try {
           $returnData['conversation'] = $hasConversation;
@@ -199,7 +198,7 @@ class ChatController extends BaseController
         'user_ids' => 'required|array',
       ]);
       if ($validator->fails()){
-          return $this->sendError('Validation Error.', $validator->errors());       
+        return $this->sendError('Validation Error.', $validator->errors());       
       }
       try {
         $conversation = Conversation::create(['name', 'room_com']);
@@ -237,6 +236,44 @@ class ChatController extends BaseController
     public function destroy($id)
     {
         //
+    }
+
+    public function addPeopleToChat($conversation_id, Request $request)
+    {
+      $returnData = [];
+      $user = Auth::guard('api')->user();
+      $validator = Validator::make($request->all(), [
+        'user_ids' => 'required|array',
+      ]);
+      if ($validator->fails()){
+        return $this->sendError('Validation Error.', $validator->errors());       
+      }
+      $conversation = Conversation::withCount('participants')->find($conversation_id);
+      if (!isset($conversation)){
+        return $this->sendError('Invalid Conversation', ['error'=>'No chat exists', 'message' => 'No chat exsits']);
+      }
+      try {
+        //return $conversation->participants_count;
+        if($conversation->participants_count == 2) {
+          $new_conversation = Conversation::create(['name', 'room_com']);
+          $new_conversation->participants()->attach($user->id);
+          $new_conversation->participants()->attach($request->user_ids);
+          $conversation_id = $new_conversation->id;
+        }
+        else {
+          $conversation_id = $conversation->id;
+          $conversation->participants()->attach($request->user_ids);
+        }
+        
+        $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation_id);
+        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $returnData['conversation'] = $new_conversation;
+      }catch(QueryException $ex) {
+        return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+      }catch(\Exception $ex) {
+        return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+      }
+      return $this->sendResponse($returnData, 'Participant Added');
     }
     
     public function uploadOnChat(Request $request)
