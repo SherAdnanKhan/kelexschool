@@ -116,6 +116,7 @@ Route::namespace('API')->group(function () {
                     Route::put('user-name', 'UserController@updateUserName');
                     Route::get('unread-message-count', 'ChatController@unreadCount');
                     Route::post('report', 'UserController@reportUser');
+                    Route::post('block', 'UserController@blockUser');
                 });
                 Route::get('user/online-status/{status}', 'UserController@updateStatusOnline');
                 Route::group(['prefix' => 'user/privacy'], function () {

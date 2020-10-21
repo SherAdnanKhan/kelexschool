@@ -11,11 +11,11 @@ class UserReport extends Model
 
     public function reportToUser()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'report_to');
     }
 
     public function reportByUser()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'report_by');
     }
 }

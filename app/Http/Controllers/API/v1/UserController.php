@@ -9,6 +9,7 @@ use App\Models\UserFeel;
 use App\Models\Fav;
 use App\Models\UserSprvfsIO;
 use App\Models\UserReport;
+use App\Models\UserBlock;
 use Auth;
 use Validator;
 
@@ -268,5 +269,46 @@ class UserController extends BaseController
         $returnData['report'] =  $report;
 
         return $this->sendResponse($returnData, 'User is Reported');   
+    }
+
+    public function blockUser(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'block_user_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+
+            $block_user = User::find($request->block_user_id);
+            if (!isset($block_user)) {
+                return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+            }
+
+            $blocked_user_check = UserBlock::where([
+                ['block_to', $request->block_user_id], 
+                ['block_by', $user->id]
+                ])->first();
+            if(isset($blocked_user_check)) {
+                return $this->sendError('Already Blocked Users', ['error'=>'User is already blocked', 'message' => 'User is already blocked']);
+            }
+
+            $block = new UserBlock();
+            $block->block_to = $request->block_user_id;
+            $block->block_by = $user->id;
+            $block->save();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
+        $returnData['report'] =  $block;
+
+        return $this->sendResponse($returnData, 'User is Blocked');   
     }
 }
