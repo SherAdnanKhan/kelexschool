@@ -21,18 +21,18 @@ class ChatController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
         $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent')
         ->whereHas('participants', function($query) use ($user) {
-            $query->where('user_id', $user->id);
+          $query->where('user_id', $user->id);
         })
         ->withCount('unreadMessagesLogs')
         ->orderBy('updated_at', 'desc')
-        ->get();
+        ->paginate(env('PAGINATE_LENGTH', 15));
 
         $returnData['conversations'] = $conversations;
 
@@ -248,7 +248,7 @@ class ChatController extends BaseController
       if ($validator->fails()){
         return $this->sendError('Validation Error.', $validator->errors());       
       }
-      $conversation = Conversation::withCount('participants')->find($conversation_id);
+      $conversation = Conversation::with('participants')->withCount('participants')->find($conversation_id);
       if (!isset($conversation)){
         return $this->sendError('Invalid Conversation', ['error'=>'No chat exists', 'message' => 'No chat exsits']);
       }
@@ -256,13 +256,19 @@ class ChatController extends BaseController
         //return $conversation->participants_count;
         if($conversation->participants_count == 2) {
           $new_conversation = Conversation::create(['name', 'room_com']);
-          $new_conversation->participants()->attach($user->id);
+          foreach ($conversation->participants as $participant) {
+            $new_conversation->participants()->attach($participant->id);
+          }
           $new_conversation->participants()->attach($request->user_ids);
           $conversation_id = $new_conversation->id;
         }
         else {
           $conversation_id = $conversation->id;
-          $conversation->participants()->attach($request->user_ids);
+          foreach ($request->user_ids as $user_id_add) {
+            if (! $conversation->participants->contains($user_id_add)) {
+              $conversation->participants()->attach($user_id_add);
+            }
+          }
         }
         
         $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation_id);
