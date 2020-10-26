@@ -62,15 +62,16 @@ class ChatController extends BaseController
           $returnData['user'] = $user_chatable_check; 
           array_push($userIds, $user_chatable_check->id);
           // Check conversation exists
-          $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
+          $coverations_all = Conversation::withCount('participants')->whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
           })->get('id');
           foreach ($coverations_all as $coveration) {
-            array_push($conversation_all_ids, $coveration->id);
+            if($coveration->participants_count == 2) {
+              array_push($conversation_all_ids, $coveration->id);
+            }
           }
-          //return $conversation_all_ids;
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check, $user) {
-            $query->where('user_id', $user_chatable_check->id)->where('user_id', $user->id);
+            $query->where('user_id', $user_chatable_check->id);
           })->whereIn('id', $conversation_all_ids)->first();
         }
         if( !$hasConversation ) {
