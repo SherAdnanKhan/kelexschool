@@ -25,7 +25,17 @@ module.exports = function (server) {
       socket.user = user.slug;
       socket.token = token;
 
-      online_users.push({ slug: user.slug, socketId: socket.id, token });
+      const userObject = {
+        slug: user.slug,
+        socketId: socket.id,
+        token
+      };
+
+      if (!online_users.some(user => user.slug === userObject.slug)) {
+        socket.broadcast.emit('onlineUser', userObject.slug);
+      }
+
+      online_users.push(userObject);
 
       try {
         await requestServices.setOnlineStatus(1, token);
@@ -35,8 +45,7 @@ module.exports = function (server) {
 
       const users = removeDuplicates(online_users);
 
-      io.emit('onlineUsers', users.map(user => user.slug));
-      callback && callback();
+      callback && callback(users.map(user => user.slug));
     });
 
     socket.on('join', (data, callback) => {
@@ -185,12 +194,18 @@ module.exports = function (server) {
       io.to(user.slug).emit('notifyColrChange', user);
     });
 
-    socket.on('logout', (data) => {
+    socket.on('logout', async (data) => {
       online_users = online_users.filter(user => user.token !== data.token);
-      const users = removeDuplicates(online_users);
 
+      if (!online_users.some(user => user.slug === data.user.slug)) {
+        try {
+          await requestServices.setOnlineStatus(0, data.token);
+        } catch (ex) {
+          console.log(ex.message);
+        }
+        io.emit('offlineUser', data.user.slug);
+      }
       socket.to(data.user.slug).emit('logout-called', { token: data.token });
-      io.emit('onlineUsers', users.map(user => user.slug));
     });
 
     socket.on('draw', payload => {
@@ -212,17 +227,16 @@ module.exports = function (server) {
       const userFound = online_users.find(user => user.socketId === socket.id);
       online_users = online_users.filter(user => user.socketId !== socket.id);
 
-      if (!online_users.some(user => user.slug === userFound.slug)) {
-        try {
-          await requestServices.setOnlineStatus(0, userFound.token);
-        } catch (ex) {
-          console.log(ex.message);
+      if (userFound) {
+        if (!online_users.some(user => user.slug === userFound.slug)) {
+          try {
+            await requestServices.setOnlineStatus(0, userFound.token);
+          } catch (ex) {
+            console.log(ex.message);
+          }
+          io.emit('offlineUser', userFound.slug);
         }
       }
-
-      const users = removeDuplicates(online_users);
-
-      io.emit('onlineUsers', users.map(user => user.slug));
     });
 
     socket.on('onUserNotifications', (data, notification_type, callback) => {
