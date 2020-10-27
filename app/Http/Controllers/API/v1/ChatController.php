@@ -89,7 +89,7 @@ class ChatController extends BaseController
             $returnData['conversation'] = $hasConversation;
         }
         
-        return $this->sendResponse($returnData, 'User One to one Conversation');
+        return $this->sendResponse($returnData, 'User Conversation Created');
 
     }
 

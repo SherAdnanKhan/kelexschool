@@ -5,11 +5,13 @@ namespace App\Http\Controllers\API\v1;
 use App\Http\Controllers\API\v1\BaseController;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Gallery;
 use App\Models\UserFeel;
 use App\Models\Fav;
 use App\Models\UserSprvfsIO;
 use App\Models\UserReport;
 use App\Models\UserBlock;
+use App\Models\UserFavGallery;
 use Auth;
 use Validator;
 
@@ -276,23 +278,46 @@ class UserController extends BaseController
         $user = Auth::guard('api')->user();
         $returnData = [];
         $validator = Validator::make($request->all(), [
-            'block_user_id' => 'required',
+          'block_user_id' => 'required',
         ]);
    
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());       
+          return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-
-            $block_user = User::find($request->block_user_id);
+            $block_user = User::with('galleries')->find($request->block_user_id);
             if (!isset($block_user)) {
                 return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
             }
+            //remove from fav users from both sides
+            $favs = Fav::where([ ['faved_by', $block_user->id], ['faved_to', $user->id] ])->delete();
+            $favs = Fav::where([ ['faved_by', $user->id], ['faved_to', $block_user->id] ])->delete();
+
+            //remove from user selections list on both sides
+            $privacy_check = UserSprvfsIO::where([
+              ['created_to',  $block_user->id], 
+              ['created_by', $user->id]
+              ])->delete();
+
+            $privacy_check = UserSprvfsIO::where([
+              ['created_to',  $user->id], 
+              ['created_by', $block_user->id]
+              ])->delete();
+            
+            //remove from fav galleries on each user
+            $user_galleries = Gallery::where('created_by', $user->id)->get('id');
+            foreach ($user_galleries as $gallery) {
+              $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $block_user->id)->delete();
+            }
+            
+            foreach ($block_user->galleries as $galley) {
+              $user_fav_gallery = UserFavGallery::where('gallery_id', $gallery->id)->where('user_id', $user->id)->delete();
+            }
 
             $blocked_user_check = UserBlock::where([
-                ['block_to', $request->block_user_id], 
-                ['block_by', $user->id]
-                ])->first();
+              ['block_to', $request->block_user_id], 
+              ['block_by', $user->id]
+              ])->first();
             if(isset($blocked_user_check)) {
                 return $this->sendError('Already Blocked Users', ['error'=>'User is already blocked', 'message' => 'User is already blocked']);
             }
