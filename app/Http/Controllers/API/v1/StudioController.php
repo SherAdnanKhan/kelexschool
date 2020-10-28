@@ -16,6 +16,7 @@ use App\Models\PrivacyPage;
 use App\Models\UserIOGallery;
 use App\Models\Fav;
 use App\Models\Gallery;
+use App\Models\UserBlock;
 
 class StudioController extends BaseController
 {
@@ -119,6 +120,10 @@ class StudioController extends BaseController
         $returnData['fav_by_count'] = $fav_by_count;
         $returnData['favs_count'] = $fav_to_count;
         $returnData['has_faved'] = $has_faved = Fav::where([ ['faved_by', $my_user->id], ['faved_to', $user->id] ])->exists();
+
+        //is_blocked user
+        $returnData['is_blocked'] = $this->CheckUserBlocked($my_user->id, $user->id);
+        $returnData['is_viewable'] = $this->CheckUserViewable($my_user->id, $user->id);
 
         //privacy settings of user
         $user_privacy_settings = UserPrivacy::where('user_id', $user->id)->get();
