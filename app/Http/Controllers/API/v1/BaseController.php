@@ -10,6 +10,7 @@ use App\Models\UserSprvfsIO;
 use App\Models\UserPrivacy;
 use App\Models\Fav;
 use App\Models\UserLog;
+use App\Models\UserBlock;
 
 class BaseController extends Controller
 {
@@ -233,5 +234,39 @@ class BaseController extends Controller
 
         return;
 
+    }
+
+    public function CheckUserBlocked($auth_user_id, $check_user_id)
+    {
+        $is_blocked = false;
+        $block_user_check = UserBlock::where([
+        ['block_to', $check_user_id], 
+        ['block_by', $auth_user_id]
+        ])->first();
+        if(isset($block_user_check)) {
+            $is_blocked = true;
+        }
+        return $is_blocked;
+    }
+
+    public function CheckUserViewable($auth_user_id, $check_user_id)
+    {
+        $is_viewable = true;
+        $block_user_check = UserBlock::where([
+        ['block_to', $check_user_id], 
+        ['block_by', $auth_user_id]
+        ])->first();
+        if(isset($block_user_check)) {
+            $is_viewable = false;
+        }
+        $block_user_check = UserBlock::where([
+            ['block_to', $auth_user_id], 
+            ['block_by', $check_user_id]
+            ])->first();
+        if(isset($block_user_check)) {
+            $is_viewable = false;
+        }
+
+        return $is_viewable;
     }
 }

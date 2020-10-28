@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
+use App\Models\UserBlock;
 use App\Models\User;
 use App\Models\Message;
 use App\Models\MessageLog;
@@ -81,16 +82,37 @@ class ChatController extends BaseController
             $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
             $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
+            if($new_conversation->participants->count() == 2) {
+              foreach($new_conversation->participants as $participant){
+                if($participant->id != $user->id) {
+                  $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
+                  $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
+                }
+              }
+            }
         }
         else {
             $coversation_id = $hasConversation->id;
             $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
+            if($hasConversation->participants->count() == 2) {
+              foreach($hasConversation->participants as $participant){
+                if($participant->id != $user->id) {
+                  $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
+                  $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
+                }
+              }
+            }
         }
         
         return $this->sendResponse($returnData, 'User Conversation Created');
 
+    }
+
+    public function CheckPati(Type $var = null)
+    {
+      # code...
     }
 
     /**

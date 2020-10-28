@@ -321,7 +321,6 @@ class UserController extends BaseController
             if(isset($blocked_user_check)) {
                 return $this->sendError('Already Blocked Users', ['error'=>'User is already blocked', 'message' => 'User is already blocked']);
             }
-
             $block = new UserBlock();
             $block->block_to = $request->block_user_id;
             $block->block_by = $user->id;
@@ -335,5 +334,42 @@ class UserController extends BaseController
         $returnData['report'] =  $block;
 
         return $this->sendResponse($returnData, 'User is Blocked');   
+    }
+
+    public function unblockUser(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+          'unblock_user_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $unblock_user = User::with('galleries')->find($request->unblock_user_id);
+            if (!isset($unblock_user)) {
+              return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+            }
+
+            $unblocked_user_check = UserBlock::where([
+              ['block_to', $unblock_user->id], 
+              ['block_by', $user->id]
+              ])->first();
+            if(!isset($unblocked_user_check)) {
+              return $this->sendError('Not a blocked Users', ['error'=>'User is not blocked', 'message' => 'User is not blocked']);
+            }
+            UserBlock::where([
+              ['block_to', $unblock_user->id], 
+              ['block_by', $user->id]
+              ])->delete();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
+        return $this->sendResponse($returnData, 'User is unblocked');   
     }
 }
