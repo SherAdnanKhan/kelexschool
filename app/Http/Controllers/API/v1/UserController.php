@@ -11,6 +11,7 @@ use App\Models\Fav;
 use App\Models\UserSprvfsIO;
 use App\Models\UserReport;
 use App\Models\UserBlock;
+use App\Models\UserMute;
 use App\Models\UserFavGallery;
 use Auth;
 use Validator;
@@ -371,5 +372,81 @@ class UserController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }              
         return $this->sendResponse($returnData, 'User is unblocked');   
+    }
+
+    public function muteUser(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'mute_user_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+
+            $mute_user = User::find($request->mute_user_id);
+            if (!isset($mute_user)) {
+                return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+            }
+            $mute_user_check = UserMute::where([
+                ['mute_to', $mute_user->id], 
+                ['mute_by', $user->id]
+                ])->first();
+              if(isset($mute_user_check)) {
+                return $this->sendError('Already a muted Users', ['error'=>'User is already muted', 'message' => 'User is already muted']);
+              }
+            $mute = new UserMute();
+            $mute->mute_to = $mute_user->id;
+            $mute->mute_by = $user->id;
+            $mute->save();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
+       // $returnData['report'] =  $report;
+
+        return $this->sendResponse($returnData, 'User is Reported');   
+    }
+
+    public function unmuteUser(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+          'unmute_user_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $unmute_user = User::with('galleries')->find($request->unmute_user_id);
+            if (!isset($unmute_user)) {
+              return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
+            }
+
+            $unmuted_user_check = UserMute::where([
+              ['mute_to', $unmute_user->id], 
+              ['mute_by', $user->id]
+              ])->first();
+            if(!isset($unmuted_user_check)) {
+              return $this->sendError('Not a muted Users', ['error'=>'User is not muted', 'message' => 'User is not muted']);
+            }
+            UserMute::where([
+              ['mute_to', $unmute_user->id], 
+              ['mute_by', $user->id]
+              ])->delete();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }              
+        return $this->sendResponse($returnData, 'User is unmuted');   
     }
 }
