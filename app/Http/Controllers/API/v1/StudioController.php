@@ -124,6 +124,7 @@ class StudioController extends BaseController
         //is_blocked user
         $returnData['is_blocked'] = $this->CheckUserBlocked($my_user->id, $user->id);
         $returnData['is_viewable'] = $this->CheckUserViewable($my_user->id, $user->id);
+        $returnData['is_muted'] = $this->CheckUserMute($my_user->id, $user->id);
 
         //privacy settings of user
         $user_privacy_settings = UserPrivacy::where('user_id', $user->id)->get();
