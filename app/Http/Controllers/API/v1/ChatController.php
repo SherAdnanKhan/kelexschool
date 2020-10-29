@@ -87,7 +87,7 @@ class ChatController extends BaseController
                 if($participant->id != $user->id) {
                   $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
                   $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
-                  $returnData['is_muted'] = $this->CheckUserMute($my_user->id, $user->id);
+                  $returnData['is_muted'] = $this->CheckUserMute($user->id, $participant->id);
                 }
               }
             }
@@ -102,7 +102,7 @@ class ChatController extends BaseController
                 if($participant->id != $user->id) {
                   $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
                   $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
-                  $returnData['is_muted'] = $this->CheckUserMute($my_user->id, $user->id);
+                  $returnData['is_muted'] = $this->CheckUserMute($user->id, $participant->id);
                 }
               }
             }
