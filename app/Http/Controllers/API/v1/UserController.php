@@ -410,7 +410,7 @@ class UserController extends BaseController
         }              
        // $returnData['report'] =  $report;
 
-        return $this->sendResponse($returnData, 'User is Reported');   
+        return $this->sendResponse($returnData, 'User is Muted');   
     }
 
     public function unmuteUser(Request $request)
