@@ -118,6 +118,8 @@ Route::namespace('API')->group(function () {
                     Route::post('report', 'UserController@reportUser');
                     Route::post('block', 'UserController@blockUser');
                     Route::post('unblock', 'UserController@unblockUser');
+                    Route::post('mute', 'UserController@muteUser');
+                    Route::post('unmute', 'UserController@unmuteUser');
                 });
                 Route::get('user/online-status/{status}', 'UserController@updateStatusOnline');
                 Route::group(['prefix' => 'user/privacy'], function () {
