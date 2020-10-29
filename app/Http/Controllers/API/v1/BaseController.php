@@ -11,6 +11,7 @@ use App\Models\UserPrivacy;
 use App\Models\Fav;
 use App\Models\UserLog;
 use App\Models\UserBlock;
+use App\Models\UserMute;
 
 class BaseController extends Controller
 {
@@ -247,6 +248,19 @@ class BaseController extends Controller
             $is_blocked = true;
         }
         return $is_blocked;
+    }
+
+    public function CheckUserMute($auth_user_id, $check_user_id)
+    {
+        $is_muted = false;
+        $mute_user_check = UserMute::where([
+        ['mute_to', $check_user_id], 
+        ['mute_by', $auth_user_id]
+        ])->first();
+        if(isset($mute_user_check)) {
+            $is_muted = true;
+        }
+        return $is_muted;
     }
 
     public function CheckUserViewable($auth_user_id, $check_user_id)
