@@ -366,6 +366,9 @@ class UserController extends BaseController
               ['block_by', $user->id]
               ])->delete();
 
+            $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $unblock_user->id);
+            $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $unblock_user->id);
+
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
