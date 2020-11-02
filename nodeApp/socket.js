@@ -173,8 +173,20 @@ module.exports = function (server) {
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
         io.to(response.message.conversation_id).emit('recieveMessage', response);
-        for (let reciever of data.recievers) {
-          io.to(reciever).emit('notify', response);
+
+        if (data.recievers.length === 1) {
+          try {
+            const { data: { is_muted } } = await requestServices.checkMuteStatus(data.recievers[0].id, socket.token);
+            if (!is_muted) {
+              io.to(data.recievers[0].id).emit('notify', response);
+            }
+          } catch (ex) {
+            console.log(ex.message);
+          }
+        } else {
+          for (let reciever of data.recievers) {
+            io.to(reciever.slug).emit('notify', response);
+          }
         }
       } catch (ex) {
         callback && callback('Could not send message try again.');
