@@ -178,7 +178,7 @@ module.exports = function (server) {
           try {
             const { data: { is_muted } } = await requestServices.checkMuteStatus(data.recievers[0].id, socket.token);
             if (!is_muted) {
-              io.to(data.recievers[0].id).emit('notify', response);
+              io.to(data.recievers[0].slug).emit('notify', response);
             }
           } catch (ex) {
             console.log(ex.message);
