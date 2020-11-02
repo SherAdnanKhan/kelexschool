@@ -36,5 +36,14 @@ module.exports = {
         Accept: 'application/json'
       }
     });
+  },
+
+  checkMuteStatus: function (reciver_id, token) {
+    return axios.post(base_url + `users/check-status-mute`, { check_mute_user_id: reciver_id }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
   }
 };

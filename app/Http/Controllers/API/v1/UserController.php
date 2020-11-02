@@ -452,4 +452,19 @@ class UserController extends BaseController
         }              
         return $this->sendResponse($returnData, 'User is unmuted');   
     }
+
+    public function checkMuteStatus(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+          'check_mute_user_id' => 'required',
+        ]);
+    
+        if ($validator->fails()) {
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $returnData['is_muted'] = $this->CheckUserMute($request->check_mute_user_id, $user->id);
+        return $returnData;
+    }
 }

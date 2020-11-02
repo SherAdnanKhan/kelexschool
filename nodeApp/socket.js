@@ -173,7 +173,6 @@ module.exports = function (server) {
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
         io.to(response.message.conversation_id).emit('recieveMessage', response);
-
         for (let reciever of data.recievers) {
           io.to(reciever).emit('notify', response);
         }
@@ -239,8 +238,16 @@ module.exports = function (server) {
       }
     });
 
-    socket.on('onUserNotifications', (data, notification_type, callback) => {
-      io.to(data.reciever.slug).emit('reciveUserNotifications', data, notification_type);
+    socket.on('onUserNotifications', async (data, notification_type, callback) => {
+      //await requestServices.checkMuteStatus(socket.token, data.reciever.id);
+      try {
+        const { data: { is_muted } } = await requestServices.checkMuteStatus(data.reciever.id, socket.token);
+        if (!is_muted) {
+          io.to(data.reciever.slug).emit('reciveUserNotifications', data, notification_type);
+        }
+      } catch (ex) {
+        console.log(ex.message);
+      }
       callback && callback();
     });
   });
