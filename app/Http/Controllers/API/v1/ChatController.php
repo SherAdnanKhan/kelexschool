@@ -263,6 +263,29 @@ class ChatController extends BaseController
         //
     }
 
+    public function destroyMessage($id)
+    {
+        $user = Auth::guard('api')->user();
+        try {
+            $message_check = Message::find($id);
+            if (!$message_check) {
+              return $this->sendError('No record', ['error'=>'No record of message', 'message' => 'There is no such message found']);
+
+            }
+            if ($message_check->created_by != $user->id) {
+              return $this->sendError('Unauthoirzed', ['error'=>'Unauthorized message', 'message' => 'You are not allowed to delete this message']);
+            }
+
+            $message_check->delete(); 
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse([], 'Message delete sucessfully');
+    }
+
     public function addPeopleToChat($conversation_id, Request $request)
     {
       $returnData = [];

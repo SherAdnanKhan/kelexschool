@@ -42,6 +42,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/group-chat', 'ChatController@groupChat');
                     Route::post('/invite-people/{coversation_id}', 'ChatController@addPeopleToChat');
                     Route::get('/conversation/{id}', 'ChatController@show');
+                    Route::delete('/message/{id}', 'ChatController@destroyMessage');
                 });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');
