@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\Conversation;
+use App\Models\UserConversation;
 use Storage;
 use Image;
 
@@ -33,7 +34,7 @@ class ChatController extends BaseController
         })
         ->withCount('unreadMessagesLogs')
         ->orderBy('updated_at', 'desc')
-        ->paginate(env('PAGINATE_LENGTH', 15));
+        ->paginate(15);
 
         $returnData['conversations'] = $conversations;
 
@@ -112,10 +113,6 @@ class ChatController extends BaseController
 
     }
 
-    public function CheckPati(Type $var = null)
-    {
-      # code...
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -260,7 +257,22 @@ class ChatController extends BaseController
      */
     public function destroy($id)
     {
-        //
+      $user = Auth::guard('api')->user();
+      $returnData = [];
+      try {
+          $returnData['conversation'] = $conversation_check = Conversation::whereHas('participants', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+          })->find($id);
+          if (!$conversation_check) {
+            return $this->sendError('No record', ['error'=>'No record of chat', 'message' => 'There is no such chat found']);
+          }
+
+      }catch(QueryException $ex) {
+          return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+      }catch(\Exception $ex) {
+          return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+      }
+      return $this->sendResponse($returnData, 'chat deleted sucessfully');
     }
 
     public function destroyMessage($id)
@@ -283,7 +295,7 @@ class ChatController extends BaseController
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-        return $this->sendResponse([], 'Message delete sucessfully');
+        return $this->sendResponse([], 'Message deleted sucessfully');
     }
 
     public function addPeopleToChat($conversation_id, Request $request)
