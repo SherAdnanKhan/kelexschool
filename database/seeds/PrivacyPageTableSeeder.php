@@ -23,7 +23,7 @@ class PrivacyPageTableSeeder extends Seeder
         
         \DB::table('privacy_pages')->delete();
         
-        PrivacyPage::create(array('id' => 1, 'name' => 'Stro'));
+        PrivacyPage::create(array('id' => 1, 'name' => 'Strq'));
         PrivacyPage::create(array('id' => 2, 'name' => 'Mzflash'));
         PrivacyPage::create(array('id' => 3, 'name' => 'Critiques'));
         PrivacyPage::create(array('id' => 4, 'name' => 'Faves'));
