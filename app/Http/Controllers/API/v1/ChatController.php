@@ -275,7 +275,7 @@ class ChatController extends BaseController
       $user = Auth::guard('api')->user();
       $returnData = [];
       try {
-          $returnData['conversation'] = $conversation = Conversation::whereHas('participants', function($query) use ($user) {
+          $conversation = Conversation::whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
           })->find($id);
           if (!$conversation) {
