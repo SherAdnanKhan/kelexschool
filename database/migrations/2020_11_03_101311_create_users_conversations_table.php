@@ -14,6 +14,7 @@ class CreateUsersConversationsTable extends Migration
     public function up()
     {
         Schema::create('users_conversations', function (Blueprint $table) {
+            $table->id();
             $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('user_id');
             $table->boolean('is_deleted')->default(true);

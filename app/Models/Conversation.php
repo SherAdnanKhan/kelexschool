@@ -41,5 +41,14 @@ class Conversation extends Model
         return $this->hasMany(MessageLog::class, 'conversation_id')->where('status', 0)->where('user_id', \Auth::guard('api')->user()->id);
     }
 
+    public function deleteCheck()
+    {
+        return $this->hasOne(UserConversation::class, 'conversation_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
+    }
+    public function conversationStatus()
+    {
+        return $this->hasOne(UserConversation::class, 'conversation_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
+    }
+
     
 }

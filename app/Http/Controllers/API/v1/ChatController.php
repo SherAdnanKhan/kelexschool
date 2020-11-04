@@ -13,6 +13,7 @@ use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\Conversation;
 use App\Models\UserConversation;
+use Carbon\Carbon;
 use Storage;
 use Image;
 
@@ -28,10 +29,12 @@ class ChatController extends BaseController
         $returnData = [];
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
-        $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent')
+        $deleted_conversation_ids = $this->getDeletedConversationIds($user->id);
+        $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent', 'conversationStatus')
         ->whereHas('participants', function($query) use ($user) {
           $query->where('user_id', $user->id);
         })
+        ->whereNotIn('id', $deleted_conversation_ids)
         ->withCount('unreadMessagesLogs')
         ->orderBy('updated_at', 'desc')
         ->paginate(15);
@@ -52,7 +55,7 @@ class ChatController extends BaseController
         $returnData = $userIds = $conversation_all_ids =[];
         $user = Auth::guard('api')->user();
         if(isset($chat_type) ) {
-          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->findOrFail($user_slug);
+          $hasConversation = Conversation::with('participants.avatars', 'participants.feel', 'conversationStatus')->findOrFail($user_slug);
           $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
           $returnData['conversation'] = $hasConversation;
         }else {
@@ -72,7 +75,7 @@ class ChatController extends BaseController
               array_push($conversation_all_ids, $coveration->id);
             }
           }
-          $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($user_chatable_check, $user) {
+          $hasConversation = Conversation::with('participants.avatars', 'participants.feel', 'conversationStatus')->whereHas('participants', function($query) use ($user_chatable_check, $user) {
             $query->where('user_id', $user_chatable_check->id);
           })->whereIn('id', $conversation_all_ids)->first();
         }
@@ -95,7 +98,12 @@ class ChatController extends BaseController
         }
         else {
             $coversation_id = $hasConversation->id;
-            $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $coversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            if($hasConversation->conversationStatus) {
+              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where([ ['conversation_id', $coversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            }else {
+              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where([ ['conversation_id', $coversation_id] ])->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+            }
+            
             $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
             if($hasConversation->participants->count() == 2) {
@@ -152,6 +160,13 @@ class ChatController extends BaseController
             
             //update conversation update time
             $hasConversation->touch();
+
+            //deleted chat updation remove from is_deleted
+            $deleted_conversation = UserConversation::where([ ['conversation_id', $request->conversation_id], ['user_id', $user->id] ])->first();
+            if($deleted_conversation) {
+              $deleted_conversation->is_deleted = 0;
+              $deleted_conversation->update();
+            }
 
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
@@ -260,11 +275,28 @@ class ChatController extends BaseController
       $user = Auth::guard('api')->user();
       $returnData = [];
       try {
-          $returnData['conversation'] = $conversation_check = Conversation::whereHas('participants', function($query) use ($user) {
+          $returnData['conversation'] = $conversation = Conversation::whereHas('participants', function($query) use ($user) {
             $query->where('user_id', $user->id);
           })->find($id);
-          if (!$conversation_check) {
+          if (!$conversation) {
             return $this->sendError('No record', ['error'=>'No record of chat', 'message' => 'There is no such chat found']);
+          }
+          //check already deleted
+          $user_conversation_check = UserConversation::where([['conversation_id', $conversation->id], ['user_id', $user->id]])->first();
+          if ($user_conversation_check) {
+            if ($user_conversation_check->is_deleted == 1) {
+              return $this->sendError('Already deleted', ['error'=>'Already deleted chat', 'message' => 'This chat is already deleted']);
+            }else {
+              $user_conversation_check->is_deleted = 1;
+              $user_conversation_check->last_deleted_at = Carbon::now();
+              $user_conversation_check->update();
+            }
+          }
+          else {
+            $user_conversation = new UserConversation();
+            $user_conversation->conversation_id = $conversation->id;
+            $user_conversation->user_id = $user->id;
+            $user_conversation->save();
           }
 
       }catch(QueryException $ex) {
