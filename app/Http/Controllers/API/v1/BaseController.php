@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Storage;
 use App\Models\UserSprvfsIO;
+use App\Models\PrivacyPage;
 use App\Models\UserPrivacy;
 use App\Models\Fav;
 use App\Models\UserLog;
@@ -109,17 +110,19 @@ class BaseController extends Controller
     public function CheckPrivacyPage($is_sprfvs, $my_user_id, $user_id, $page_id)
     {
         $other_privacy = [];
+        $privacy_page = PrivacyPage::findOrFail($page_id);
+        //dd($privacy_page);
         $user_page_privacy = UserPrivacy::where([ ['user_id', $user_id], ['privacy_type', 'App\Models\PrivacyPage'], ['privacy_id', 3] ])->first();
 
         if(!isset($user_page_privacy)) {
             $other_privacy = [
-                'privacy_page' => "Critiques",
+                'privacy_page' => $privacy_page->name,
                 'is_allowed' => 1
             ];
         }else {
             if ($user_page_privacy->privacy_type_id == 1) {
                 $other_privacy = [
-                    'privacy_page' => "Critiques",
+                    'privacy_page' => $privacy_page->name,
                     'is_allowed' => 1
                 ];
             }
@@ -127,13 +130,13 @@ class BaseController extends Controller
                 $check_fav = Fav::where([ ['faved_by', $user_id], ['faved_to', $my_user_id] ])->first();
                 if (isset($check_fav)) {
                    $other_privacy = [
-                        'privacy_page' => "Critiques",
+                        'privacy_page' => $privacy_page->name,
                         'is_allowed' => 1
                     ];
                 }
                 else {
                    $other_privacy = [
-                        'privacy_page' => "Critiques",
+                        'privacy_page' => $privacy_page->name,
                         'is_allowed' => 0
                     ];
                 }
@@ -141,12 +144,12 @@ class BaseController extends Controller
             else if ($user_page_privacy->privacy_type_id == 3) {
                 if ($is_sprfvs == 1) {
                    $other_privacy = [
-                        'privacy_page' => "Critiques",
+                        'privacy_page' => $privacy_page->name,
                         'is_allowed' => 1
                     ];
                 }else {
                    $other_privacy = [
-                        'privacy_page' => "Critiques",
+                        'privacy_page' => $privacy_page->name,
                         'is_allowed' => 0
                     ];
                 }
@@ -160,20 +163,20 @@ class BaseController extends Controller
                     ])->first();
                     if (isset($user_srfvs)) {
                        $other_privacy = [
-                        'privacy_page' => "Critiques",
+                        'privacy_page' => $privacy_page->name,
                         'is_allowed' => 1
                         ];
                     }
                     else {
                        $other_privacy = [
-                            'privacy_page' => "Critiques",
+                            'privacy_page' => $privacy_page->name,
                             'is_allowed' => 0
                         ];
                     }
             }
             else {
                $other_privacy = [
-                    'privacy_page' => "Critiques",
+                    'privacy_page' => $privacy_page->name,
                     'is_allowed' => 0
                 ];
             }

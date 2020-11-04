@@ -13,6 +13,7 @@ use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\Conversation;
 use App\Models\UserConversation;
+use App\Models\UserSprvfsIO;
 use Carbon\Carbon;
 use Storage;
 use Image;
@@ -53,6 +54,7 @@ class ChatController extends BaseController
     public function create($user_slug, $chat_type = null, Request $request)
     {
         $returnData = $userIds = $conversation_all_ids =[];
+        $is_sprfvs = 0;
         $user = Auth::guard('api')->user();
         if(isset($chat_type) ) {
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel', 'conversationStatus')->findOrFail($user_slug);
@@ -92,6 +94,23 @@ class ChatController extends BaseController
                   $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
                   $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
                   $returnData['is_muted'] = $this->CheckUserMute($user->id, $participant->id);
+
+                  //Check if sprfvs already 
+                  $check_user_sprfvs = UserSprvfsIO::where([
+                    ['created_to',  $participant->id], 
+                    ['privacy_type_id', 3], 
+                    ['created_by', $user->id]
+                    ])->first();
+                  if(isset($check_user_sprfvs)) {
+                    if($check_user_sprfvs->status == 1) {
+                      $is_sprfvs = 1;
+                    }
+                    else {
+                      $is_sprfvs = 2;
+                    }
+                  }
+                  $returnData['is_sprfvs'] = $is_sprfvs;
+                  $returnData['strq_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $user->id, $participant->id, 1);
                 }
               }
             }
@@ -112,6 +131,23 @@ class ChatController extends BaseController
                   $returnData['is_blocked'] = $this->CheckUserBlocked($user->id, $participant->id);
                   $returnData['is_viewable'] = $this->CheckUserViewable($user->id, $participant->id);
                   $returnData['is_muted'] = $this->CheckUserMute($user->id, $participant->id);
+
+                  //Check if sprfvs already 
+                  $check_user_sprfvs = UserSprvfsIO::where([
+                    ['created_to',  $participant->id], 
+                    ['privacy_type_id', 3], 
+                    ['created_by', $user->id]
+                    ])->first();
+                  if(isset($check_user_sprfvs)) {
+                    if($check_user_sprfvs->status == 1) {
+                      $is_sprfvs = 1;
+                    }
+                    else {
+                      $is_sprfvs = 2;
+                    }
+                  }
+                  $returnData['is_sprfvs'] = $is_sprfvs;
+                  $returnData['strq_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $user->id, $participant->id, 1);
                 }
               }
             }
@@ -510,5 +546,10 @@ class ChatController extends BaseController
 
         return $this->sendResponse($returnData, 'User unread counts');
 
+    }
+
+    public function privacyCheckChat()
+    {
+      # code...
     }
 }
