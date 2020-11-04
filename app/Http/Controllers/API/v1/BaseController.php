@@ -12,6 +12,7 @@ use App\Models\Fav;
 use App\Models\UserLog;
 use App\Models\UserBlock;
 use App\Models\UserMute;
+use App\Models\UserConversation;
 
 class BaseController extends Controller
 {
@@ -283,4 +284,16 @@ class BaseController extends Controller
 
         return $is_viewable;
     }
+
+    public function getDeletedConversationIds($user_id)
+    {
+        $deleted_conversation_ids = [];
+        $deleted_conversations = UserConversation::where([ ['is_deleted', 1], ['user_id', $user_id] ])->get('conversation_id');
+        foreach ($deleted_conversations as $deleted_conversation) {
+          array_push($deleted_conversation_ids, $deleted_conversation->conversation_id);
+        }
+
+        return $deleted_conversation_ids;
+    }
+    
 }
