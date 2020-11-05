@@ -23,6 +23,7 @@ Route::namespace('API')->group(function () {
                 Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
                 Route::post('change-password', 'AuthController@changePassword');
             });
+            Route::get('/posts/{slug}', 'PostController@show');
             Route::middleware('auth:api')->group(function () {
                 Route::group(['prefix' => 'arts'], function () {
                     Route::get('/', 'ArtController@getAll');
@@ -104,7 +105,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'posts'], function () {
                     Route::post('/', 'PostController@store');
-                    Route::get('/{slug}', 'PostController@show');
+                    // Route::get('/{slug}', 'PostController@show');
                 });
                 Route::group(['prefix' => 'studios'], function () {
                     Route::get('/{slug}', 'StudioController@getUserStudio');
