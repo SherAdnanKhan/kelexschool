@@ -179,34 +179,39 @@ class PostController extends BaseController
     {
         $returnData = $other_privacy = [];
         $my_user = Auth::guard('api')->user();
+    
         $is_sprfvs = 0;
         $post = Post::where('slug', $slug)->with('image', 'art', 'user.art.parent', 'user.avatars', 'user.feel')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
         $returnData['post'] = $post;
-        $returnData['has_stroke'] = $hasStroke = $my_user->strokePosts()->where('id', $post->id)->exists();
         
         $other_posts = Post::with('image', 'user.art.parent', 'user.avatars', 'user.feel')->where([ ['gallery_id', '=', $post->gallery_id], ['id', '!=', $post->id] ])->get();
         $returnData['other_posts'] = $other_posts;
-        //Check if sprfvs already 
-        $check_user_sprfvs = UserSprvfsIO::where([
-            ['created_to',  $post->user->id], 
-            ['privacy_type_id', 3], 
-            ['created_by', $my_user->id]
-            ])->first();
-        if(isset($check_user_sprfvs)) {
-            if($check_user_sprfvs->status == 1) {
-                $is_sprfvs = 1;
+        //if auth exsists
+        if (isset($my_user)) {
+            $returnData['has_stroke'] = $hasStroke = $my_user->strokePosts()->where('id', $post->id)->exists();
+            //Check if sprfvs already 
+            $check_user_sprfvs = UserSprvfsIO::where([
+                ['created_to',  $post->user->id], 
+                ['privacy_type_id', 3], 
+                ['created_by', $my_user->id]
+                ])->first();
+            if(isset($check_user_sprfvs)) {
+                if($check_user_sprfvs->status == 1) {
+                    $is_sprfvs = 1;
+                }
+                else {
+                    $is_sprfvs = 2;
+                }
             }
-            else {
-                $is_sprfvs = 2;
-            }
+            $returnData['is_sprfvs'] = $is_sprfvs;
+            
+            //crtiques page
+            $returnData['other_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $my_user->id, $post->user->id, 3);
         }
-        $returnData['is_sprfvs'] = $is_sprfvs;
-        //crtiques page
         
-        $returnData['other_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $my_user->id, $post->user->id, 3);
         return $this->sendResponse($returnData, 'Post');
     }
 
