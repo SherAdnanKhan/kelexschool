@@ -16,6 +16,7 @@ class FeelSeeder extends Seeder
             'id' => 1,
             'name'=> 'gold',
             'color'=> 'gold',
+            'description' => 'Happy',
             'color_code'=> '#FFD700',
             'image_path'=> asset('images/feelicons/iconyellow.png'),
             //'image_path'=> 'http://localhost:8000/images/feelicons/iconyellow.png',
@@ -23,6 +24,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 2,
             'name'=> 'gray',
+            'description' => 'Confused',
             'color'=> 'gray',
             'color_code'=> '#808080',
             'image_path'=> asset('images/feelicons/icongray.png'),
@@ -32,6 +34,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 3,
             'name'=> 'orange',
+            'description' => 'Excited',
             'color'=> 'orange',
             'color_code'=> '#FFA500',
             'image_path'=> asset('images/feelicons/iconorange.png'),
@@ -41,6 +44,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 4,
             'name'=> 'green',
+            'description' => 'Serene',
             'color'=> 'limegreen',
             'color_code'=> '#32CD32',
             'image_path'=> asset('images/feelicons/icongreen.png'),
@@ -49,6 +53,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 5,
             'name'=> 'red',
+            'description' => 'Angry',
             'color'=> 'red',
             'color_code'=> '#FF0000',
             'image_path'=> asset('images/feelicons/iconred.png'),
@@ -58,6 +63,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 6,
             'name'=> 'purple',
+            'description' => 'Inspired',
             'color'=> 'purple',
             'color_code'=> '#800080',
             'image_path'=> asset('images/feelicons/iconpurple.png'),
@@ -67,6 +73,7 @@ class FeelSeeder extends Seeder
         DB::table('feels')->insert([
             'id' => 7,
             'name'=> 'blue',
+            'description' => 'Sad',
             'color'=> 'dodgerblue',
             'color_code'=> '#1E90FF',
             'image_path'=> asset('images/feelicons/iconblue.png'),
