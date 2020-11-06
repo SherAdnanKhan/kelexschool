@@ -232,15 +232,14 @@ class PostController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'title' => 'required',
-            'gallery_id' => 'required',
-            'image' => env('IMAGE_TYPE_SIZE', '1000'),
-            'video' => env('DOCUMENT_SIZE', '2000'),
+            'gallery_id' => 'required'
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
         $post = Post::with('image')->find($id);
+        $post_type = $post->post_type;
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
@@ -253,44 +252,31 @@ class PostController extends BaseController
             if ($gallery->created_by != $user->id) {
                 return $this->sendError('Invalid Gallery', ['error'=>'Unauthorised Gallery', 'message' => 'Please post into your gallery']);
             }
+
+            if($request->doc_type == "image") {
+                $post_type  = 1;
+            }
+            else if ($request->doc_type == "video") {
+                $post_type  = 2;
+            }
             $post->title = $request->title;
             $post->gallery_id = $request->gallery_id;
             $post->art_id = $request->art_id ? $request->art_id : null;
             $post->description = $request->description ? $request->description : null;
+            $post->post_type = $post_type;
             $post->update(); 
 
-            if($request->has('image')) {
-                $image_recived = $this->uploadImage($request->image, "posts/");
-                //delete old video/image agains post
+            if($request->has('doc_type')) {
                 $old_image = Image::where('image_type', 'App\Models\Post')->where('image_id', $post->id)->delete(); 
                 $image = new Image();
-                $image->title = $image_recived['image_name'];
-                $image->path = $image_recived['image_path'];
+                $image->title = $request->doc_name;
+                $image->path = $request->doc_path;
                 $image->image_type = 'App\Models\Post';
                 $image->image_id = $post->id;
                 $image->created_by = $user->id;
                 $image->save();
-
-                //update post type 
-                $post->update(['post_type' => 1]);
             }
 
-            if($request->has('video')) {
-                $image_recived = $this->uploadImage($request->video, "posts/videos/");
-                //delete old video/image agains post
-                $old_image = Image::where('image_type', 'App\Models\Post')->where('image_id', $post->id)->delete(); 
-                //return $old_image;
-                $image = new Image();
-                $image->title = $image_recived['image_name'];
-                $image->path = $image_recived['image_path'];
-                $image->image_type = 'App\Models\Post';
-                $image->image_id = $post->id;
-                $image->created_by = $user->id;
-                $image->save();
-
-                //update post type 
-                $post->update(['post_type' => 2]);
-            }
             $postupdated = Post::with('image')->find($id);
             $returnData['post'] = $postupdated;
 
