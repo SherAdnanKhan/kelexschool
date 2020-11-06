@@ -14,6 +14,8 @@ use App\Models\UserLog;
 use App\Models\UserBlock;
 use App\Models\UserMute;
 use App\Models\UserConversation;
+use Validator;
+use Auth;
 
 class BaseController extends Controller
 {
@@ -297,6 +299,65 @@ class BaseController extends Controller
         }
 
         return $deleted_conversation_ids;
+    }
+
+    public function genericUploads(Request $request)
+    {
+        $returnData = [];
+        $user = Auth::guard('api')->user();
+        $file_type = "document";
+        $supported_image = ["jpg","jpeg","gif","png","bmp"];
+        $supported_video = ["mp4", "m4a", "m4v", "f4v", "f4a", "m4b", "m4r", "f4b", "mov", "3gp", "3gp2", "3g2", "3gpp", "3gpp2", "ogg", "oga", "ogv", "ogx", "wmv", "wma", "asf*", "webm", "flv", "MTS", "mpg", "mkv", "mpeg"];
+
+        $directory = 'generic/uploads/';
+        if (!isset($request->file_upload)) {
+            return $this->sendError('No file', ['error'=>'No file', 'message' => 'Please send attachement to upload']);
+        }
+        $validator = Validator::make($request->all(), [
+            'file_upload' => env('DOCUMENT_SIZE', '2000'),
+        ]);
+        if ($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $file = $request->file_upload;
+        try {
+            $fileNameStore = time();
+            $extension = $file->getClientOriginalExtension();
+            $uuid = $this->generateRandomString();
+            $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
+            $fileName = pathinfo($file)['filename'];
+            if(!isset($fileName) || $fileName= ' ') {
+                pathinfo($file)['filename'] = $uuid;
+            }
+            //$file = $_FILES['file_upload'];
+            //dd($_FILES['file_upload']);
+
+            if(in_array($extension,$supported_image)) {
+                $file_type = "image";
+                $directory = 'generic/images/';
+            }
+            else if (in_array($extension, $supported_video)) {
+                $file_type = "video";
+                $directory = 'generic/videos/';
+            }
+            else {
+                $file_type = "document";
+                $directory = 'generic/uploads/';
+            }
+
+            Storage::disk('s3')->put($directory.$imageName,  fopen($file, 'r+'), 'public');
+            $document_path = Storage::disk('s3')->url($directory.$imageName);
+        
+            $returnData['path'] = $document_path;
+            $returnData['doc_type'] = $file_type;
+            $returnData['doc_name'] = $imageName; 
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        
+        return $this->sendResponse($returnData, 'File Uploaded');
     }
     
 }
