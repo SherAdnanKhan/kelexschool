@@ -73,8 +73,6 @@ class MzFlashController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'feed' => 'max:200',
-            'image' => env('IMAGE_TYPE_SIZE', '1000'),
-            'video' => env('DOCUMENT_SIZE', '2000'),
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
@@ -89,10 +87,10 @@ class MzFlashController extends BaseController
                 $last_parent = $this->last_parent_feed_id($isFeed->parent_id, $isFeed->id);
             }
             $feedtype = 0;
-            if($request->has('image')) {
+            if($request->doc_type == "image") {
                 $feedtype  = 1;
             }
-            else if ($request->has('video')) {
+            else if ($request->doc_type == "video") {
                 $feedtype  = 2;
             }
             
@@ -104,18 +102,11 @@ class MzFlashController extends BaseController
             $feed->created_by = $user->id;
             $feed->save(); 
 
-            if($request->has('image') || $request->has('video')) {
-                if ($request->has('image')) {
-                    $image_recived = $this->uploadImage($request->image, "feeds/");
-                }
-
-                if ($request->has('video')) {
-                    $image_recived = $this->uploadImage($request->video, "feeds/");
-                }
+            if($request->has('doc_path') && $request->has('doc_type') && $request->has('doc_name')) {
                 
                 $image = new Image();
-                $image->title = $image_recived['image_name'];
-                $image->path = $image_recived['image_path'];
+                $image->title = $request->doc_name;
+                $image->path = $request->doc_path;
                 $image->image_type = 'App\Models\Feed';
                 $image->image_id = $feed->id;
                 $image->created_by = $user->id;

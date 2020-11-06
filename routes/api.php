@@ -25,6 +25,7 @@ Route::namespace('API')->group(function () {
             });
             Route::get('/posts/{slug}', 'PostController@show');
             Route::middleware('auth:api')->group(function () {
+                Route::post('generic/uploads', 'BaseController@genericUploads');
                 Route::group(['prefix' => 'arts'], function () {
                     Route::get('/', 'ArtController@getAll');
                     Route::post('/', 'ArtController@store');
