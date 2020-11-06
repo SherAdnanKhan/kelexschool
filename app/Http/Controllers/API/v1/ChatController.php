@@ -167,7 +167,7 @@ class ChatController extends BaseController
     public function store(Request $request)
     {
         $returnData = [];
-        //$user = Auth::guard('api')->user();
+        $my_user = Auth::guard('api')->user();
 
         $validator = Validator::make($request->all(), [
             'message' => 'min:1',
@@ -198,11 +198,13 @@ class ChatController extends BaseController
             $hasConversation->touch();
 
             //deleted chat updation remove from is_deleted
-            $deleted_conversation = UserConversation::where([ ['conversation_id', $request->conversation_id], ['user_id', $user->id] ])->first();
-            if($deleted_conversation) {
+            $deleted_conversation = UserConversation::where([ ['conversation_id', $request->conversation_id], ['user_id', $my_user->id] ])->first();
+            //return $deleted_conversation;
+            if(isset($deleted_conversation)) {
               $deleted_conversation->is_deleted = 0;
               $deleted_conversation->update();
             }
+            //return $deleted_conversation;
 
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
