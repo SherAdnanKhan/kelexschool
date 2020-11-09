@@ -320,7 +320,6 @@ class BaseController extends Controller
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         $file = $request->file_upload;
-        return $file;
         try {
             $fileNameStore = time();
             $extension = $file->getClientOriginalExtension();
