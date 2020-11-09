@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersConversationsTable extends Migration
+class CreateUserConversationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateUsersConversationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_conversations', function (Blueprint $table) {
+        Schema::create('user_conversations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('user_id');
@@ -23,6 +23,8 @@ class CreateUsersConversationsTable extends Migration
 
             $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+
+            Schema::dropIfExists('users_conversations');
         });
     }
 
@@ -33,6 +35,6 @@ class CreateUsersConversationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users_conversations');
+        Schema::dropIfExists('user_conversations');
     }
 }
