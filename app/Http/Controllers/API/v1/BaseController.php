@@ -320,10 +320,16 @@ class BaseController extends Controller
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         $file = $request->file_upload;
+        return $file;
         try {
             $fileNameStore = time();
             $extension = $file->getClientOriginalExtension();
             $uuid = $this->generateRandomString();
+            if (!$extension || $extension == '') {
+                if($file_type == "image") {
+                    $extension = 'jpeg';
+                }
+            }
             $imageName = $uuid.'-'.$fileNameStore.'.'.$extension;
             $fileName = pathinfo($file)['filename'];
             if(!isset($fileName) || $fileName= ' ') {
