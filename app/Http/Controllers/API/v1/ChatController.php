@@ -175,15 +175,15 @@ class ChatController extends BaseController
             'user_id' => 'required'
         ]);
         if ($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+          return $this->sendError('Validation Error.', $validator->errors());       
         }
         $user = User::with('avatars')->findOrFail($request->user_id);
         try {
             $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+              $query->where('user_id', $user->id);
             })->find($request->conversation_id);
             if (!$hasConversation) {
-                return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+              return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
             }
             $message = new Message;
             $message->message = $request->message;
@@ -199,12 +199,10 @@ class ChatController extends BaseController
 
             //deleted chat updation remove from is_deleted
             $deleted_conversation = UserConversation::where([ ['conversation_id', $request->conversation_id], ['user_id', $my_user->id] ])->first();
-            //return $deleted_conversation;
             if(isset($deleted_conversation)) {
               $deleted_conversation->is_deleted = 0;
               $deleted_conversation->update();
             }
-            //return $deleted_conversation;
 
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
