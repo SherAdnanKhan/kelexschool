@@ -146,6 +146,7 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'vault'], function() {
                     Route::get('/', 'VaultController@index');
                     Route::post('/', 'VaultController@store');
+                    Route::delete('/{vaultable_id}', 'VaultController@destroy');
                 });
 
             });
