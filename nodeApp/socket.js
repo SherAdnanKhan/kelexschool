@@ -132,13 +132,20 @@ module.exports = function (server) {
           .to(data.room)
           .emit('user-leave', { user: data.user, socketId: socket.id });
 
-        socket.leave(data.room);
 
         if (videoRooms[data.room].length === 0) {
           delete videoRooms[data.room];
+          io.to(data.room).emit('onMeetingEnded');
         }
       }
     });
+
+    socket.on('onMeetingStatus', (room, callback) => {
+      if (videoRooms[room]) {
+        return callback(true);
+      }
+      return callback(false);
+    })
 
     socket.on('on-toggle-microphone', data => {
       socket.to(data.room).emit('toggle-microphone', data);
@@ -233,6 +240,11 @@ module.exports = function (server) {
       for (let room in videoRooms) {
         videoRooms[room] = videoRooms[room].filter(data => data.socketId !== socket.id);
         socket.leave(room);
+
+        if (videoRooms[room].length === 0) {
+          delete videoRooms[room];
+          io.to(room).emit('onMeetingEnded');
+        }
       }
 
       const userFound = online_users.find(user => user.socketId === socket.id);
