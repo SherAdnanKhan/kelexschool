@@ -16,11 +16,21 @@ class LobbyController extends BaseController
     {
         $returnData = [];
         $faved_gallery_ids = [];
-        $user = Auth::guard('api')->user();       
-        $user_faved_galleries = User::with(['favGalleries'])->find($user->id);
+        $user = Auth::guard('api')->user();
+        //user faved galleries
+        $user_faved_galleries = User::with(['favGalleries', 'galleries'])->find($user->id);
         foreach($user_faved_galleries->favGalleries as $faved_gallery){
-            array_push($faved_gallery_ids, $faved_gallery->id);
+            if (!array_key_exists($faved_gallery->id, $faved_gallery_ids)) {
+                array_push($faved_gallery_ids, $faved_gallery->id);
+            }
         }
+        //user galleries added too
+        foreach($user_faved_galleries->galleries as $gallery){
+            if (!array_key_exists($gallery->id, $faved_gallery_ids)) {
+                array_push($faved_gallery_ids, $gallery->id);
+            }
+        }
+
         $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->withCount('strokeUsers', 'comments', 'is_vault')->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->paginate(env('PAGINATE_LENGTH', 15));
         //$user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         
@@ -34,7 +44,7 @@ class LobbyController extends BaseController
     {
         $faved_user_ids = [];
         $faved_users = Fav::where('faved_by', $user_id)->get(['faved_to']);
-
+        
         foreach($faved_users as $faved_user) {
             array_push($faved_user_ids, $faved_user->faved_to);
         }
