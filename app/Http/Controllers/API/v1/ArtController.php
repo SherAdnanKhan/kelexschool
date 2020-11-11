@@ -78,11 +78,10 @@ class ArtController extends BaseController
         $returnData = [];
         try {
             if($request->has('art')) {
-                $arts = Art::where('name', 'LIKE', '%'.$request->art.'%')->get();
+                $arts = Art::with('children')->where([ ['name', 'LIKE', '%'.$request->art.'%'], ['parent_id', null]])->get();
             }else {
-              $arts = Art::all();  
+              $arts = Art::with('children')->where('parent_id', null)->get();  
             }
-            //$arts = Art::where('name', 'LIKE', '%'.$art.'%')->get();
             $returnData['arts'] = $arts;
 
         }catch(QueryException $ex) {
