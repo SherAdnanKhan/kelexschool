@@ -18,7 +18,7 @@ class VaultController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-        $returnData['vault_posts'] = $vaults = vault::with('post.image', 'post.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->paginate(env('PAGINATE_LENGTH', 15));
+        $returnData['vault_posts'] = $vaults = vault::with('post.image', 'post.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Post')->distinct('vaultable_id')->paginate(env('PAGINATE_LENGTH', 15));
         //$returnData['vault_feeds'] = $vaults = vault::with('feed.image', 'feed.user.avatars')->where('user_id', $user->id)->where('vaultable_type', 'App\Models\Feed')->get();
         return $this->sendResponse($returnData, 'Fetched Vault list');
     }
@@ -41,6 +41,11 @@ class VaultController extends BaseController
                 $post = Post::with('image')->find($request->vaultable_id);
                 if (!isset($post)) {
                     return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
+                }
+                //check if already in vault
+                $check_vault = Vault::where([ ['user_id', $user->id], ['vaultable_type', 'App\Models\Post'], ['vaultable_id', $request->vaultable_id] ])->exists();
+                if($check_vault) {
+                    return $this->sendError('Already in Vault', ['error'=>'Post already exists in vault', 'message' => 'Post already exists in vault']);
                 }
                 $vault = new vault();
                 $vault->vaultable_id = $request->vaultable_id;
@@ -71,5 +76,27 @@ class VaultController extends BaseController
         }
         return $this->sendResponse($returnData, 'Added');
         
+    }
+
+    public function destroy($vaultable_id)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+        try {
+            $check_vault = Vault::where('vaultable_id', $vaultable_id)->first();
+            if (!$check_vault) {
+                return $this->sendError('No record', ['error'=>'No record of vault', 'message' => 'There is no such vault found']);
+            }
+
+            $destroy_vault = Vault::where('vaultable_id', $vaultable_id)->delete();
+            return $this->sendResponse($returnData, 'Post removed from vault');
+
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'remove from vault sucessfully');
     }
 }

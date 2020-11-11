@@ -74,4 +74,8 @@ class Post extends Model
     {
         return $this->morphMany(Vault::class, 'vault');
     }
+    public function is_vault()
+    {
+        return $this->hasOne(Vault::class, 'vaultable_id')->where('user_id', \Auth::guard('api')->user()->id);
+    }
 }
