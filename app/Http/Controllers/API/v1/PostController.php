@@ -171,8 +171,8 @@ class PostController extends BaseController
         $returnData = $other_privacy = [];
         $my_user = Auth::guard('api')->user();
     
-        $is_sprfvs = 0;
-        $post = Post::where('slug', $slug)->with('image', 'art', 'user.art.parent', 'user.avatars', 'user.feel')->withCount('strokeUsers', 'is_vault')->first();
+        $is_sprfvs = $is_vault = 0;
+        $post = Post::where('slug', $slug)->with('image', 'art', 'user.art.parent', 'user.avatars', 'user.feel')->withCount('strokeUsers')->first();
         if (!isset($post)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No post exists']);
         }
@@ -197,7 +197,9 @@ class PostController extends BaseController
                     $is_sprfvs = 2;
                 }
             }
+            $is_vault = $post->is_vault()->count();
             $returnData['is_sprfvs'] = $is_sprfvs;
+            $returnData['is_vault'] = $is_vault;
             
             //crtiques page
             $returnData['other_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $my_user->id, $post->user->id, 3);
