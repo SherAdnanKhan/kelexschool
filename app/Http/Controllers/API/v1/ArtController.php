@@ -78,9 +78,9 @@ class ArtController extends BaseController
         $returnData = [];
         try {
             if($request->has('art')) {
-                $arts = Art::with('children')->where([ ['name', 'LIKE', '%'.$request->art.'%'], ['parent_id', null]])->get();
+                $arts = Art::withCount('children')->where([ ['name', 'LIKE', '%'.$request->art.'%'], ['parent_id', null]])->get();
             }else {
-              $arts = Art::with('children')->where('parent_id', null)->get();  
+              $arts = Art::withCount('children')->where('parent_id', null)->get();  
             }
             $returnData['arts'] = $arts;
 
@@ -90,6 +90,29 @@ class ArtController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'your art search');
+
+    }
+
+    public function searchChildArt(Request $request)
+    {
+        $returnData = [];
+        $validator = Validator::make($request->all(), [
+            'parent_art_id' => 'required',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $arts = Art::where('parent_id', $request->parent_art_id)->get();
+            $returnData['child_arts'] = $arts;
+        }
+        catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'your child art search');
 
     }
 
