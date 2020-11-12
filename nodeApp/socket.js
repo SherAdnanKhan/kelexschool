@@ -200,6 +200,10 @@ module.exports = function (server) {
       }
     });
 
+    socket.on('onDeleteMessage', payload => {
+      socket.to(payload.room).emit('deleteMessage', payload.id);
+    });
+
     socket.on('leave', (data) => {
       socket.leave(data.room);
     });
