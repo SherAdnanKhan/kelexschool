@@ -32,6 +32,7 @@ Route::namespace('API')->group(function () {
                     Route::post('user-art-selection', 'ArtController@userArtSection');
                     Route::get('/art/{id}', 'ArtController@show');
                     Route::get('search', 'ArtController@searchArt');
+                    Route::get('search-child', 'ArtController@searchChildArt');
                 });
                 Route::group(['prefix' => 'chats'], function () {
                     Route::get('/user/{slug}/{test}', 'ChatController@create');
