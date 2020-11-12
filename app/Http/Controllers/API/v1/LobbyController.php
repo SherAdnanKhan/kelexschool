@@ -8,6 +8,7 @@ use Auth;
 use App\Models\Fav;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\MessageLog;
 
 
 class LobbyController extends BaseController
@@ -20,13 +21,13 @@ class LobbyController extends BaseController
         //user faved galleries
         $user_faved_galleries = User::with(['favGalleries', 'galleries'])->find($user->id);
         foreach($user_faved_galleries->favGalleries as $faved_gallery){
-            if (!array_key_exists($faved_gallery->id, $faved_gallery_ids)) {
+            if (!in_array($faved_gallery->id, $faved_gallery_ids)) {
                 array_push($faved_gallery_ids, $faved_gallery->id);
             }
         }
         //user galleries added too
         foreach($user_faved_galleries->galleries as $gallery){
-            if (!array_key_exists($gallery->id, $faved_gallery_ids)) {
+            if (!in_array($gallery->id, $faved_gallery_ids)) {
                 array_push($faved_gallery_ids, $gallery->id);
             }
         }
@@ -61,6 +62,22 @@ class LobbyController extends BaseController
         $returnData['all_faved_users'] = $all_faved_users;
 
         return $this->sendResponse($returnData, 'Lobby Faved Users Data');
+    }
+
+    public function unreadMessageConversations()
+    {
+        $user = Auth::guard('api')->user();
+        $conversation_ids = [];
+        $message_logs = MessageLog::where([['user_id', $user->id], ['status', 0]])->select('conversation_id')->get();
+        //return $message_logs;
+        foreach($message_logs as $message_log) {
+            if(!in_array($message_log->conversation_id, $conversation_ids)) {
+                array_push($conversation_ids, $message_log->conversation_id);
+            }
+        }
+
+        $conversation_ids = array_unique($conversation_ids);
+        return $conversation_ids;
     }
 
 
