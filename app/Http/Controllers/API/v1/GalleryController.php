@@ -12,6 +12,10 @@ use App\Models\Post;
 use App\Models\Image;
 use App\Models\User;
 use App\Models\UserFavGallery;
+use App\Models\UserIOGallery;
+use App\Models\Vault;
+use App\Models\Comment;
+
 
 class GalleryController extends BaseController
 {
@@ -289,6 +293,37 @@ class GalleryController extends BaseController
         $returnData['user_faved_galleries'] = $user_fav_galleries;
         return $this->sendResponse($returnData, 'User all faved galleries');
 
+    }
+
+    public function destroy($gallery_id)
+    {
+        $user = Auth::guard('api')->user();
+        $gallery = Gallery::where('created_by', $user->id)->find($gallery_id);
+        if(!isset($gallery)) {
+            return $this->sendError('Invalid Gallery', ['error'=>'No Gallery Exists or Unauthorized Gallery', 'message' => 'No gallery exists or unauthorized gallery']);
+        }
+        
+        
+        //remove faves 
+        UserFavGallery::where('gallery_id', $gallery_id)->delete();
+
+        //remove from invite olny galleries
+        UserIOGallery::where('gallery_id', $gallery_id)->delete();
+
+        //remove everting against each posts
+        $posts = Post::where('gallery_id', $gallery_id)->get();
+        foreach($posts as $post) {
+            //delete from vault, comments and stroks against post
+            Vault::where([['vaultable_id', $post->id], ['vaultable_type', 'App\Models\Post']])->delete();
+            Comment::where('post_id', $post->id)->delete();
+            $post->strokeUsers()->delete();
+        }
+
+        //delete posts of gallery
+        Post::where('gallery_id', $gallery_id)->delete();
+        $gallery->delete();
+
+        return $this->sendResponse([], 'Gallery destroyed successfully');
     }
 
 
