@@ -64,6 +64,7 @@ Route::namespace('API')->group(function () {
                     Route::post('my-gallery/create', 'GalleryController@store');
                     Route::post('my-gallery/update/{gallery_id}', 'GalleryController@update');
                     Route::delete('my-gallery/delete-image/{gallery_id}', 'GalleryController@deleteImage');
+                    Route::delete('/{gallery_id}', 'GalleryController@destroy');
                     Route::get('/{slug}', 'GalleryController@show');
                     Route::post('/fav', 'GalleryController@make_fav');
                     Route::post('/unfav', 'GalleryController@make_unfav');
