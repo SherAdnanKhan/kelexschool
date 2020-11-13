@@ -104,7 +104,11 @@ class ArtController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());       
         }
         try {
-            $arts = Art::where('parent_id', $request->parent_art_id)->get();
+            if($request->has('child_art')) { 
+                $arts = Art::where([['parent_id', $request->parent_art_id], ['name', 'LIKE', '%'.$request->child_art.'%']])->get();
+            }else {
+                $arts = Art::where('parent_id', $request->parent_art_id)->get();
+            }
             $returnData['child_arts'] = $arts;
         }
         catch(QueryException $ex) {
