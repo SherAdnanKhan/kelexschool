@@ -152,8 +152,12 @@ module.exports = function (server) {
     })
 
     socket.on('onType', (data) => {
-      io.to(data.conversation_id).emit('typing', data);
+      socket.to(data.conversation_id).emit('typing', data);
     });
+
+    socket.on('stopTyping', data => {
+      socket.to(data.conversation_id).emit('typingStopped', data);
+    })
 
     socket.on('onRead', async (message_id, user, data, token, callback) => {
       try {
