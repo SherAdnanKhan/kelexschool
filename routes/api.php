@@ -25,6 +25,7 @@ Route::namespace('API')->group(function () {
             });
             Route::get('/posts/{slug}', 'PostController@show');
             Route::get('/comments/{post_id}', 'CommentController@index');
+            Route::get('/metas', 'ScraperContoller@index');
             Route::middleware('auth:api')->group(function () {
                 Route::post('generic/uploads', 'BaseController@genericUploads');
                 Route::group(['prefix' => 'arts'], function () {
