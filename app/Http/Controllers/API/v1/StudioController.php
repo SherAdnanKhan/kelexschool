@@ -198,13 +198,8 @@ class StudioController extends BaseController
                     
                 }
                 else if ($user_gallery->privacy->privacy_type_id == 4) {
-                    $user_srfvs = UserSprvfsIO::where([
-                        ['created_to',  $my_user->id], 
-                        ['privacy_type_id', $user_gallery->privacy->privacy_type_id], 
-                        ['created_by', $user->id],
-                        ['status' , 1]
-                        ])->first();
-                        if (isset($user_srfvs)) {
+                    $user_invite_only = UserIOGallery::where([ ['user_id', $my_user->id], ['gallery_id', $user_gallery->id] ])->first();
+                        if (isset($user_invite_only)) {
                             array_push($gallery_privacy, [
                                 'gallery_id' => $user_gallery->id,
                                 'is_allowed' => 1
