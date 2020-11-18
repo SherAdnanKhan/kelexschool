@@ -24,6 +24,7 @@ Route::namespace('API')->group(function () {
                 Route::post('change-password', 'AuthController@changePassword');
             });
             Route::get('/posts/{slug}', 'PostController@show');
+            Route::get('/comments/{post_id}', 'CommentController@index');
             Route::middleware('auth:api')->group(function () {
                 Route::post('generic/uploads', 'BaseController@genericUploads');
                 Route::group(['prefix' => 'arts'], function () {
@@ -50,7 +51,7 @@ Route::namespace('API')->group(function () {
                 });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');
-                    Route::get('/{post_id}', 'CommentController@index');
+                    //Route::get('/{post_id}', 'CommentController@index');
                 });
                 Route::group(['prefix' => 'favs'], function () {
                     Route::post('/', 'FavController@store');
