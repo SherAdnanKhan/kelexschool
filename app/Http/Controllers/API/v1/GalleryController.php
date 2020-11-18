@@ -316,7 +316,7 @@ class GalleryController extends BaseController
             //delete from vault, comments and stroks against post
             Vault::where([['vaultable_id', $post->id], ['vaultable_type', 'App\Models\Post']])->delete();
             Comment::where('post_id', $post->id)->delete();
-            $post->strokeUsers()->delete();
+            //$post->strokeUsers()->delete();
         }
 
         //delete posts of gallery
