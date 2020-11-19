@@ -320,13 +320,13 @@ class ChatController extends BaseController
           //check already deleted
           $user_conversation_check = UserConversation::where([['conversation_id', $conversation->id], ['user_id', $user->id]])->first();
           if ($user_conversation_check) {
-            if ($user_conversation_check->is_deleted == 1) {
-              return $this->sendError('Already deleted', ['error'=>'Already deleted chat', 'message' => 'This chat is already deleted']);
-            }else {
+            // if ($user_conversation_check->is_deleted == 1) {
+            //   return $this->sendError('Already deleted', ['error'=>'Already deleted chat', 'message' => 'This chat is already deleted']);
+            // }else {
               $user_conversation_check->is_deleted = 1;
               $user_conversation_check->last_deleted_at = Carbon::now();
               $user_conversation_check->update();
-            }
+            //}
           }
           else {
             $user_conversation = new UserConversation();
