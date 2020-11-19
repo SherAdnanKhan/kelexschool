@@ -118,11 +118,12 @@ class PostController extends BaseController
         }
         try {
             $hasStroke = $user->strokePosts()->where('id', $request->post_id)->exists();
-            if ($hasStroke) {
-                return $this->sendError('Already Stoke Post', ['error'=>'Already Stroke Post', 'message' => 'You already stroke this post']);
+            if (!$hasStroke) {
+                //return $this->sendError('Already Stoke Post', ['error'=>'Already Stroke Post', 'message' => 'You already stroke this post']);
+                $user->strokePosts()->attach($request->post_id);
             }
             
-            $user->strokePosts()->attach($request->post_id);
+            //$user->strokePosts()->attach($request->post_id);
 
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
