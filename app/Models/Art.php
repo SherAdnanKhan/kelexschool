@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Art extends Model
 {
     public $timestamps = false;
+    protected $table = 'arts';
     protected $fillable = [ 'name', 'parent_id' ];
     protected $hidden = [ 'deleted_at' ];
     
