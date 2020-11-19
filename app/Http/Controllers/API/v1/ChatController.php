@@ -192,6 +192,7 @@ class ChatController extends BaseController
             $message->created_by = $user->id;
             $message->type = isset($request->message_type) ? $request->message_type : 0; //message_type: image ? 1 : video ? 2 : document ? 3 url ? 4: 0,
             $message->url = isset($request->url) ? $request->url : null; 
+            $message->web_url = isset($request->web_url) ? $request->web_url : null; 
             $message->save(); 
             
             //update conversation update time
@@ -320,13 +321,13 @@ class ChatController extends BaseController
           //check already deleted
           $user_conversation_check = UserConversation::where([['conversation_id', $conversation->id], ['user_id', $user->id]])->first();
           if ($user_conversation_check) {
-            if ($user_conversation_check->is_deleted == 1) {
-              return $this->sendError('Already deleted', ['error'=>'Already deleted chat', 'message' => 'This chat is already deleted']);
-            }else {
+            // if ($user_conversation_check->is_deleted == 1) {
+            //   return $this->sendError('Already deleted', ['error'=>'Already deleted chat', 'message' => 'This chat is already deleted']);
+            // }else {
               $user_conversation_check->is_deleted = 1;
               $user_conversation_check->last_deleted_at = Carbon::now();
               $user_conversation_check->update();
-            }
+            //}
           }
           else {
             $user_conversation = new UserConversation();
