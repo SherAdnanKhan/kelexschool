@@ -32,7 +32,7 @@ class LobbyController extends BaseController
             }
         }
 
-        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->withCount('strokeUsers', 'comments', 'is_vault')->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $faved_galleries_posts = Post::with(['image', 'user.avatars', 'user.feel', 'strokeUsers', 'has_stroke', 'comments', 'user.art.parent', 'gallery'])->withCount('strokeUsers', 'comments', 'is_vault', 'has_stroke')->whereIn('gallery_id', $faved_gallery_ids)->orderBy('created_at','DESC')->paginate(env('PAGINATE_LENGTH', 15));
         //$user_unread_msg = User::withCount('unreadMessages')->find($user->id);
         
         //$returnData['user_with_count_unread'] = $user_unread_msg->unread_messages_count;
