@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Validator;
 use Auth;
+use App\Models\UserSprvfsIO;
 use App\Models\Post;
 use App\Models\Comment;
 
@@ -19,7 +20,27 @@ class CommentController extends BaseController
      */
     public function index($post_id)
     {
+        $my_user = Auth::guard('api')->user();
+        $is_sprfvs = 0;
+        $post = Post::with('user')->findOrFail($post_id);
         $returnData['comments'] = $comments = Comment::with('user.avatars', 'user.feel')->where('post_id', $post_id)->get();
+        if(isset($my_user)) {
+            $check_user_sprfvs = UserSprvfsIO::where([
+                ['created_to',  $post->user->id], 
+                ['privacy_type_id', 3], 
+                ['created_by', $my_user->id]
+                ])->first();
+            if(isset($check_user_sprfvs)) {
+                if($check_user_sprfvs->status == 1) {
+                    $is_sprfvs = 1;
+                }
+                else {
+                    $is_sprfvs = 2;
+                }
+            }
+            $returnData['other_privacy'] = $other_privacy = $this->CheckPrivacyPage($is_sprfvs, $my_user->id, $post->user->id, 3);
+        }
+
         return $this->sendResponse($returnData, 'comments');
     }
 
