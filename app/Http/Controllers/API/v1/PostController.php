@@ -356,9 +356,7 @@ class PostController extends BaseController
             if (!$hasConversation) {
                 $conversation = Conversation::create(['name', 'room_com']);
                 $conversation->participants()->attach([$user->id, $request->send_to]);
-                $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($request) {
-                    $query->where('user_id', $request->send_to);
-                })->whereIn('id', $conversation->id)->first();
+                $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
             }
             $url = env('FRONT_APP_URL', 'https://staging.meuzm.com/')."dashboard/viewpost/".$post->slug;
 
