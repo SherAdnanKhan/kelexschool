@@ -98,7 +98,7 @@ class ScraperContoller extends BaseController
           $cut_string = substr($image, 1);
           $check_slash = stripos($image, $find_slash);
           if ($check_slash == 0) {
-            $image = $url.$firstIndex;
+            $image = $url.$cut_string;
           }else {
             $image = $url.$image;
           }
