@@ -90,6 +90,12 @@ class ScraperContoller extends BaseController
           $favicon = $url.$favicon;
         }
       }
+
+      if ($image != '') {
+        if (!filter_var($image, FILTER_VALIDATE_URL)) {
+          $image = $url.$image;
+        }
+      }
       $returnData['title'] = $title;
       $returnData['description'] = $description;
       $returnData['image'] = $image;
