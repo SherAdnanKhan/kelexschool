@@ -340,11 +340,13 @@ class PostController extends BaseController
         if($request->has('send_to')) {
             $conversation_all_ids = $userIds = [];
             $user = Auth::guard('api')->user();
-            $coverations_all = Conversation::whereHas('participants', function($query) use ($user) {
+            $coverations_all = Conversation::withCount('participants')->whereHas('participants', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->get('id');
             foreach ($coverations_all as $coveration) {
-                array_push($conversation_all_ids, $coveration->id);
+                if($coveration->participants_count == 2) {
+                    array_push($conversation_all_ids, $coveration->id);
+                }
             }
 
             $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($request) {
@@ -356,7 +358,7 @@ class PostController extends BaseController
                 $conversation->participants()->attach([$user->id, $request->send_to]);
                 $hasConversation = Conversation::with('participants.avatars', 'participants.feel')->whereHas('participants', function($query) use ($request) {
                     $query->where('user_id', $request->send_to);
-                })->whereIn('id', $conversation_all_ids)->first();
+                })->whereIn('id', $conversation->id)->first();
             }
             $url = env('FRONT_APP_URL', 'https://staging.meuzm.com/')."dashboard/viewpost/".$post->slug;
 
