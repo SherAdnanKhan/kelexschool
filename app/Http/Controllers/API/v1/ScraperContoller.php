@@ -14,6 +14,7 @@ class ScraperContoller extends BaseController
     {
       $returnData = [];
       $title = $description = $image = $favicon = $url =  "";
+      $find_slash = '/';
       $validator = Validator::make($request->all(), [
         'url' => 'required',
       ]);
@@ -93,7 +94,16 @@ class ScraperContoller extends BaseController
 
       if ($image != '') {
         if (!filter_var($image, FILTER_VALIDATE_URL)) {
-          $image = $url.$image;
+          //$image = $url.$image;
+          $cut_string = substr($image, 1);
+          $check_slash = stripos($image, $find_slash);
+          if ($check_slash == 0) {
+            $image = $url.$firstIndex;
+          }else {
+            $image = $url.$image;
+          }
+
+          //return $firstIndex;
         }
       }
       $returnData['title'] = $title;
