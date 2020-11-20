@@ -13,14 +13,6 @@ volumes:
       type: none
       device: /home/sarah/projects/meuzmnet-laravel
 services:
-  my-mysql:
-    image: mysql:5.7.18
-    environment: 
-      MYSQL_ROOT_PASSWORD: "imgettingitroot"
-    ports: 
-      - "3306:3306"
-    volumes: 
-      - mysql-data:/var/lib/mysql
   meuzm:
     build:
       context: ../
@@ -29,12 +21,22 @@ services:
       - meuzm-app-dir:/meuzm-app
     environment:
       DB_CONNECTION: "mysql"
-      DB_HOST: "my-mysql"
-      DB_USERNAME: "root"
-      DB_PASSWORD: "imgettingitroot"
+      DB_HOST: "127.0.0.1"
+      DB_USERNAME: "rootubu"
+      DB_PASSWORD: "123456"
       DB_PORT: "3306"
-      DB_DATABASE: "dockmeuzm"
+      DB_DATABASE: "meuzmnet_laravel"
     ports:
       - "8001:8000"
-    depends_on: 
-      - my-mysql
+  muuzm-node: 
+    build: 
+      context: ../nodeApp/
+      dockerfile: Dockerfile
+    environment: 
+      FRONT_APP_URL: "https://staging.meuzm.com/"
+      BACKEND_APP_URL: "https://staging-api.meuzm.com/api/v1/"
+      NODE_APP_ENV: local
+      NODE_APP_PORT: "8080"
+    ports:
+      - "8080:8080"
+    
