@@ -190,7 +190,7 @@ class ChatController extends BaseController
             $message->conversation_id = $request->conversation_id;
             $message->feel_id = $user->feel_id;
             $message->created_by = $user->id;
-            $message->type = isset($request->message_type) ? $request->message_type : 0; //message_type: image ? 1 : video ? 2 : document ? 3 url ? 4: 0,
+            $message->type = isset($request->message_type) ? $request->message_type : 0; //message_type: image ? 1 : video ? 2 : document ? 3 : 0,
             $message->url = isset($request->url) ? $request->url : null; 
             $message->web_url = isset($request->web_url) ? $request->web_url : null; 
             $message->save(); 
