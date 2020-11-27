@@ -270,6 +270,14 @@ module.exports = function (server) {
       }
     });
 
+    socket.on('faveExhibitNotifications', async (data, notification_type) => {
+      if (data.recievers && data.recievers.length > 0) {
+        for (let reciever of data.recievers) {
+          socket.to(reciever).emit('reciveUserNotifications', data, notification_type);
+        }
+      }
+    });
+
     socket.on('onUserNotifications', async (data, notification_type, callback) => {
       //await requestServices.checkMuteStatus(socket.token, data.reciever.id);
       try {
