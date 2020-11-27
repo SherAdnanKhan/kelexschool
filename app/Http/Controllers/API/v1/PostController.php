@@ -17,6 +17,7 @@ use App\Models\Message;
 use App\Models\MessageLog;
 use App\Models\User;
 use App\Models\Feed;
+use App\Models\UserFavGallery;
 
 class PostController extends BaseController
 {
@@ -48,7 +49,7 @@ class PostController extends BaseController
      */
     public function store(Request $request)
     {
-        $returnData = [];
+        $returnData = $faved_user_slugs = [];
         $user = Auth::guard('api')->user();
         $post_type = 0;
 
@@ -96,6 +97,14 @@ class PostController extends BaseController
 
             $returnData['post'] = $post;
             $returnData['post']['image'] = $image;
+
+            //fave gallery users
+            $faved_users = UserFavGallery::with('user')->where('gallery_id', $gallery->id)->get();
+            foreach($faved_users as $faved_user) {
+                array_push($faved_user_slugs, $faved_user->user->slug);            
+            }
+
+            $returnData['faved_users_slug'] = $faved_user_slugs;
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
