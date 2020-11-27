@@ -101,7 +101,11 @@ class PostController extends BaseController
             //fave gallery users
             $faved_users = UserFavGallery::with('user')->where('gallery_id', $gallery->id)->get();
             foreach($faved_users as $faved_user) {
-                array_push($faved_user_slugs, $faved_user->user->slug);            
+                //check if user is muted
+                $is_muted = $this->CheckUserMute($faved_user->user->id, $user->id);
+                if($is_muted == false) {
+                    array_push($faved_user_slugs, $faved_user->user->slug);
+                }  
             }
 
             $returnData['faved_users_slug'] = $faved_user_slugs;
