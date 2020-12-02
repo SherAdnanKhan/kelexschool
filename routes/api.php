@@ -23,10 +23,14 @@ Route::namespace('API')->group(function () {
                 Route::post('forgot-password', 'AuthController@sendResetLinkEmail');
                 Route::post('change-password', 'AuthController@changePassword');
             });
+            Route::get('/test/email', 'AuthController@sendEmail');
             Route::get('/posts/{slug}', 'PostController@show');
             Route::get('/comments/{post_id}', 'CommentController@index');
             Route::get('/metas', 'ScraperContoller@index');
-            Route::middleware('auth:api')->group(function () {
+
+            Route::middleware('auth:api')->post('/auth/verify', 'AuthController@VerifyAccount');
+            Route::middleware('auth:api')->get('/auth/resend-verify-code', 'AuthController@ResendVerificationCode');
+            Route::middleware('auth:api', 'verified')->group(function () {
                 Route::post('generic/uploads', 'BaseController@genericUploads');
                 Route::group(['prefix' => 'arts'], function () {
                     Route::get('/', 'ArtController@getAll');
@@ -45,7 +49,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/message/read-all', 'ChatController@readAllMessage');
                     Route::post('/message/uploads', 'ChatController@uploadOnChat');
                     Route::post('/group-chat', 'ChatController@groupChat');
-                    Route::post('/invite-people/{coversation_id}', 'ChatController@addPeopleToChat');
+                    Route::post('/invite-people/{conversation_id}', 'ChatController@addPeopleToChat');
                     Route::get('/conversation/{id}', 'ChatController@show');
                     Route::delete('/message/{id}', 'ChatController@destroyMessage');
                     Route::delete('/{id}', 'ChatController@destroy');

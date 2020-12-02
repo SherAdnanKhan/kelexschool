@@ -11,7 +11,7 @@ use Spatie\Sluggable\SlugOptions;
 use Storage;
 use Carbon\Carbon;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, Notifiable, HasSlug;
     
@@ -30,7 +30,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'created_at', 'updated_at', 'deleted_at'
+        'password', 'remember_token', 'created_at', 'updated_at', 'deleted_at', 'verification_code', 'verification_code_expiry'
     ];
 
     protected $dates = [
