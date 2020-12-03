@@ -65,6 +65,11 @@ Route::namespace('API')->group(function () {
                     Route::get('/get-faves', 'FavController@favs');
                     Route::get('/fav-counts', 'FavController@favCounts');
                 });
+
+                Route::group(['prefix' => 'feedback'], function () {
+                    Route::post('/', 'FeedbackController@store'); 
+                });
+
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
                     Route::post('my-gallery/create', 'GalleryController@store');
