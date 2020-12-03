@@ -230,7 +230,7 @@ class AuthController extends BaseController
                     $updateUser->email_verified_at = now();
                     $updateUser->save();
 
-                    \Mail::to($request->email)->send(new \App\Mail\WelcomeMail());
+                    \Mail::to($user->email)->send(new \App\Mail\WelcomeMail());
                 }
                 
             }
