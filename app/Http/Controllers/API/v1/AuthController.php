@@ -33,7 +33,9 @@ class AuthController extends BaseController
             'email' => 'required|unique:users,email|email',
             'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
-            'avatar' => env('IMAGE_TYPE_SIZE', '1000')
+            'dob' => 'required|date|date_format:Y-m-d',
+            'avatar' => env('IMAGE_TYPE_SIZE', '1000'), 
+            'agreement' => 'required|boolean'
         ]);
    
         if ($validator->fails()){
