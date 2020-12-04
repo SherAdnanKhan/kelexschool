@@ -166,6 +166,31 @@ class UserController extends BaseController
 
     }
 
+    public function updateUserDob(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'dob' => 'required|date|date_format:Y-m-d',
+        ]);
+   
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        try {
+            $user->dob = $request->dob;
+            $user->update();
+
+            $return_user = User::with('avatars', 'feel')->find($user->id);
+            $returnData['user'] = $return_user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'User Date of birth Successfully.');
+
+    }
+
     public function updateUserName(Request $request)
     {
         $user = Auth::guard('api')->user();
