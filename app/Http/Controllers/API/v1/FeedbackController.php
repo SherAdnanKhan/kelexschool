@@ -14,7 +14,7 @@ class FeedbackController extends BaseController
 {
     public function store(Request $request)
     {
-        $returnData = [];
+        $returnData = $emailData = [];
         $user = Auth::guard('api')->user();
 
         $validator = Validator::make($request->all(), [
@@ -41,6 +41,9 @@ class FeedbackController extends BaseController
                 $image->save();
             }
             //updated feed
+            $emailData['email'] = $user->email;
+            $emailData['feedback'] = $request->feedback;
+            \Mail::to(env('FEEDBACK_EMAIL', 'sarahsajjad93@gmail.com'))->send(new \App\Mail\FeedbackMail($emailData));
             $returnData['feedback'] = Feedback::with('image')->find($feedback->id);
 
         }catch(QueryException $ex) {
