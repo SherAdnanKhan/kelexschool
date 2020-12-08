@@ -1,0 +1,42 @@
+version: '3.3'
+volumes: 
+  mysql-data: 
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ~/mysql
+  meuzm-app-dir:
+    driver: local
+    driver_opts: 
+      o: bind
+      type: none
+      device: ~/projects/meuzmnet-laravel
+services:
+  meuzm:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    volumes:
+      - meuzm-app-dir:/meuzm-app
+    environment:
+      DB_CONNECTION: "mysql"
+      DB_HOST: "127.0.0.1"
+      DB_USERNAME: "rootubu"
+      DB_PASSWORD: "123456"
+      DB_PORT: "3306"
+      DB_DATABASE: "meuzmnet_laravel"
+    ports:
+      - "8001:8000"
+  muuzm-node: 
+    build: 
+      context: ../nodeApp/
+      dockerfile: Dockerfile
+    environment: 
+      FRONT_APP_URL: "https://staging.meuzm.com/"
+      BACKEND_APP_URL: "https://staging-api.meuzm.com/api/v1/"
+      NODE_APP_ENV: local
+      NODE_APP_PORT: "8080"
+    ports:
+      - "8080:8080"
+    

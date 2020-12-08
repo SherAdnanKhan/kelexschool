@@ -1,34 +1,44 @@
-version: '3.3'
-volumes: 
-  mysql-data: 
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: /home/sarah/mysql
-  meuzm-app-dir:
-    driver: local
-    driver_opts: 
-      o: bind
-      type: none
-      device: /home/sarah/projects/meuzmnet-laravel
+version: '3'
 services:
+
+  #MySQL Service
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mezum_laravel
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root_test
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+    networks:
+      - app-network
+
   meuzm:
     build:
       context: ../
       dockerfile: Dockerfile
-    volumes:
-      - meuzm-app-dir:/meuzm-app
     environment:
       DB_CONNECTION: "mysql"
-      DB_HOST: "127.0.0.1"
-      DB_USERNAME: "rootubu"
-      DB_PASSWORD: "123456"
+      DB_HOST: "db"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "root_test"
       DB_PORT: "3306"
-      DB_DATABASE: "meuzmnet_laravel"
+      DB_DATABASE: "mezum_laravel"
     ports:
-      - "8001:8000"
-  muuzm-node: 
+      - "8000:8000"
+    depends_on:
+      - db
+    links: 
+      - db
+    networks:
+      - app-network
+  meuzm-node: 
     build: 
       context: ../nodeApp/
       dockerfile: Dockerfile
@@ -39,4 +49,13 @@ services:
       NODE_APP_PORT: "8080"
     ports:
       - "8080:8080"
-    
+    networks:
+      - app-network
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
