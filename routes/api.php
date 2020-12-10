@@ -65,11 +65,9 @@ Route::namespace('API')->group(function () {
                     Route::get('/get-faves', 'FavController@favs');
                     Route::get('/fav-counts', 'FavController@favCounts');
                 });
-
                 Route::group(['prefix' => 'feedback'], function () {
                     Route::post('/', 'FeedbackController@store'); 
                 });
-
                 Route::group(['prefix' => 'galleries'], function () {
                     Route::get('my-gallery', 'GalleryController@getMyGalleries');
                     Route::post('my-gallery/create', 'GalleryController@store');
@@ -153,15 +151,18 @@ Route::namespace('API')->group(function () {
                     Route::post('/invite-only', 'PrivacyController@addUserToInviteOnly');
                     Route::post('/uninvite-only', 'PrivacyController@uninviteUserToInviteOnly');
                 });
-
                 Route::group(['prefix' => 'feel'], function () {
                     Route::get('/', 'FeelController@index');
                 });
-
                 Route::group(['prefix' => 'vault'], function() {
                     Route::get('/', 'VaultController@index');
                     Route::post('/', 'VaultController@store');
                     Route::delete('/{vaultable_id}', 'VaultController@destroy');
+                });
+
+                Route::group(['prefix' => 'notification'], function() {
+                    Route::get('/', 'NotificationController@index');
+                    Route::get('/count', 'NotificationController@count');
                 });
 
             });
