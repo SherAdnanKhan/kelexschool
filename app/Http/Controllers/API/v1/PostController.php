@@ -500,7 +500,7 @@ class PostController extends BaseController
             $notification->notifyable_type = 'App\Models\Post';
             $notification->notifyable_id = $post_new->id;
             $notification->sender_id = $user->id;
-            $notification->receiver_id = $user->id;
+            $notification->receiver_id = $post->created_by;
             $notification->save();
 
 
