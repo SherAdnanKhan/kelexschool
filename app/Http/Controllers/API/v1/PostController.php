@@ -18,6 +18,7 @@ use App\Models\MessageLog;
 use App\Models\User;
 use App\Models\Feed;
 use App\Models\UserFavGallery;
+use App\Models\Notification;
 
 class PostController extends BaseController
 {
@@ -492,6 +493,17 @@ class PostController extends BaseController
 
             $returnData['post'] = $post_new;
             $returnData['post']['image'] = $image;
+
+            //generate notification
+            $notification = new Notification();
+            $notification->type = 'REPOST EXHIBIT';
+            $notification->notifyable_type = 'App\Models\Post';
+            $notification->notifyable_id = $post_new->id;
+            $notification->sender_id = $user->id;
+            $notification->receiver_id = $user->id;
+            $notification->save();
+
+
 
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
