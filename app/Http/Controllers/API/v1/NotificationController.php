@@ -28,4 +28,26 @@ class NotificationController extends BaseController
         
         return $this->sendResponse($returnData, 'Notifications count');
     }
+    public function readNotification($notification_id)
+    {
+        $user = Auth::guard('api')->user();
+        $returnData = [];
+
+        try {
+            $notification = Notification::findorfail($notification_id);
+            if ($notification->receiver_id == $user->id) {
+                return $this->sendError('Unauthorized notification', ['error'=>'Unauthorized notification', 'message' => 'This notification doesnt belongs to you']);   
+            }
+            $notification->status = 1;
+            $notification->update();
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        
+        return $this->sendResponse($returnData, 'Notification Status read');
+    }
+
 }
