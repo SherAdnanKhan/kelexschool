@@ -5,8 +5,7 @@ services:
   db:
     image: mysql:5.7.22
     container_name: db
-    restart: unless-stopped
-    tty: true
+    restart: always
     ports:
       - "3306:3306"
     environment:
@@ -16,6 +15,23 @@ services:
       SERVICE_NAME: mysql
     volumes:
       - dbdata:/var/lib/mysql/
+    networks:
+      - app-network
+
+  #phpmyadmin container
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root_test
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    links: 
+      - db
     networks:
       - app-network
 
@@ -31,7 +47,7 @@ services:
       DB_PORT: "3306"
       DB_DATABASE: "mezum_laravel"
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db
     links: 
@@ -46,9 +62,9 @@ services:
       FRONT_APP_URL: "https://staging.meuzm.com/"
       BACKEND_APP_URL: "https://staging-api.meuzm.com/api/v1/"
       NODE_APP_ENV: local
-      NODE_APP_PORT: "8080"
+      NODE_APP_PORT: "8030"
     ports:
-      - "8080:8080"
+      - "8030:8080"
     networks:
       - app-network
 #Docker Networks
