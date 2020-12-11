@@ -494,17 +494,17 @@ class PostController extends BaseController
             $returnData['post'] = $post_new;
             $returnData['post']['image'] = $image;
 
-            //generate notification
-            $notification = new Notification();
-            $notification->type = 'REPOST EXHIBIT';
-            $notification->notifyable_type = 'App\Models\Post';
-            $notification->notifyable_id = $post_new->id;
-            $notification->sender_id = $user->id;
-            $notification->receiver_id = $post->created_by;
-            $notification->save();
-
-
-
+            //generate notification if user reciver and sender is not same
+            if($user->id != $post->created_by) {
+                $notification = new Notification();
+                $notification->type = 'REPOST EXHIBIT';
+                $notification->notifyable_type = 'App\Models\Post';
+                $notification->notifyable_id = $post_new->id;
+                $notification->sender_id = $user->id;
+                $notification->receiver_id = $post->created_by;
+                $notification->save();
+            }
+            
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {

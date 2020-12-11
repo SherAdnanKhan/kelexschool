@@ -163,6 +163,7 @@ Route::namespace('API')->group(function () {
                 Route::group(['prefix' => 'notification'], function() {
                     Route::get('/', 'NotificationController@index');
                     Route::get('/count', 'NotificationController@count');
+                    Route::get('/read/{notification_id}', 'NotificationController@readNotification');
                 });
 
             });
