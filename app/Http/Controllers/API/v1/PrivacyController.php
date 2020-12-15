@@ -131,6 +131,7 @@ class PrivacyController extends BaseController
             $returnData['privacy'] = $this->commonAddUserToPrivacy($request); 
             $emailData = $this->EmailData($request->user_id);
             \Mail::to($to_user->email)->send(new \App\Mail\SprfvsRequestMail($emailData));
+            
             }catch(QueryException $ex) {
                 return $this->sendError('Validation Error.', $ex->getMessage(), 200);
             }catch(\Exception $ex) {
@@ -146,6 +147,10 @@ class PrivacyController extends BaseController
 
         if ($request->privacy_type_id == 3) {
             $status = '0';
+            $privacy_user = User::find($request->user_id);
+            $type='SPRFVS INVITE';
+            $this->generateNotification($user->id, $privacy_user->id, $privacy_user, $type);
+            
         }
         else {
             $status = '1';
@@ -262,6 +267,8 @@ class PrivacyController extends BaseController
             if(!isset($privacy_check)) {
                 return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
             }
+            $type='SPRFVS APPROVED';
+            $this->generateNotification($user->id, $other_user->id, $other_user, $type);
             $privacy_check->update(['status' => 1]);
 
             //add to users fave gallery list

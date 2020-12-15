@@ -85,6 +85,10 @@ class CommentController extends BaseController
             $comment_return = Comment::with('user.avatars', 'user.feel')->find($comment->id);
             $returnData['comment'] = $comment_return;
 
+            $post = Post::find($request->post_id);
+            $type='CRITIQES';
+           $result= $this->generateNotification($user->id, $post->created_by,$post,$type);
+
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {

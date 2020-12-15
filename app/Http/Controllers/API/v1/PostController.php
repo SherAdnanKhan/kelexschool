@@ -135,6 +135,9 @@ class PostController extends BaseController
             if (!$hasStroke) {
                 //return $this->sendError('Already Stoke Post', ['error'=>'Already Stroke Post', 'message' => 'You already stroke this post']);
                 $user->strokePosts()->attach($request->post_id);
+                $post = Post::find($request->post_id);
+                $type='STROKE EXHIBIT';
+               $result= $this->generateNotification($user->id, $post->created_by,$post,$type);
             }
             
             //$user->strokePosts()->attach($request->post_id);
@@ -145,6 +148,8 @@ class PostController extends BaseController
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
         return $this->sendResponse($returnData, 'Mark Stroke Successfully.');
+
+       
     }
 
     public function unStroke(Request $request)
@@ -495,22 +500,15 @@ class PostController extends BaseController
             $returnData['post']['image'] = $image;
 
             //generate notification if user reciver and sender is not same
-            if($user->id != $post->created_by) {
-                $notification = new Notification();
-                $notification->type = 'REPOST EXHIBIT';
-                $notification->notifyable_type = 'App\Models\Post';
-                $notification->notifyable_id = $post_new->id;
-                $notification->sender_id = $user->id;
-                $notification->receiver_id = $post->created_by;
-                $notification->save();
-            }
-            
+            $type='REPOST EXHIBIT';
+          $result= $this->generateNotification($user->id, $post->created_by,$post_new,$type);  
+             
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
             return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
         }
-        return $this->sendResponse($returnData, 'Exhibit Reposted');
+        return $this->sendResponse($result, 'Exhibit Reposted');
     }
 
     public function toMzflash(Request $request)

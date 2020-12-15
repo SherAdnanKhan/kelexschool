@@ -360,5 +360,16 @@ class BaseController extends Controller
         
         return $this->sendResponse($returnData, 'File Uploaded');
     }
+
+
+    public function generateNotification($sender_id,$receiver_id,$model,$type)
+    {   
+        if($sender_id!= $receiver_id) {
+            $model->notify()->create(['type'=>$type,'sender_id'=>$sender_id,
+            'receiver_id'=> $receiver_id]);
+            return true;
+        }
+       
+    }
     
 }

@@ -96,6 +96,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Comment::class, 'created_by', 'id');
     }
 
+    public function notify()
+    {
+        return $this->morphMany(Notification::class, 'notifyable');
+    }
+    
     public function feeds()
     {
         return $this->hasMany(Feed::class, 'created_by', 'id');

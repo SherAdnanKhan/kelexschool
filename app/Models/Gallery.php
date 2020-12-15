@@ -33,6 +33,11 @@ class Gallery extends Model
     {
         return $this->hasMany(Post::class, 'gallery_id', 'id');
     }
+    
+    public function notify()
+    {
+        return $this->morphMany(Notification::class, 'notifyable');
+    }
 
     public function image()
     {

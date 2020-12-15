@@ -24,7 +24,7 @@ class NotificationController extends BaseController
     {
         $returnData = [];
         $user = Auth::guard('api')->user();
-        $returnData['notification_count'] = Notification::where('receiver_id', $user->id)->count();
+        $returnData['notification_count'] = Notification::where(['receiver_id'=> $user->id,'status'=>'0'])->count();
         
         return $this->sendResponse($returnData, 'Notifications count');
     }
@@ -35,7 +35,7 @@ class NotificationController extends BaseController
 
         try {
             $notification = Notification::findorfail($notification_id);
-            if ($notification->receiver_id == $user->id) {
+            if ($notification->sender_id == $user->id) {
                 return $this->sendError('Unauthorized notification', ['error'=>'Unauthorized notification', 'message' => 'This notification doesnt belongs to you']);   
             }
             $notification->status = 1;
