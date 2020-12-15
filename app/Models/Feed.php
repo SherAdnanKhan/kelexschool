@@ -25,6 +25,11 @@ class Feed extends Model
         return $this->belongsTo(Feed::class,'parent_id');
     }
 
+    public function notify()
+    {
+        return $this->morphMany(Notification::class, 'notifyable');
+    }
+    
     public function parents() 
     {
         return $this->belongsTo(Feed::class,'parent_id')->with('parent');

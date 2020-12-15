@@ -85,6 +85,10 @@ class MzFlashController extends BaseController
                     return $this->sendError('Invalid Feed', ['error'=>'Unauthorised Feed', 'message' => 'Please add correct feed']);
                 }
                 $last_parent = $this->last_parent_feed_id($isFeed->parent_id, $isFeed->id);
+                $feed = Feed::find($last_parent);  
+                $type='REPOST FEED';
+                $this->generateNotification($user->id, $feed->created_by, $feed, $type);
+    
             }
             $feedtype = 0;
             if($request->doc_type == "image") {
@@ -320,8 +324,10 @@ class MzFlashController extends BaseController
             if ($hasStroke) {
                 return $this->sendError('Already Stoke Feed', ['error'=>'Already Stroke Feed', 'message' => 'You already stroke this feed']);
             }
-            
             $user->strokeFeeds()->attach($request->feed_id);
+            $feed = Feed::find($request->feed_id);  
+            $type='STROKE FEED';
+            $this->generateNotification($user->id, $feed->created_by,$feed,$type);
 
         }catch(QueryException $ex) {
             return $this->sendError('Query Exception Error.', $ex->getMessage(), 200);

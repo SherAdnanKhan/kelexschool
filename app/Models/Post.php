@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
@@ -70,6 +70,10 @@ class Post extends Model
         return $this->belongsToMany(User::class, 'user_stroke_posts')->where('user_id', \Auth::guard('api')->user()->id);
     }
 
+    public function notify()
+    {
+        return $this->morphMany(Notification::class, 'notifyable');
+    }
     public function vaults()
     {
         return $this->morphMany(Vault::class, 'vault');
