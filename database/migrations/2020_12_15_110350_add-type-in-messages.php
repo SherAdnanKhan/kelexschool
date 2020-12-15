@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTypeNotificationColum extends Migration
+class AddTypeInMessages extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,13 @@ class AddTypeNotificationColum extends Migration
      * @return void
      */
     public function up()
-    { 
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->enum('type', ['CRITIQES', 'GALLERY FAVED', 'SPRFVS APPROVED', 'SPRFVS INVITE' , 'REPOST FEED', 'REPOST EXHIBIT', 'STROKE FEED', 'STROKE EXHIBIT']);
+    {
+        Schema::table('messages', function (Blueprint $table) {
+            $table->tinyInteger('type')->comment('1-Image, 0-text, 2-Video, 4-CallInfo')->default(0)->after('created_by');
         });
     }
-
     
+
     /**
      * Reverse the migrations.
      *
@@ -26,7 +26,7 @@ class AddTypeNotificationColum extends Migration
      */
     public function down()
     {
-        Schema::table('notifications', function (Blueprint $table) {
+        Schema::table('messages', function (Blueprint $table) {
             //
         });
     }
