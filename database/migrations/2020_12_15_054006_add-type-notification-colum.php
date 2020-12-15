@@ -12,12 +12,13 @@ class AddTypeNotificationColum extends Migration
      * @return void
      */
     public function up()
-    {
+    { 
         Schema::table('notifications', function (Blueprint $table) {
             $table->enum('type', ['CRITIQES', 'GALLERY FAVED', 'SPRFVS APPROVED', 'SPRFVS INVITE' , 'REPOST FEED', 'REPOST EXHIBIT', 'STROKE FEED', 'STROKE EXHIBIT']);
         });
     }
 
+    
     /**
      * Reverse the migrations.
      *

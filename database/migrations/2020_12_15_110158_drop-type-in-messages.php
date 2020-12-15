@@ -16,8 +16,10 @@ class DropTypeInMessages extends Migration
         Schema::table('messages', function (Blueprint $table) {
             $table->dropColumn('type');
         });
-    }
+    } 
 
+
+    
     /**
      * Reverse the migrations.
      *

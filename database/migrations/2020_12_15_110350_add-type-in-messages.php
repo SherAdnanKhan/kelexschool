@@ -17,6 +17,7 @@ class AddTypeInMessages extends Migration
             $table->tinyInteger('type')->comment('1-Image, 0-text, 2-Video, 4-CallInfo')->default(0)->after('created_by');
         });
     }
+    
 
     /**
      * Reverse the migrations.
