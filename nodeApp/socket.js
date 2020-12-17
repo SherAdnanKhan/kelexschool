@@ -200,6 +200,7 @@ module.exports = function (server) {
           }
         }
       } catch (ex) {
+        console.log(ex.message)
         callback && callback('Could not send message try again.');
       }
     });

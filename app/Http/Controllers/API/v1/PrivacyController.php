@@ -269,11 +269,11 @@ class PrivacyController extends BaseController
                 return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
             }
 
-            $read_accept= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$other_user->id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();
-           
+            $read_accept= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$other_user->id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();  
             if(isset($read_accept)) {
-            $read_accept->status='1';
-            $read_accept->update(); }
+                $read_accept->status='1';
+                $read_accept->update(); 
+            }
 
             $type='SPRFVS APPROVED';
             $this->generateNotification($user->id, $other_user->id, $other_user, $type);
@@ -335,10 +335,10 @@ class PrivacyController extends BaseController
                 }
                 $privacy_check->delete();
                 $read_reject= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$request->user_id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();
-              
                 if(isset($read_reject)) {
-                $read_reject->status='1';
-                $read_reject->update(); }
+                    $read_reject->status='1';
+                    $read_reject->update(); 
+                }
 
 
                 //add to users fave gallery list
