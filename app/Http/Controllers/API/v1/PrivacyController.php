@@ -270,8 +270,10 @@ class PrivacyController extends BaseController
             }
 
             $read_accept= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$other_user->id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();
+           
+            if(isset($read_accept)) {
             $read_accept->status='1';
-            $read_accept->update(); 
+            $read_accept->update(); }
 
             $type='SPRFVS APPROVED';
             $this->generateNotification($user->id, $other_user->id, $other_user, $type);
@@ -295,6 +297,7 @@ class PrivacyController extends BaseController
                 }
             }
             $returnData['privacy'] = $privacy_check;
+
             $emailData['by_user'] = $by_user = User::with('avatars')->findOrFail($other_user->id);
             $emailData['to_user'] = $to_user = User::with('avatars')->findOrFail($user->id);
             $emailData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
@@ -332,8 +335,10 @@ class PrivacyController extends BaseController
                 }
                 $privacy_check->delete();
                 $read_reject= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$request->user_id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();
+              
+                if(isset($read_reject)) {
                 $read_reject->status='1';
-                $read_reject->update(); 
+                $read_reject->update(); }
 
 
                 //add to users fave gallery list
