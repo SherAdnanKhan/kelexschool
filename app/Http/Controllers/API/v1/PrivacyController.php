@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Http\Controllers\API\v1\BaseController;
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use Validator;
 use Auth;
-use App\Models\Gallery;
+use Validator;
 use App\Models\User;
+use App\Models\Gallery;
+use App\Models\PrivacyPage;
 use App\Models\PrivacyType;
 use App\Models\UserPrivacy;
-use App\Models\PrivacyPage;
+use App\Models\Notification;
 use App\Models\UserSprvfsIO;
+use Illuminate\Http\Request;
 use App\Models\UserIOGallery;
 use App\Models\UserFavGallery;
+use Illuminate\Database\QueryException;
+use App\Http\Controllers\API\v1\BaseController;
 
 class PrivacyController extends BaseController
 {
@@ -64,7 +65,7 @@ class PrivacyController extends BaseController
             }
         }
         
-        $returnData['faves'] = $all_faved_users = User::with('avatars', 'feel', 'art.parent','notify', 'galleries')->whereIn('id', $user_list_ids)->get();
+        $returnData['faves'] = $all_faved_users = User::with('avatars','feel','art.parent','galleries')->whereIn('id', $user_list_ids)->get();
         return $this->sendResponse($returnData, 'users lists');
         
     }
@@ -267,6 +268,13 @@ class PrivacyController extends BaseController
             if(!isset($privacy_check)) {
                 return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
             }
+
+            $read_accept= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$other_user->id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();  
+            if(isset($read_accept)) {
+                $read_accept->status='1';
+                $read_accept->update(); 
+            }
+
             $type='SPRFVS APPROVED';
             $this->generateNotification($user->id, $other_user->id, $other_user, $type);
             $privacy_check->update(['status' => 1]);
@@ -289,6 +297,7 @@ class PrivacyController extends BaseController
                 }
             }
             $returnData['privacy'] = $privacy_check;
+
             $emailData['by_user'] = $by_user = User::with('avatars')->findOrFail($other_user->id);
             $emailData['to_user'] = $to_user = User::with('avatars')->findOrFail($user->id);
             $emailData['logo'] = env('FRONT_APP_URL', 'https://staging.meuzm.com/').'assets/images/LogoIconGold.png';
@@ -325,6 +334,12 @@ class PrivacyController extends BaseController
                     return $this->sendError('No User selected', ['error'=>'No user as sprfvs', 'message' => 'No user as SPRFS']);
                 }
                 $privacy_check->delete();
+                $read_reject= Notification::where(['receiver_id'=>Auth::guard('api')->user()->id,'sender_id'=>$request->user_id,'type'=>'SPRFVS INVITE','status'=>'0'])->first();
+                if(isset($read_reject)) {
+                    $read_reject->status='1';
+                    $read_reject->update(); 
+                }
+
 
                 //add to users fave gallery list
                 $galleries = Gallery::where('created_by', $request->user_id)->get();
