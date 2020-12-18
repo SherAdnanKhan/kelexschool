@@ -285,7 +285,7 @@ class MzFlashController extends BaseController
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-
+ 
         try {
             $feed = Feed::find($request->feed_id);
             if (!isset($feed)) {
@@ -298,6 +298,9 @@ class MzFlashController extends BaseController
             $feed_comment->save(); 
 
             $new_feed_comment = FeedComment::with('user.avatars', 'user.feel')->find($feed_comment->id);
+
+            $type='COMMENT FEED';
+            $this->generateNotification($user->id, $feed->created_by, $feed, $type);
             $returnData['feed_comment'] = $new_feed_comment;
 
         }catch(QueryException $ex) {
