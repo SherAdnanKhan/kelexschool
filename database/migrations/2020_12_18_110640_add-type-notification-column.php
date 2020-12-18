@@ -16,7 +16,7 @@ class AddTypeNotificationColumn extends Migration
         Schema::table('notifications', function (Blueprint $table) {
             $table->enum('type', ['CRITIQES', 'GALLERY FAVED', 'SPRFVS APPROVED', 'SPRFVS INVITE' , 'REPOST FEED', 'COMMENT FEED', 'REPOST EXHIBIT', 'STROKE FEED', 'STROKE EXHIBIT']);
         });
-    }
+    } 
 
     /**
      * Reverse the migrations.

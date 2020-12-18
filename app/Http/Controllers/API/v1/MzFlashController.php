@@ -285,7 +285,7 @@ class MzFlashController extends BaseController
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-
+ 
         try {
             $feed = Feed::find($request->feed_id);
             if (!isset($feed)) {

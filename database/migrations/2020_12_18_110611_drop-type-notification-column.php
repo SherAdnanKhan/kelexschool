@@ -8,7 +8,7 @@ class DropTypeNotificationColumn extends Migration
 {
     /**
      * Run the migrations.
-     *
+     * 
      * @return void
      */
     public function up()
@@ -17,7 +17,7 @@ class DropTypeNotificationColumn extends Migration
             $table->dropColumn('type');
         });
     }
-
+ 
     /**
      * Reverse the migrations.
      *
