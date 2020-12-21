@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Http\Controllers\API\v1\BaseController;
-use Illuminate\Http\Request;
 use Auth;
 use App\Models\Fav;
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use App\Models\MessageLog;
+use Illuminate\Http\Request;
+use App\Models\ConversationLog;
+use App\Http\Controllers\API\v1\BaseController;
 
 
 class LobbyController extends BaseController
@@ -68,7 +69,7 @@ class LobbyController extends BaseController
     {
         $user = Auth::guard('api')->user();
         $conversation_ids = [];
-        $message_logs = MessageLog::where([['user_id', $user->id], ['status', 0]])->select('conversation_id')->get();
+        $message_logs = ConversationLog::where([['user_id', $user->id], ['status', 0]])->select('conversation_id')->get();
         //return $message_logs;
         foreach($message_logs as $message_log) {
             if(!in_array($message_log->conversation_id, $conversation_ids)) {
