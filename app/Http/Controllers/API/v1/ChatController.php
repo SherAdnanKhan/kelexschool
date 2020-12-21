@@ -244,7 +244,6 @@ class ChatController extends BaseController
         $validator = Validator::make($request->all(), [
             'message' => 'min:1',
             'conversation_id' => 'required',
-            'user_id' => 'required'
         ]);
         if ($validator->fails()){
           return $this->sendError('Validation Error.', $validator->errors());       
@@ -337,13 +336,14 @@ class ChatController extends BaseController
             foreach($hasConversation->participants as $participant) {
               if($participant->id == $my_user->id){
                 $conversation_log = ConversationLog::where(['message_id'=> $request->message_id, 'conversation_id'=> $request->conversation_id, 'user_id'=> $my_user->id])->first();
-                $conversation_log->call_start = Carbon::now();
-                $conversation_log->status = '1';
-                $conversation_log->update();
+                if(isset($conversation_log)){
+                  $conversation_log->call_start = Carbon::now();
+                  $conversation_log->status = '1';
+                  $conversation_log->update();
+                }
               }
             }
-            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
-            $returnData['message'] = $newly_mesage;
+            $returnData['message'] = 'call joined successfully';
             $returnData['user'] = $user;
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
@@ -354,7 +354,7 @@ class ChatController extends BaseController
     }
 
     public function call_end(Request $request)
-    {
+      {
         $returnData = [];
         $my_user = Auth::guard('api')->user();
         $validator = Validator::make($request->all(), [
@@ -389,6 +389,43 @@ class ChatController extends BaseController
         }
         return $this->sendResponse($returnData, 'Chat Message sent');
     }
+    public function call_decline(Request $request)
+    {
+        $returnData = [];
+        $my_user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'message_id' => 'required','min:1',
+            'conversation_id' => 'required',
+        ]);
+        if ($validator->fails()){
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $user = User::with('avatars')->findOrFail($my_user->id);
+        try {
+            $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+              $query->where('user_id', $user->id);
+            })->find($request->conversation_id);
+            if (!$hasConversation) {
+              return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+            }
+            $conversation_log = ConversationLog::where(['message_id'=> $request->message_id,'user_id'=>$my_user->id])->first();
+            if(isset($conversation_log)) {
+            $conversation_log->status = '2';
+            $conversation_log->update();
+            }
+            // $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $returnData['message'] = 'call decline successfully';
+            $returnData['user'] = $user;
+              //$returnData['message'] = 'sucessfully end meeting'; 
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Chat Message sent');
+    }
+
     public function show($id, Request $request)
     {
         $returnData = [];
@@ -645,7 +682,7 @@ class ChatController extends BaseController
         }
 
         try {
-            $messages_logs = ConversationLog::where([ ['message_id', $message_id], ['user_id', $request->user_id] ])->first();
+            $messages_logs = ConversationLog::where([ ['message_id', $message_id],['status','!=', '2'], ['user_id', $request->user_id]])->first();
             if (!isset($messages_logs)) {
                 return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
             }
@@ -682,7 +719,7 @@ class ChatController extends BaseController
             return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
         }
         try {
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
+            $messages_logs = ConversationLog::where('conversation_id', $hasConversation->id)->where('status','!=', '2')->where('user_id', $user->id)->update(['status' => 1]);
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {

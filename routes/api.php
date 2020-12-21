@@ -56,6 +56,7 @@ Route::namespace('API')->group(function () {
                     Route::post('/call-start', 'ChatController@call_start');
                     Route::post('/call-join', 'ChatController@call_join');
                     Route::post('/call-end', 'ChatController@call_end');
+                    Route::post('/call-decline', 'ChatController@call_decline');
                 });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');

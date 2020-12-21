@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Http\Controllers\API\v1\BaseController;
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use Validator;
 use Auth;
+use Validator;
+use App\Models\Feed;
 use App\Models\Post;
+use App\Models\User;
 use App\Models\Image;
 use App\Models\Gallery;
-use App\Models\PrivacyPage;
-use App\Models\UserSprvfsIO;
-use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\MessageLog;
-use App\Models\User;
-use App\Models\Feed;
-use App\Models\UserFavGallery;
+use App\Models\PrivacyPage;
+use App\Models\Conversation;
 use App\Models\Notification;
+use App\Models\UserSprvfsIO;
+use Illuminate\Http\Request;
+use App\Models\UserFavGallery;
+use App\Models\ConversationLog;
+use Illuminate\Database\QueryException;
+use App\Http\Controllers\API\v1\BaseController;
 
 class PostController extends BaseController
 {
@@ -392,7 +393,7 @@ class PostController extends BaseController
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
                     $participant_user = User::find($participant->id);
-                    $message_log = new MessageLog;
+                    $message_log = new ConversationLog;
                     $message_log->conversation_id = $hasConversation->id;
                     $message_log->message_id = $message->id;
                     $message_log->user_id = $participant->id;
