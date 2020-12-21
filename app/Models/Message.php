@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ConversationLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -23,11 +24,11 @@ class Message extends Model
     }
     public function messagesLogs() 
     {
-        return $this->hasMany(MessageLog::class, 'message_id', 'id');
+        return $this->hasMany(ConversationLog::class, 'message_id', 'id');
     }
 
     public function userMessageLog()
     {
-        return $this->hasMany(MessageLog::class, 'message_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
+        return $this->hasMany(ConversationLog::class, 'message_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
     }
 }
