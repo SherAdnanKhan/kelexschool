@@ -18,12 +18,14 @@ class CreateConversationsLogs extends Migration
             $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('message_id');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('feel_id');
             $table->boolean('status')->comment('1-Read/Attend, 0-Unread/Notattend')->default(0);
+            $table->timestamp('call_start')->nullable();
+            $table->timestamp('call_end')->nullable();
             $table->timestamps();
             $table->dateTime('read_at')->nullable();
             $table->softDeletes();
-            $table->timestamp('call_start')->nullable();
-            $table->timestamp('call_end')->nullable();
+            $table->foreign('feel_id')->references('id')->on('feels')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('message_id')->references('id')->on('messages')->onDelete('cascade')->onUpdate('cascade');

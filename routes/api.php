@@ -53,6 +53,9 @@ Route::namespace('API')->group(function () {
                     Route::get('/conversation/{id}', 'ChatController@show');
                     Route::delete('/message/{id}', 'ChatController@destroyMessage');
                     Route::delete('/{id}', 'ChatController@destroy');
+                    Route::post('/call-start', 'ChatController@call_start');
+                    Route::post('/call-join', 'ChatController@call_join');
+                    Route::post('/call-end', 'ChatController@call_end');
                 });
                 Route::group(['prefix' => 'comments'], function () {
                     Route::post('/', 'CommentController@store');

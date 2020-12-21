@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Http\Controllers\API\v1\BaseController;
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use Validator;
 use Auth;
-use App\Models\UserBlock;
+use Image;
+use Storage;
+use Validator;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Message;
+use App\Models\UserBlock;
 use App\Models\MessageLog;
 use App\Models\Conversation;
-use App\Models\UserConversation;
 use App\Models\UserSprvfsIO;
-use Carbon\Carbon;
-use Storage;
-use Image;
+use Illuminate\Http\Request;
+use App\Models\ConversationLog;
+use App\Models\UserConversation;
+use Illuminate\Database\QueryException;
+use App\Http\Controllers\API\v1\BaseController;
 
 class ChatController extends BaseController
 {
@@ -123,7 +124,7 @@ class ChatController extends BaseController
               $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where([ ['conversation_id', $coversation_id] ])->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             }
             
-            $messages_logs = MessageLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
+            $messages_logs = ConversationLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
             if($hasConversation->participants->count() == 2) {
               foreach($hasConversation->participants as $participant){
@@ -172,12 +173,11 @@ class ChatController extends BaseController
         $validator = Validator::make($request->all(), [
             'message' => 'min:1',
             'conversation_id' => 'required',
-            'user_id' => 'required'
         ]);
         if ($validator->fails()){
           return $this->sendError('Validation Error.', $validator->errors());       
         }
-        $user = User::with('avatars')->findOrFail($request->user_id);
+        $user = User::with('avatars')->findOrFail($my_user->id);
         try {
             $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
               $query->where('user_id', $user->id);
@@ -208,12 +208,12 @@ class ChatController extends BaseController
             foreach($hasConversation->participants as $participant) {
                 if($participant->id != $user->id) {
                     $participant_user = User::find($participant->id);
-                    $message_log = new MessageLog;
-                    $message_log->conversation_id = $request->conversation_id;
-                    $message_log->message_id = $message->id;
-                    $message_log->user_id = $participant->id;
-                    $message_log->feel_id = $participant_user->feel_id;
-                    $message_log->save();
+                    $conversation_log = new ConversationLog;
+                    $conversation_log->conversation_id = $request->conversation_id;
+                    $conversation_log->message_id = $message->id;
+                    $conversation_log->user_id = $participant->id;
+                    $conversation_log->feel_id = $participant_user->feel_id;
+                    $conversation_log->save();
                 }
             }
 
@@ -235,6 +235,160 @@ class ChatController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    
+    public function call_start(Request $request){
+      $returnData = [];
+        $my_user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'message' => 'min:1',
+            'conversation_id' => 'required',
+            'user_id' => 'required'
+        ]);
+        if ($validator->fails()){
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $user = User::with('avatars')->findOrFail($my_user->id);
+        try{
+          $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+              $query->where('user_id', $user->id);
+            })->find($request->conversation_id);
+            if(!$hasConversation) {
+              return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+            }
+            $message = new Message;
+            $message->message = $request->message;
+            $message->conversation_id = $request->conversation_id;
+            $message->feel_id = $user->feel_id;
+            $message->created_by = $user->id;
+            $message->type = '4'; //message_type: image ? 1 : text ? 0 : video ? 2 : Callinfo ? 3,
+            $message->url = isset($request->url) ? $request->url : null; 
+            $message->web_url = isset($request->web_url) ? $request->web_url : null; 
+            $message->save(); 
+            
+            //update conversation update time
+            $hasConversation->touch();
+
+            //deleted chat updation remove from is_deleted
+            $deleted_conversation = UserConversation::where([ ['conversation_id', $request->conversation_id], ['user_id', $my_user->id] ])->first();
+            if(isset($deleted_conversation)) {
+              $deleted_conversation->is_deleted = 0;
+              $deleted_conversation->update();
+            } 
+            foreach($hasConversation->participants as $participant) {
+              if($participant->id != $user->id){
+                $conversation_log = new ConversationLog;
+                $participant_user = User::find($participant->id);
+                $conversation_log->conversation_id = $request->conversation_id;
+                $conversation_log->user_id = $participant->id;
+                $conversation_log->message_id = $message->id;
+                $conversation_log->feel_id = $participant_user->feel_id;
+                $conversation_log->status = '0';
+                $conversation_log->save();
+              }
+            }
+            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $returnData['message'] = $newly_mesage;
+            $returnData['user'] = $user;
+        
+          }catch(QueryException $ex) {
+          return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+          }catch(\Exception $ex) {
+          return $this->sendError('Unknown Error', $ex->getMessage(), 200);
+        }
+      return $this->sendResponse($returnData, 'Chat Message sent');
+    }
+
+    public function call_join(Request $request)
+    {
+        $returnData = [];
+        $my_user = Auth::guard('api')->user();
+
+        $validator = Validator::make($request->all(), [
+            'message_id' => 'required','min:1',
+            'conversation_id' => 'required',
+        ]);
+        if ($validator->fails()){
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $user = User::with('avatars')->findOrFail($my_user->id);
+        try {
+            $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+              $query->where('user_id', $user->id);
+            })->find($request->conversation_id);
+            if (!$hasConversation) {
+              return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+            }
+            $message = Message::where('id',$request->message_id)->first();
+            // foreach($hasConversation->participants as $participant) {
+            //   if($participant->id != $user->id && $participant->id == $request->participant_id){
+            //     $conversation_log = new ConversationLog;
+            //     $participant_user = User::find($participant->id);
+            //     $conversation_log->conversation_id = $request->conversation_id;
+            //     $conversation_log->user_id = $participant->id;
+            //     $conversation_log->message_id = $message->id;
+            //     $conversation_log->call_start = Carbon::now();
+            //     $conversation_log->feel_id = $participant_user->feel_id;
+            //     $conversation_log->status = '1';
+            //     $conversation_log->save();
+            //   }
+            // }
+            foreach($hasConversation->participants as $participant) {
+              if($participant->id == $my_user->id){
+                $conversation_log = ConversationLog::where(['message_id'=> $request->message_id, 'conversation_id'=> $request->conversation_id, 'user_id'=> $my_user->id])->first();
+                $conversation_log->call_start = Carbon::now();
+                $conversation_log->status = '1';
+                $conversation_log->update();
+              }
+            }
+            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $returnData['message'] = $newly_mesage;
+            $returnData['user'] = $user;
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Chat Message sent');
+    }
+
+    public function call_end(Request $request)
+    {
+        $returnData = [];
+        $my_user = Auth::guard('api')->user();
+        $validator = Validator::make($request->all(), [
+            'message_id' => 'required','min:1',
+            'conversation_id' => 'required',
+        ]);
+        if ($validator->fails()){
+          return $this->sendError('Validation Error.', $validator->errors());       
+        }
+        $user = User::with('avatars')->findOrFail($my_user->id);
+        try {
+            $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+              $query->where('user_id', $user->id);
+            })->find($request->conversation_id);
+            if (!$hasConversation) {
+              return $this->sendError('Invalid Conversation', ['error'=>'Unauthorised Chat Part', 'message' => 'Please send into your respected']);
+            }
+            $conversation_log = ConversationLog::where(['message_id'=> $request->message_id,'user_id'=>$my_user->id])->first();
+            if(isset($conversation_log)) {
+            $conversation_log->call_end = Carbon::now();
+            $conversation_log->update();
+            }
+            // $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $returnData['message'] = 'call end successfully';
+            $returnData['user'] = $user;
+              //$returnData['message'] = 'sucessfully end meeting'; 
+
+        }catch(QueryException $ex) {
+            return $this->sendError('Validation Error.', $ex->getMessage(), 200);
+        }catch(\Exception $ex) {
+            return $this->sendError('Unknown Error', $ex->getMessage(), 200);       
+        }
+        return $this->sendResponse($returnData, 'Chat Message sent');
+    }
     public function show($id, Request $request)
     {
         $returnData = [];
@@ -491,12 +645,12 @@ class ChatController extends BaseController
         }
 
         try {
-            $messages_logs = MessageLog::where([ ['message_id', $message_id], ['user_id', $request->user_id] ])->first();
+            $messages_logs = ConversationLog::where([ ['message_id', $message_id], ['user_id', $request->user_id] ])->first();
             if (!isset($messages_logs)) {
                 return $this->sendError('Invalid Message', ['error'=>'No Message Exists', 'message' => 'No Message exists']);
             }
             $messages_logs->status = 1;
-            $messages_logs->read_at = now();
+            $messages_logs->read_at = Carbon::now();
             $messages_logs->update();
 
             $message = Message::with('messagesLogs.feel', 'feel')->find($message_id);
