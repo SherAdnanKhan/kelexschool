@@ -3,6 +3,7 @@ var base_url = process.env.BACKEND_APP_URL;
 
 module.exports = {
   setOnlineStatus: function (online, token) {
+    console.log("set online");
     return axios.get(base_url + `user/online-status/${online}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -45,5 +46,41 @@ module.exports = {
         Accept: 'application/json'
       }
     });
-  }
+  },
+
+  callStart: function (data, token) {
+    return axios.post(base_url + `chats/call-start`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
+  },
+
+  callJoin: function (data, token) {
+    return axios.post(base_url + `chats/call-join`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
+  },
+
+  callEnd: function (data, token) {
+    return axios.post(base_url + `chats/call-end`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
+  },
+
+  callDecline: function (data, token) {
+    return axios.post(base_url + `chats/call-decline`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
+  },
 };
