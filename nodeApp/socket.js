@@ -83,27 +83,47 @@ module.exports = function (server) {
       socket.to(data.room).emit('call-rejoined', payload);
     });
 
-    socket.on('outgoing-call', data => {
+    socket.on('outgoing-call', async (data) => {
+      console.log("this is out going call");
+      const conversationData = {
+        conversation_id: data.room
+      }
+      const responseCall = await requestServices.callStart(conversationData, socket.token);
+      //console.log("ResponseCallData", responseCall);
+      //socket.callMessageId = responseCall.data.data.message.id;
       const payload = {
         caller: data.caller,
         room: data.room,
-        socketId: socket.id
+        socketId: socket.id,
+        messageId: responseCall.data.data.message.id,
       };
-
       data.participants.forEach(participant => {
         socket.to(participant.slug).emit('incoming-call', payload)
       });
     });
 
-    socket.on('accept-call', data => {
-      socket.to(data.callerSocket).emit('call-accepted', data)
+    socket.on('accept-call', async (data) => {
+      console.log("Accept Call Data", data);
+      socket.to(data.callerSocket).emit('call-accepted', data);
+      const callJoinData = {
+        message_id: data.messageId,
+        conversation_id: data.room
+      }
+      await requestServices.callJoin(callJoinData, socket.token);
     });
 
-    socket.on('reject-call', data => {
-      socket.to(data.callerSocket).emit('call-rejected', data)
+    socket.on('reject-call', async (data) => {
+      console.log("reject call data", data);
+      socket.to(data.callerSocket).emit('call-rejected', data);
+      const callRejectData = {
+        message_id: data.messageId,
+        conversation_id: data.room
+      }
+      await requestServices.callDecline(callRejectData, socket.token);
     });
 
     socket.on('decline-call', data => {
+      console.log("decline call data", data);
       const payload = {
         caller: data.caller,
         room: data.room,
@@ -125,6 +145,7 @@ module.exports = function (server) {
 
     socket.on('leave-call', data => {
       if (videoRooms[data.room]) {
+        console.log('leave-call', data);
         videoRooms[data.room] = videoRooms[data.room]
           .filter(user => user.user.id !== data.user.id);
 
@@ -132,10 +153,11 @@ module.exports = function (server) {
           .to(data.room)
           .emit('user-leave', { user: data.user, socketId: socket.id });
 
-
         if (videoRooms[data.room].length === 0) {
           delete videoRooms[data.room];
+          console.log("meeting end");
           io.to(data.room).emit('onMeetingEnded');
+
         }
       }
     });
@@ -183,6 +205,7 @@ module.exports = function (server) {
     socket.on('sendMessage', async (data, token, callback) => {
       try {
         const { data: { data: response } } = await requestServices.sendMessage(data, token);
+        console.log(response);
         io.to(response.message.conversation_id).emit('recieveMessage', response);
 
         if (data.recievers.length === 1) {

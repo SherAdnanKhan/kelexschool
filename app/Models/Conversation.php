@@ -38,7 +38,7 @@ class Conversation extends Model
     public function unreadMessagesLogs()
     {
         //dd(\Auth::guard('api')->user()->id);
-        return $this->hasMany(MessageLog::class, 'conversation_id')->where('status', 0)->where('user_id', \Auth::guard('api')->user()->id);
+        return $this->hasMany(ConversationLog::class, 'conversation_id')->where('status', 0)->where('user_id', \Auth::guard('api')->user()->id);
     }
 
     public function deleteCheck()

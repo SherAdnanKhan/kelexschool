@@ -6,7 +6,6 @@ use Auth;
 use App\Models\Fav;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use App\Models\ConversationLog;
 use App\Http\Controllers\API\v1\BaseController;
