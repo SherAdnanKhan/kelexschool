@@ -91,6 +91,7 @@ class ChatController extends BaseController
                                             ->whereHas('messagesLogs', function($query) {
                                               $query->where('call_start', null);
                                               $query->where('call_end', null);
+                                              $query->where('status', '!=', 2);
                                             })
                                             ->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
             $returnData['conversation'] = $new_conversation;
@@ -129,6 +130,7 @@ class ChatController extends BaseController
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
                                                 $query->where('call_end', null);
+                                                $query->where('status', '!=', 2);
                                               })
                                               ->orderBy('created_at', 'DESC')
                                               ->paginate(env('PAGINATE_LENGTH', 15));
@@ -138,6 +140,7 @@ class ChatController extends BaseController
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
                                                 $query->where('call_end', null);
+                                                $query->where('status', '!=', 2);
                                               })
                                               ->orderBy('created_at', 'DESC')
                                               ->paginate(env('PAGINATE_LENGTH', 15));
