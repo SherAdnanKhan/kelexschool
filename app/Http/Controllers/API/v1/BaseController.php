@@ -313,8 +313,9 @@ class BaseController extends Controller
         if (!isset($request->file_upload)) {
             return $this->sendError('No file', ['error'=>'No file', 'message' => 'Please send attachement to upload']);
         }
+        $max_files_size = env('DOCUMENT_SIZE','2000');
         $validator = Validator::make($request->all(), [
-            'file_upload' => env('DOCUMENT_SIZE', '2000'),
+            'file_upload' => "max:".$max_files_size."",
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
