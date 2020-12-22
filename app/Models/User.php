@@ -133,7 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function unreadMessages()
     {
-        return $this->hasMany(MessageLog::class, 'user_id')->where('status', 0);
+        return $this->hasMany(ConversationLog::class, 'user_id')->where('status', 0);
     }
 
     public function userFeels()
