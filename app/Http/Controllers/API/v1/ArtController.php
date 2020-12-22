@@ -39,6 +39,7 @@ class ArtController extends BaseController
             $input['parent_id'] = $parent_id;
             $art = Art::create($input);
             $returnData['art'] =  $art;
+            
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(Exception $ex) {

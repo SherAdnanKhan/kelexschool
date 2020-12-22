@@ -615,7 +615,7 @@ class ChatController extends BaseController
             return $this->sendError('No file', ['error'=>'No file', 'message' => 'Please send attachement to upload']);
         }
         $validator = Validator::make($request->all(), [
-            'file_upload' => 'max:env("DOCUMENT_SIZE", "2000")',
+            'file_upload' => "max:".env('DOCUMENT_SIZE','2000')."",
         ]);
         if ($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
