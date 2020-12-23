@@ -31,7 +31,7 @@ class ChatController extends BaseController
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
         $deleted_conversation_ids = $this->getDeletedConversationIds($user->id);
-        $conversations = Conversation::with('lastMessage.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent', 'conversationStatus')
+        $conversations = Conversation::with('conversationLog.message.user.avatars', 'participants.avatars', 'participants.feel', 'participants.art.parent', 'conversationStatus')
         ->whereHas('participants', function($query) use ($user) {
           $query->where('user_id', $user->id);
         })

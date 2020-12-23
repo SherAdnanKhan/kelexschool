@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
+use Illuminate\Database\Eloquent\Model;
 
 class Conversation extends Model
 {
@@ -48,6 +48,10 @@ class Conversation extends Model
     public function conversationStatus()
     {
         return $this->hasOne(UserConversation::class, 'conversation_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
+    }
+    public function conversationLog()
+    {
+        return $this->hasOne(ConversationLog::class, 'conversation_id', 'id')->where(['call_start'=>null ,'call_end'=>null])->where( 'status' , '!=' , '2')->latest();
     }
 
     
