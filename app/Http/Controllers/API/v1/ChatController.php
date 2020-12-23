@@ -87,7 +87,7 @@ class ChatController extends BaseController
 
             $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
             $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
-                                            ->where(['conversation_id', $conversation->id])
+                                            ->where('conversation_id', $conversation->id)
                                             ->whereHas('messagesLogs', function($query) {
                                               $query->where('call_start', null);
                                               $query->where('call_end', null);
