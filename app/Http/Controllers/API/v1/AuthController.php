@@ -34,7 +34,7 @@ class AuthController extends BaseController
             'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
             'dob' => 'required|date|date_format:Y-m-d',
-            'avatar' => "max:".env('IMAGE_TYPE_SIZE','1000')."", 
+            'avatar' => env('IMAGE_TYPE_SIZE','max:1000'), 
             'agreement' => 'required|boolean'
         ]);
    
