@@ -2,6 +2,7 @@ module.exports = function (server) {
 
   let online_users = [];
   const videoRooms = {};
+  const meetingIds = {};
   const draws = {};
 
   const io = require('socket.io')(server);
@@ -89,41 +90,43 @@ module.exports = function (server) {
         conversation_id: data.room
       }
       const responseCall = await requestServices.callStart(conversationData, socket.token);
-      //console.log("ResponseCallData", responseCall);
-      //socket.callMessageId = responseCall.data.data.message.id;
+
       const payload = {
         caller: data.caller,
         room: data.room,
         socketId: socket.id,
         messageId: responseCall.data.data.message.id,
       };
+
+      if (!meetingIds[data.room]) {
+        meetingIds[data.room] = responseCall.data.data.message.id;
+      }
+
       data.participants.forEach(participant => {
         socket.to(participant.slug).emit('incoming-call', payload)
       });
     });
 
     socket.on('accept-call', async (data) => {
-      console.log("Accept Call Data", data);
       socket.to(data.callerSocket).emit('call-accepted', data);
       const callJoinData = {
-        message_id: data.messageId,
+        message_id: meetingIds[data.room],
         conversation_id: data.room
       }
+
       await requestServices.callJoin(callJoinData, socket.token);
     });
 
     socket.on('reject-call', async (data) => {
-      console.log("reject call data", data);
       socket.to(data.callerSocket).emit('call-rejected', data);
       const callRejectData = {
-        message_id: data.messageId,
+        message_id: meetingIds[data.room],
         conversation_id: data.room
       }
       await requestServices.callDecline(callRejectData, socket.token);
     });
 
     socket.on('decline-call', data => {
-      console.log("decline call data", data);
       const payload = {
         caller: data.caller,
         room: data.room,
@@ -143,21 +146,40 @@ module.exports = function (server) {
       socket.to(data.to).emit('answer-made', data);
     });
 
-    socket.on('leave-call', data => {
+    socket.on('leave-call', async data => {
       if (videoRooms[data.room]) {
-        console.log('leave-call', data);
+
         videoRooms[data.room] = videoRooms[data.room]
           .filter(user => user.user.id !== data.user.id);
+
+        const callEndData = {
+          message_id: meetingIds[data.room],
+          conversation_id: data.room
+        }
+
+        try {
+          await requestServices.callEnd(callEndData, socket.token);
+        } catch (ex) {
+          console.log(ex.message)
+        }
 
         socket
           .to(data.room)
           .emit('user-leave', { user: data.user, socketId: socket.id });
 
         if (videoRooms[data.room].length === 0) {
-          delete videoRooms[data.room];
-          console.log("meeting end");
-          io.to(data.room).emit('onMeetingEnded');
+          const payload = {
+            room: data.room,
+            socketId: socket.id
+          };
 
+          data?.participants?.forEach(participant => {
+            socket.to(participant.slug).emit('call-declined', payload)
+          });
+
+          delete videoRooms[data.room];
+          delete meetingIds[data.room];
+          io.to(data.room).emit('onMeetingEnded');
         }
       }
     });
