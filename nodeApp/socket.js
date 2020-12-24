@@ -173,9 +173,11 @@ module.exports = function (server) {
             socketId: socket.id
           };
 
-          data?.participants?.forEach(participant => {
-            socket.to(participant.slug).emit('call-declined', payload)
-          });
+          if (data.participants) {
+            data.participants.forEach(participant => {
+              socket.to(participant.slug).emit('call-declined', payload)
+            });
+          }
 
           delete videoRooms[data.room];
           delete meetingIds[data.room];
