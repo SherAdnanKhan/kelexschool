@@ -56,6 +56,30 @@
             <span class="kt-menu__link-text">Feels</span>
           </a>
         </li>
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/feedbacks') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
+          <a href="{{action('Admin\FeedbackController@index')}}" class="kt-menu__link ">
+            <span class="kt-menu__link-icon">
+              <i class="flaticon2-edit nav-icon"></i>
+            </span>
+            <span class="kt-menu__link-text">Feedbacks</span>
+          </a>
+        </li>
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/user-reports') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
+          <a href="{{action('Admin\ReportController@index')}}" class="kt-menu__link ">
+            <span class="kt-menu__link-icon">
+              <i class="flaticon2-user-outline-symbol nav-icon"></i>
+            </span>
+            <span class="kt-menu__link-text">User Reports</span>
+          </a>
+        </li>
+        <li class="kt-menu__item {{ (stripos($_SERVER['REQUEST_URI'], '/post-reports') !== false)? 'kt-menu__item--active': '' }}" aria-haspopup="true">
+          <a href="{{action('Admin\ReportController@indexPost')}}" class="kt-menu__link ">
+            <span class="kt-menu__link-icon">
+              <i class="flaticon2-speaker nav-icon"></i>
+            </span>
+            <span class="kt-menu__link-text">Post Reports</span>
+          </a>
+        </li>
       </ul>
     </div>
   </div>
