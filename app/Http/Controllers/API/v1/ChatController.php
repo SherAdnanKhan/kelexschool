@@ -58,7 +58,14 @@ class ChatController extends BaseController
         $user = Auth::guard('api')->user();
         if(isset($chat_type) ) {
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel', 'conversationStatus')->findOrFail($user_slug);
-          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
+                                                  ->whereHas('messagesLogs', function($query) {
+                                                    $query->where('call_start', null);
+                                                    $query->where('call_end', null);
+                                                    $query->where('status', '!=', 2);
+                                                  })
+                                                  ->where('conversation_id', $hasConversation->id)
+                                                  ->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
           $returnData['conversation'] = $hasConversation;
         }else {
           array_push($userIds, $user->id);
@@ -126,7 +133,11 @@ class ChatController extends BaseController
             $coversation_id = $hasConversation->id;
             if($hasConversation->conversationStatus) {
               $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
-                                              ->where([ ['conversation_id', $coversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])
+                                              ->where([ ['conversation_id', $coversation_id], ['conversation_id', $coversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])
+                                              ->Where(function ($query) {
+                                                $query->where('created_by', '!=', Auth::guard('api')->user()->id)
+                                                      ->orwhere('type', '!=', '4');
+                                              })
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
                                                 $query->where('call_end', null);
