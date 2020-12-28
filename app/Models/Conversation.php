@@ -51,7 +51,7 @@ class Conversation extends Model
     }
     public function conversationLog()
     {
-        return $this->hasOne(ConversationLog::class, 'conversation_id', 'id')->where(['call_start'=>null ,'call_end'=>null])->where( 'status' , '!=' , '2')->latest();
+        return $this->hasOne(ConversationLog::class, 'conversation_id', 'id')->where(['call_start'=>null ,'call_end'=>null])->where('user_id', \Auth::guard('api')->user()->id)->where( 'status' , '!=' , '2')->latest();
     }
 
     
