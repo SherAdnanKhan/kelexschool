@@ -156,6 +156,18 @@ class ChatController extends BaseController
             }else {
               $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
                                               ->where([ ['conversation_id', $coversation_id] ])
+                                              ->Where(function ($query) {
+                                                $query->where('created_by', '=', Auth::guard('api')->user()->id)
+                                                ->where('type', '!=', '4');
+                                              })
+                                              ->orWhere(function ($query) {
+                                                $query->where('created_by', '!=', Auth::guard('api')->user()->id)
+                                                ->where('type', '!=', '4');
+                                              })
+                                              ->orWhere(function ($query) {
+                                                $query->where('created_by', '!=', Auth::guard('api')->user()->id)
+                                                ->where('type', '=', '4');
+                                              })
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
                                                 $query->where('call_end', null);
