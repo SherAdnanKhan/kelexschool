@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 
 class FeedbackController extends Controller
@@ -20,15 +21,19 @@ class FeedbackController extends Controller
     public function getFeedbackData(Request $request)
     {
         $data = [];
-        $data = Feedback::with('user','image','user.avatars')->get();
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        $skip = 10 * ($page - 1);
+        $data = Feedback::with('image' ,'user.avatar')->take(10)->skip($skip)->get();
+        $feedback_count = Feedback::count();
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$feedback_count);
 
-        return response()->json($data);
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function show($feedbackId)
     {
         $data = [];
-        $user = Feedback::with('user','image','user.avatars')->where('id',$feedbackId)->first();
+        $user = Feedback::with('image', 'user.avatar')->where('id',$feedbackId)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }

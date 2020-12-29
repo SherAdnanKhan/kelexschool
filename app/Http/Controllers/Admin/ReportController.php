@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserReport;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 
 class ReportController extends Controller
@@ -20,8 +21,12 @@ class ReportController extends Controller
     public function getReportUserData(Request $request)
     {
         $data = [];
-        $data = UserReport::with('reportToUser.avatars','reportByUser.avatars')->get();
-        return response()->json($data);
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        $skip = 10 * ($page - 1);
+        $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip($skip)->get();
+        $user_report_count = UserReport::count();
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$user_report_count);
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function banUser($slug,$report_id)
@@ -55,21 +60,26 @@ class ReportController extends Controller
     public function indexPost()
     {
         $data = [];
-        $data['report_count'] = Post::where('reports','1')->count();
+        $data['report_count'] = Post::where('reports','>','0')->count();
         return view('admin.reports.post.index', $data);
     }
 
     public function getReportPostData(Request $request)
     {
         $data = [];
-        $data = Post::with('image','user.avatars')->where('reports','1')->get();
-        return response()->json($data);
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        $skip = 10 * ($page - 1);
+        $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip($skip)->get();
+        $post_count = Post::count();
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$post_count);
+
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function viewPost($slug)
     {
         $data = [];
-        $data = Post::with('image','user.avatars')->where('slug',$slug)->first();
+        $data = Post::with('image','user.avatar')->where('slug',$slug)->first();
         $data['post'] = $data;
         return view('admin.reports.post.view', $data);
     }
@@ -80,15 +90,7 @@ class ReportController extends Controller
         if (!isset($currentPost)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No Post exists']);
         }
-        if($currentPost->parent_id==null) {
-            $currentPost->delete();
-        }
-        else {
-            $parentPost = Post::where('id',$currentPost->parent_id)->delete();
-            if (!isset($parentPost)) {
-                return $this->sendError('Invalid Parent', ['error'=>'No Post Exists', 'message' => 'Post Already Delete']);
-            }
-        }
+        $currentPost->delete();
         return redirect('admin/post-reports');
     }
 
