@@ -19,7 +19,7 @@ class UserController extends BaseController
     {
         $data = [];
         $user_count = User::count();
-        $data = User::with('avatars')->withCount('posts', 'galleries')->get();
+        $data = User::with('avatar')->withCount('posts', 'galleries')->paginate(10);
 
         return response()->json($data);
     }
@@ -27,7 +27,7 @@ class UserController extends BaseController
     public function show($slug)
     {
         $data = [];
-        $user = User::with('avatars', 'feel', 'galleries.image', 'galleries.privacy', 'galleries.posts.image' ,'art.parent')->withCount('posts', 'galleries', 'comments', 'feeds')->where('slug', $slug)->first();
+        $user = User::with('avatar', 'feel', 'galleries.image', 'galleries.privacy', 'galleries.posts.image' ,'art.parent')->withCount('posts', 'galleries', 'comments', 'feeds')->where('slug', $slug)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }

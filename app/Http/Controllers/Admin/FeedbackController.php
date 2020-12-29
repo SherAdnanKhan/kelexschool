@@ -20,7 +20,7 @@ class FeedbackController extends Controller
     public function getFeedbackData(Request $request)
     {
         $data = [];
-        $data = Feedback::with('user','image','user.avatars')->get();
+        $data = Feedback::with('image' ,'user.avatar')->get();
 
         return response()->json($data);
     }
@@ -28,7 +28,7 @@ class FeedbackController extends Controller
     public function show($feedbackId)
     {
         $data = [];
-        $user = Feedback::with('user','image','user.avatars')->where('id',$feedbackId)->first();
+        $user = Feedback::with('image', 'user.avatar')->where('id',$feedbackId)->first();
         if (!isset($user)) {
             return $this->sendError('Invalid User', ['error'=>'No User Exists', 'message' => 'No user exists']);
         }

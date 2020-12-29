@@ -20,7 +20,7 @@ class ReportController extends Controller
     public function getReportUserData(Request $request)
     {
         $data = [];
-        $data = UserReport::with('reportToUser.avatars','reportByUser.avatars')->get();
+        $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->get();
         return response()->json($data);
     }
 
@@ -55,21 +55,21 @@ class ReportController extends Controller
     public function indexPost()
     {
         $data = [];
-        $data['report_count'] = Post::where('reports','1')->count();
+        $data['report_count'] = Post::where('reports','>','0')->count();
         return view('admin.reports.post.index', $data);
     }
 
     public function getReportPostData(Request $request)
     {
         $data = [];
-        $data = Post::with('image','user.avatars')->where('reports','1')->get();
+        $data = Post::with('image','user.avatar')->where('reports','>','0')->get();
         return response()->json($data);
     }
 
     public function viewPost($slug)
     {
         $data = [];
-        $data = Post::with('image','user.avatars')->where('slug',$slug)->first();
+        $data = Post::with('image','user.avatar')->where('slug',$slug)->first();
         $data['post'] = $data;
         return view('admin.reports.post.view', $data);
     }
@@ -80,15 +80,7 @@ class ReportController extends Controller
         if (!isset($currentPost)) {
             return $this->sendError('Invalid Post', ['error'=>'No Post Exists', 'message' => 'No Post exists']);
         }
-        if($currentPost->parent_id==null) {
-            $currentPost->delete();
-        }
-        else {
-            $parentPost = Post::where('id',$currentPost->parent_id)->delete();
-            if (!isset($parentPost)) {
-                return $this->sendError('Invalid Parent', ['error'=>'No Post Exists', 'message' => 'Post Already Delete']);
-            }
-        }
+        $currentPost->delete();
         return redirect('admin/post-reports');
     }
 

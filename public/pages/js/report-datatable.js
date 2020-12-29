@@ -60,12 +60,12 @@ var KTFeebackListDatatable = function () {
         title: 'Reported By',
         template: function (data) {
           console.log(data);
-          var avatars = data.report_by_user.avatars;
+          var avatars = data.report_by_user.avatar;
           var output = '';
           if(avatars!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ avatars[0].path + '" alt="photo">\
+                          <img src="'+ avatars.path + '" alt="photo">\
                         </div>\
                         <div class="kt-user-card-v2__details">\
                           <a href="'+ base_url + '/admin/user/' + data.report_by_user.slug + '" class="kt-user-card-v2__name">' + data.report_by_user.username + '</a>\
@@ -80,12 +80,12 @@ var KTFeebackListDatatable = function () {
         title: 'Reported Against',
         // callback function support for column rendering
         template: function (data) {
-          var avatars = data.report_to_user.avatars;
+          var avatars = data.report_to_user.avatar;
           var output = '';
          
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ avatars[0].path + '" alt="photo">\
+                          <img src="'+ avatars.path + '" alt="photo">\
                         </div>\
                         <div class="kt-user-card-v2__details">\
                           <a href="'+ base_url + '/admin/user/' + data.report_to_user.slug + '" class="kt-user-card-v2__name">' + data.report_to_user.username + '</a>\
