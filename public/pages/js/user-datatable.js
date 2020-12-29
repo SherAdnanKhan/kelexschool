@@ -57,6 +57,7 @@ var KTUserListDatatable = function () {
         width: 200,
         // callback function support for column rendering
         template: function (data) {
+          console.log(data);
           var avatars = data.avatar;
           var output = '';
           if (avatars!==null) {
