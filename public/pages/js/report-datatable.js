@@ -82,7 +82,7 @@ var KTFeebackListDatatable = function () {
         template: function (data) {
           var avatars = data.report_to_user.avatar;
           var output = '';
-         
+          if(avatars!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
                           <img src="'+ avatars.path + '" alt="photo">\
@@ -92,6 +92,7 @@ var KTFeebackListDatatable = function () {
                           <span class="kt-user-card-v2__desc">' + data.report_to_user.first_name + ' ' + data.report_to_user.last_name + '</span>\
                         </div>\
                       </div>';
+          }
           return output;
         } 
       }, {

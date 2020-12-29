@@ -62,12 +62,12 @@ var KTFeebackListDatatable = function () {
         field: 'image.path',
         title: 'Image',
         template: function (data) {
-          var image = data.image.path;
+          var image = data.image;
           var output = '';
           if(image!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ image + '" alt="photo">\
+                          <img src="'+ image.path + '" alt="photo">\
                         </div>\
                       </div>';
           }
@@ -80,8 +80,7 @@ var KTFeebackListDatatable = function () {
         template: function (data) {
           var avatars = data.user.avatar;
           var output = '';
-          console.log(data);
-         
+          if(avatars!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
                           <img src="'+ avatars.path + '" alt="photo">\
@@ -91,6 +90,7 @@ var KTFeebackListDatatable = function () {
                           <span class="kt-user-card-v2__desc">' + data.user.first_name + ' ' + data.user.last_name + '</span>\
                         </div>\
                       </div>';
+          }
           return output;
         } 
       }, {

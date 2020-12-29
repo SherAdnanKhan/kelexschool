@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserReport;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 
 class ReportController extends Controller
@@ -20,8 +21,16 @@ class ReportController extends Controller
     public function getReportUserData(Request $request)
     {
         $data = [];
-        $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->get();
-        return response()->json($data);
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        if ($page) {
+            $skip = 10 * ($page - 1);
+            $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip($skip)->get();
+        } else {
+            $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip(0)->get();
+        }
+        $user_report_count = UserReport::count();
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$user_report_count);
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function banUser($slug,$report_id)
@@ -62,8 +71,17 @@ class ReportController extends Controller
     public function getReportPostData(Request $request)
     {
         $data = [];
-        $data = Post::with('image','user.avatar')->where('reports','>','0')->get();
-        return response()->json($data);
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        if ($page) {
+            $skip = 10 * ($page - 1);
+            $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip($skip)->get();
+        } else {
+            $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip(0)->get();
+        }
+        $post_count = Post::count();
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$post_count);
+
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function viewPost($slug)
