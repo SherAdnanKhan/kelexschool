@@ -22,12 +22,8 @@ class FeedbackController extends Controller
     {
         $data = [];
         $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
-        if ($page) {
-            $skip = 10 * ($page - 1);
-            $data = Feedback::with('image' ,'user.avatar')->take(10)->skip($skip)->get();
-        } else {
-            $data = Feedback::with('image' ,'user.avatar')->take(10)->skip(0)->get();
-        }
+        $skip = 10 * ($page - 1);
+        $data = Feedback::with('image' ,'user.avatar')->take(10)->skip($skip)->get();
         $feedback_count = Feedback::count();
         $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$feedback_count);
 

@@ -22,12 +22,8 @@ class ReportController extends Controller
     {
         $data = [];
         $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
-        if ($page) {
-            $skip = 10 * ($page - 1);
-            $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip($skip)->get();
-        } else {
-            $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip(0)->get();
-        }
+        $skip = 10 * ($page - 1);
+        $data = UserReport::with('reportToUser.avatar','reportByUser.avatar')->take(10)->skip($skip)->get();
         $user_report_count = UserReport::count();
         $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$user_report_count);
         return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
@@ -72,12 +68,8 @@ class ReportController extends Controller
     {
         $data = [];
         $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
-        if ($page) {
-            $skip = 10 * ($page - 1);
-            $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip($skip)->get();
-        } else {
-            $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip(0)->get();
-        }
+        $skip = 10 * ($page - 1);
+        $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip($skip)->get();
         $post_count = Post::count();
         $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$post_count);
 
