@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Admin\BaseController;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Http\Controllers\Admin\BaseController;
 
 class UserController extends BaseController
 {
@@ -18,10 +19,13 @@ class UserController extends BaseController
     public function getUserData(Request $request)
     {
         $data = [];
+        $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
+        $skip = 10 * ($page - 1);
+        $data = User::with('avatar')->withCount('posts', 'galleries')->take(10)->skip($skip)->get();
         $user_count = User::count();
-        $data = User::with('avatar')->withCount('posts', 'galleries')->paginate(10);
+        $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$user_count);
 
-        return response()->json($data);
+        return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
     }
 
     public function show($slug)

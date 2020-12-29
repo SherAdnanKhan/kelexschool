@@ -62,12 +62,12 @@ var KTFeebackListDatatable = function () {
         field: 'image.path',
         title: 'Image',
         template: function (data) {
-          var image = data.image.path;
+          var image = data.image;
           var output = '';
           if(image!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ image + '" alt="photo">\
+                          <img src="'+ image.path + '" alt="photo">\
                         </div>\
                       </div>';
           }
