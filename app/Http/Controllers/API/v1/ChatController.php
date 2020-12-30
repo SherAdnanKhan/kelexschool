@@ -8,6 +8,7 @@ use Storage;
 use Validator;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Scrapeddata;
 use App\Models\Message;
 use App\Models\UserBlock;
 use App\Models\Conversation;
@@ -15,11 +16,13 @@ use App\Models\UserSprvfsIO;
 use Illuminate\Http\Request;
 use App\Models\ConversationLog;
 use App\Models\UserConversation;
+use App\Http\Traits\ScrapedDataTrait;
 use Illuminate\Database\QueryException;
 use App\Http\Controllers\API\v1\BaseController;
 
 class ChatController extends BaseController
 {
+  use ScrapedDataTrait;
     /**
      * Display a listing of the resource.
      *
@@ -58,7 +61,7 @@ class ChatController extends BaseController
         $user = Auth::guard('api')->user();
         if(isset($chat_type) ) {
           $hasConversation = Conversation::with('participants.avatars', 'participants.feel', 'conversationStatus')->findOrFail($user_slug);
-          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
+          $hasConversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')
                                                   ->whereHas('messagesLogs', function($query) {
                                                     $query->where('call_start', null);
                                                     $query->where('call_end', null);
@@ -93,7 +96,7 @@ class ChatController extends BaseController
             $conversation->participants()->attach($userIds);
 
             $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
-            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
+            $new_conversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')
                                             ->where('conversation_id', $conversation->id)
                                             ->whereHas('messagesLogs', function($query) {
                                               $query->where('call_start', null);
@@ -132,7 +135,7 @@ class ChatController extends BaseController
         else {
             $coversation_id = $hasConversation->id;
             if($hasConversation->conversationStatus) {
-              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
+              $hasConversation['messages'] = Message::with('messagesLogs.feel',  'metas', 'user.avatars', 'user.feel', 'feel')
                                               ->where([['conversation_id', $coversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])
                                               ->Where(function ($query) {
                                                 $query->where('created_by', '=', Auth::guard('api')->user()->id)
@@ -150,7 +153,7 @@ class ChatController extends BaseController
                                               ->orderBy('created_at', 'DESC')
                                               ->paginate(env('PAGINATE_LENGTH', 15));
             }else {
-              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')
+              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'metas','user.avatars', 'user.feel', 'feel')
                                               ->where('conversation_id', $coversation_id)
                                               ->Where(function ($query) {
                                                 $query->where('created_by', '=', Auth::guard('api')->user()->id)
@@ -238,7 +241,21 @@ class ChatController extends BaseController
             $message->type = isset($request->message_type) ? $request->message_type : 0; //message_type: image ? 1 : text ? 0 : video ? 2 : Callinfo ? 3,
             $message->url = isset($request->url) ? $request->url : null; 
             $message->web_url = isset($request->web_url) ? $request->web_url : null; 
-            $message->save(); 
+            $message->save();
+            
+            if(isset($request->web_url)){
+              $resultUrl = $this->scrapeddata($request->web_url);
+              $Scrapeddata = new Scrapeddata();
+              $Scrapeddata->message_id = $message->id;
+              $Scrapeddata->title = isset($resultUrl['title']) ? $resultUrl['title'] : null;
+              $Scrapeddata->description = isset($resultUrl['description']) ? $resultUrl['description'] : null;
+              $Scrapeddata->image = isset($resultUrl['image']) ? $resultUrl['image'] : null;
+              $Scrapeddata->favicon = isset($resultUrl['favicon']) ? $resultUrl['favicon'] : null;
+              $Scrapeddata->url = isset($resultUrl['url']) ? $resultUrl['url'] : null;
+              $Scrapeddata->save();
+
+
+            }
             
             //update conversation update time
             $hasConversation->touch();
@@ -465,7 +482,7 @@ class ChatController extends BaseController
         }
         try {
           $returnData['conversation'] = $hasConversation;
-          $returnData['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+          $returnData['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $hasConversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         }catch(QueryException $ex) {
             return $this->sendError('Validation Error.', $ex->getMessage(), 200);
         }catch(\Exception $ex) {
@@ -496,7 +513,7 @@ class ChatController extends BaseController
         $conversation->participants()->attach($user->id);
         $conversation->participants()->attach($request->user_ids);
         $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation->id);
-        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation->id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['conversation'] = $new_conversation;
       }catch(QueryException $ex) {
         return $this->sendError('Validation Error.', $ex->getMessage(), 200);
@@ -618,7 +635,7 @@ class ChatController extends BaseController
         }
         
         $new_conversation = Conversation::with('participants.avatars', 'participants.feel')->find($conversation_id);
-        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
+        $new_conversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')->where('conversation_id', $conversation_id)->orderBy('created_at', 'DESC')->paginate(env('PAGINATE_LENGTH', 15));
         $returnData['conversation'] = $new_conversation;
       }catch(QueryException $ex) {
         return $this->sendError('Validation Error.', $ex->getMessage(), 200);
