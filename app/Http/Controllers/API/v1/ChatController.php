@@ -34,7 +34,7 @@ class ChatController extends BaseController
         $user = Auth::guard('api')->user();
         //$user_with_conversation = User::with('conversations')->find($user->id);
         $deleted_conversation_ids = $this->getDeletedConversationIds($user->id);
-        $conversations = Conversation::with('lastMessage.user.avatars','lastMessage.messagesLogs' , 'participants.avatars', 'participants.feel', 'participants.art.parent', 'conversationStatus')
+        $conversations = Conversation::with('lastMessage.user.avatars', 'lastMessage.messagesLogs', 'participants.avatars', 'participants.feel', 'participants.art.parent', 'conversationStatus')
         ->whereHas('participants', function($query) use ($user) {
           $query->where('user_id', $user->id);
         })
@@ -133,17 +133,13 @@ class ChatController extends BaseController
             }
         }
         else {
-            $coversation_id = $hasConversation->id;
+            $conversation_id = $hasConversation->id;
             if($hasConversation->conversationStatus) {
-              $hasConversation['messages'] = Message::with('messagesLogs.feel',  'metas', 'user.avatars', 'user.feel', 'feel')
-                                              ->where([['conversation_id', $coversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])
-                                              ->Where(function ($query) {
-                                                $query->where('created_by', '=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '!=', '4');
-                                                $query->orWhere('created_by', '!=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '!=', '4');
-                                                $query->orWhere('created_by', '!=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '=', '4');
+              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')
+                                              ->where([['conversation_id', $conversation_id], ['created_at', '>', $hasConversation->conversationStatus->updated_at] ])
+                                              ->Where(function ($query) use($user) {
+                                                $query->orWhere('created_by', '!=', $user->id)
+                                                      ->orWhere('type', '!=', '4');
                                               })
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
@@ -153,15 +149,13 @@ class ChatController extends BaseController
                                               ->orderBy('created_at', 'DESC')
                                               ->paginate(env('PAGINATE_LENGTH', 15));
             }else {
-              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'metas','user.avatars', 'user.feel', 'feel')
-                                              ->where('conversation_id', $coversation_id)
-                                              ->Where(function ($query) {
-                                                $query->where('created_by', '=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '!=', '4');
-                                                $query->where('created_by', '!=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '!=', '4');
-                                                $query->where('created_by', '!=', Auth::guard('api')->user()->id)
-                                                      ->where('type', '=', '4');
+              $hasConversation['messages'] = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')
+                                              ->where([ 
+                                                ['conversation_id', $conversation_id] 
+                                              ])
+                                              ->Where(function ($query) use($user) {
+                                                $query->orWhere('created_by', '!=', $user->id)
+                                                      ->orWhere('type', '!=', '4');
                                               })
                                               ->whereHas('messagesLogs', function($query) {
                                                 $query->where('call_start', null);
@@ -227,7 +221,7 @@ class ChatController extends BaseController
         }
         $user = User::with('avatars')->findOrFail($my_user->id);
         try {
-            $hasConversation = Conversation::with('messages.user.avatars', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
+            $hasConversation = Conversation::with('messages.user.avatars', 'messages.metas', 'messages.user.feel')->whereHas('participants', function($query) use ($user) {
               $query->where('user_id', $user->id);
             })->find($request->conversation_id);
             if (!$hasConversation) {
@@ -279,7 +273,7 @@ class ChatController extends BaseController
                 }
             }
 
-            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $newly_mesage = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')->find($message->id);
             $returnData['message'] = $newly_mesage;
             $returnData['user'] = $user;
 
@@ -345,7 +339,7 @@ class ChatController extends BaseController
                 $conversation_log->save();
               }
             }
-            $newly_mesage = Message::with('messagesLogs.feel', 'user.avatars', 'user.feel', 'feel')->find($message->id);
+            $newly_mesage = Message::with('messagesLogs.feel', 'metas', 'user.avatars', 'user.feel', 'feel')->find($message->id);
             $returnData['message'] = $newly_mesage;
             $returnData['user'] = $user;
         

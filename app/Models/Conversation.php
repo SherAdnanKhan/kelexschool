@@ -28,7 +28,13 @@ class Conversation extends Model
     }
     public function lastMessage()
     {
-        return $this->hasOne(Message::class, 'conversation_id', 'id')->latest();
+        return $this->hasOne(Message::class, 'conversation_id', 'id')
+                ->Where(function ($query) {
+                    $query
+                    ->orWhere('created_by', '!=', \Auth::guard('api')->user()->id)
+                    ->orWhere('type', '!=', '4');
+                })
+                ->latest();
     }
     public function participants()
     {
