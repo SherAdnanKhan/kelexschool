@@ -23,7 +23,7 @@ class Message extends Model
     }
     public function messagesLogs() 
     {
-        return $this->hasMany(ConversationLog::class, 'message_id', 'id');
+        return $this->hasMany(ConversationLog::class, 'message_id', 'id')->where('user_id', \Auth::guard('api')->user()->id);
     }
 
     public function userMessageLog()

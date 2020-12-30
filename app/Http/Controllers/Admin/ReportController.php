@@ -70,7 +70,7 @@ class ReportController extends Controller
         $page = $request->input('pagination') ? $request->input('pagination')['page'] :1;
         $skip = 10 * ($page - 1);
         $data = Post::with('image','user.avatar')->where('reports','>','0')->take(10)->skip($skip)->get();
-        $post_count = Post::count();
+        $post_count = Post::where('reports','>','0')->count();
         $meta = array('page'=>$page,'pages'=>$page,'perpage'=>10,'total'=>$post_count);
 
         return response(array('meta'=>$meta,'data'=>$data), Response::HTTP_OK);
