@@ -35,4 +35,10 @@ class Message extends Model
     {
         return $this->hasOne(ConversationLog::class, 'message_id', 'id')->where(['call_start'=>null ,'call_end'=>null])->where( 'status' , '!=' , '2')->latest();
     }
+
+    public function metas() 
+    {
+        return $this->hasOne(Scrapeddata::class, 'message_id', 'id');
+    }
+
 }
