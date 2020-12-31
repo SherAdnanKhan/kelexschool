@@ -36,8 +36,8 @@
         <div class="kt-widget kt-widget--user-profile-3">
           <div class="kt-widget__top">
             <div class="kt-widget__media kt-hidden-">
-              @if(isset($feedbacks->user->avatars))
-                <img src="{{$feedbacks->user->avatars[0]->path}}" alt="image">
+              @if(isset($feedbacks->user->avatar))
+                <img src="{{$feedbacks->user->avatar->path}}" alt="image">
               @endif
             </div>
             <div class="kt-widget__pic kt-widget__pic--danger kt-font-danger kt-font-boldest kt-font-light kt-hidden">
@@ -90,7 +90,9 @@
                 <!-- /.box-header -->
                 <div class="box-body">
                   <dl>
+                    @if(isset($feedbacks->image))
                     <dd>  <img src="{{$feedbacks->image->path}}" alt="photo" height="300px" height="300px"> </dd>
+                    @endif
                   </dl>
                 </div>
                 <!-- /.box-body -->

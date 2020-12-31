@@ -64,12 +64,12 @@ var KTFeebackListDatatable = function () {
         title: 'Created By',
         template: function (data) {
           console.log(data);
-          var avatars = data.user.avatar;
+          var avatars = data.user;
           var output = '';
-          if(avatars!=null){
+          if(avatars.avatar!=null){
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ avatars.path + '" alt="photo">\
+                          <img src="'+ avatars.avatar.path + '" alt="photo">\
                         </div>\
                         <div class="kt-user-card-v2__details">\
                           <a href="'+ base_url + '/admin/user/' + data.user.slug + '" class="kt-user-card-v2__name">' + data.user.username + '</a>\

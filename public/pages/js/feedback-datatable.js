@@ -78,19 +78,20 @@ var KTFeebackListDatatable = function () {
         title: 'User',
         // callback function support for column rendering
         template: function (data) {
-          var avatars = data.user.avatar;
+          var avatars = data.user;
+          data=data.user;
           var output = '';
-          if(avatars!=null){
+          if (avatars.avatar!==null) {
             output = '<div class="kt-user-card-v2">\
                         <div class="kt-user-card-v2__pic">\
-                          <img src="'+ avatars.path + '" alt="photo">\
-                        </div>\
-                        <div class="kt-user-card-v2__details">\
-                          <a href="'+ base_url + '/admin/user/' + data.user.slug + '" class="kt-user-card-v2__name">' + data.user.username + '</a>\
-                          <span class="kt-user-card-v2__desc">' + data.user.first_name + ' ' + data.user.last_name + '</span>\
+                          <img src="'+ avatars.avatar.path + '" alt="photo">\
+                        </div>';
+          }
+          output +='<div class="kt-user-card-v2__details">\
+                          <a href="'+ base_url + '/admin/user/' + data.slug + '" class="kt-user-card-v2__name">' + data.username + '</a>\
+                          <span class="kt-user-card-v2__desc">' + data.first_name + ' ' + data.last_name + '</span>\
                         </div>\
                       </div>';
-          }
           return output;
         } 
       }, {

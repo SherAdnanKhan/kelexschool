@@ -35,8 +35,8 @@
         <div class="kt-widget kt-widget--user-profile-3">
           <div class="kt-widget__top">
             <div class="kt-widget__media kt-hidden-">
-              @if(isset($user->avatars))
-                <img src="{{$user->avatars[0]->path}}" alt="image">
+              @if(isset($user->avatar))
+                <img src="{{$user->avatar->path}}" alt="image">
               @endif
             </div>
             <div class="kt-widget__pic kt-widget__pic--danger kt-font-danger kt-font-boldest kt-font-light kt-hidden">
