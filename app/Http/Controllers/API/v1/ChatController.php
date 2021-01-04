@@ -166,7 +166,7 @@ class ChatController extends BaseController
                                               ->paginate(env('PAGINATE_LENGTH', 15));
             }
             
-            $messages_logs = ConversationLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
+           // $messages_logs = ConversationLog::where('conversation_id', $hasConversation->id)->where('user_id', $user->id)->update(['status' => 1]);
             $returnData['conversation'] = $hasConversation;
             if($hasConversation->participants->count() == 2) {
               foreach($hasConversation->participants as $participant){
